@@ -26,9 +26,9 @@
 # Main-loop body (classification in notes/analysis/mainloop.md)
 0x0014e8e0 0 RECONSTRUCTED Time__Tick          # src/system/time.c — frame counter @0x71FDE8
 0x0012b968 0 RECONSTRUCTED Random__Next        # src/system/random.c — Knuth LCG, 44 xrefs
-0x00123c18 0 hypothesis  Random__MulStep       # 64x64 multiply helper (LCG step)
-0x00142390 0 unknown func_00142390
-0x0013bde0 0 unknown func_0013bde0
+0x00123c18 0 hypothesis  Random__MulStep       # 64x64 signed multiply, low64 result; 9 callers
+0x00142390 0 hypothesis  System__FrameService  # per-frame hook + counters @0x5A3A70-78; calls 0x1314E0
+0x0013bde0 0 hypothesis  Mode__Update          # state machine on struct @0x5B2F00; switch on +0x130
 0x00142510 0 unknown func_00142510
 0x001424c0 0 unknown func_001424c0
 0x001424b0 0 unknown func_001424b0
@@ -39,7 +39,7 @@
 0x00177f00 0 unknown func_00177f00
 0x00146040 0 unknown func_00146040
 0x00142700 0 unknown func_00142700
-0x00134d50 0 unknown func_00134d50
+0x00134d50 0 hypothesis  Display__EndFrame     # struct @0x5B1AD0; fn-ptr @+0; end-of-frame routine
 
 # Syscall surface
 #   0x3C = heap/stack setup (crt0; returns sp in v0)
@@ -51,6 +51,11 @@
 # Data symbols
 0x001C7FD0 0 hypothesis g_SystemContext        # central system struct pointer
 0x0071FDD0 0 hypothesis Time__g_Context        # tick struct; counter +0x18 = 0x71FDE8, cap 0x0CDFD7F0
+0x005A3A70 0 hypothesis g_PerfCounterA         # gp-0x7B00, +1 per frame
+0x005A3A74 0 hypothesis g_PerfCounterB         # gp-0x7AFC, +1 per frame
+0x005A3A78 0 hypothesis g_FrameCallback        # gp-0x7AF8, per-frame callback
+0x005B1AD0 0 hypothesis g_DisplayContext       # Display__EndFrame struct
+0x005B2F00 0 hypothesis g_GameState            # Mode__Update state machine struct
 0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs
 0x005A3A80 0 hypothesis g_BootParamPtr         # u32 read at crt0
 0x005AB8C8 0 hypothesis g_ArenaSlots           # 0x200-byte arena, 0x10-byte slots

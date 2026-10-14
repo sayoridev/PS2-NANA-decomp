@@ -42,6 +42,12 @@ pointers exist, relocated at MWo3 load time.
 
 ## 5. Suspect decodes (verify in Ghidra)
 
+Known rizin artifacts seen repeatedly (likely MMI opcodes misdecoded):
+
+- `ext s0, sp, 0, 1` — appears at function heads (stack-alignment prologue?)
+- `xori.b w0, w0, 0xb0` — trailing constant-return idiom area
+- `mult ac3, rs, rt` — in Random__MulStep (64x64 multiply body)
+- `dpa.w.ph ac0, sp, s3` — DSP-suffix decode, implausible on R5900
 - `ext zero, v0, 0, 1` in the crt0 BSS-clear loop (0x00100160 area) — an
 `ext` writing to $zero is implausible for CW; likely rizin misdecode.
 Check raw bytes before relying on it.

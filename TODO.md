@@ -69,7 +69,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Classify remaining 12 main-loop body functions (notes/analysis/mainloop.md).
+2. Classify remaining 9 main-loop body functions (notes/analysis/mainloop.md — 5 of 14 done).
 3. Find MWo3 loader → candidates Game__Main inits (0x141D90, 0x13BB80).
 4. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 
