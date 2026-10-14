@@ -9,7 +9,7 @@
  */
 #include "../common/ps2.h"
 
-extern void Game__InitA(void);          /* @0x00141D90 — pending classification */
+extern void Game__Init(void);           /* @0x00141D90 — master init */
 extern void fcn_0013BB80(s32);          /* @0x0013BB80 — pending classification */
 
 extern s32  Time__Tick(void);           /* src/system/time.c */
@@ -34,7 +34,7 @@ extern void Display__EndFrame(void);    /* @0x00134D50 */
  *          Never returns; System__Exit is reached only via external callers. */
 void Game__Main(void)
 {
-    Game__InitA();
+    Game__Init();
     fcn_0013BB80(0);
 
     s32 firstIteration = 1;

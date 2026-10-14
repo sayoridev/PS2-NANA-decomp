@@ -72,7 +72,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Trace Game__Main init calls (0x141D90, 0x13BB80) — locate MWo3 loader + subsystem init.
+2. Trace Game__Init callees (0x1B96B0 candidate) — locate IOP .irx + MWo3 overlay loading.
 3. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 
 ## Milestones
@@ -82,7 +82,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 | Phase 0 — Project setup | completed | 100% |
 | Phase 1 — Dump inspection | completed | 100% |
 | Phase 2 — Executable analysis | completed | 100% |
-| Phase 3 — Decompilation foundation | in progress | ~35% |
+| Phase 3 — Decompilation foundation | in progress | ~40% |
 | Phase 3 — Decompilation foundation | pending | 0% |
 | Phase 4 — Game systems | pending | 0% |
 | Phase 5 — Assets and formats | pending | 0% |

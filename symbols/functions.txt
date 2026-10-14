@@ -70,8 +70,23 @@
 
 # Pending classification (helpers seen during loop analysis)
 #   0x0013B960  State__Update       — (index, struct) updater used by State__UpdatePair
-#   0x00141D90  Game__InitA         — Game__Main init call #1
-#   0x0013BB80  (arg 0)             — Game__Main init call #2
+#   0x00141D90  Game__Init          — master init (memory regions, scheduler, display 512x448)
+#   0x0013BB80 = State__Enable(0) — RECONSTRUCTED in src/game/mode.c
 #   0x00146A20 / 0x001010B8        — InitFrameHook setup calls
 #   0x00131580 / 0x001314E0        — System__FrameService helpers
 #   0x0013B780                     — value getter used by Draw__SetContext2
+
+# Game__Init subsystem calls (classification in progress)
+#   0x00141B50  — first init call
+#   0x00134DD0  Memory__InitRegions   — (0, 0x1EC000, 0x1F6000, 0xA0000, 0)
+#   0x00177FD0  Schedule__Init        — memset 0x4D14 (scheduler context)
+#   0x00176C80  — ?
+#   0x0013B340  Draw__BootInit       — display/graphic boot init
+#   0x00139D60 / 0x0013C5D0 — subsystem inits
+#   0x00134AE0/0x00134B20/0x00134B60 — Display__SetMode* (512x448 / 256x224 / scale)
+#   0x00132170 / 0x00101150 — ?
+#   0x00142660 / 0x001507B0 / 0x00147110 — ?
+#   0x001B96B0  — far module, candidate for IOP/overlay loading
+#   0x001010B8  Display__GetField    — GS CSR 0x12001000 bit 13 (FIELD)
+#   0x001003C0  Display__GetContext  — context singleton getter
+#   0x0010EDB0 / 0x0010EE40 — Gs__ReadCsrA/B

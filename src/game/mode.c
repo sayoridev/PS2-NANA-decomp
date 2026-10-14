@@ -17,6 +17,8 @@ typedef struct {
 Mode__StateBlock g_ModeStateA;   /* @0x005B3E60 — updated via fcn.0013B960(0,...) */
 Mode__StateBlock g_ModeStateB;   /* @0x005B3E50 — updated via fcn.0013B960(1,...) */
 
+u32 g_StateEnabled[2];   /* @0x005A3A98 (gp-0x7BB8) — checked by State__UpdatePair */
+
 /* STATUS: RECONSTRUCTED
  * ADDRESS: 0x001424C0 — 10 callers
  * PURPOSE: read state field @ +2. */
@@ -31,6 +33,16 @@ u16 Mode__GetStatus(void)
 u16 Mode__GetState(void)
 {
     return g_ModeStateA.field[5];
+}
+
+/* STATUS: RECONSTRUCTED
+ * ADDRESS: 0x0013BB80 — called by Game__Main with arg 0
+ * PURPOSE: enable one of the two mode state blocks (flag slot per index). */
+void State__Enable(s32 index)
+{
+    if (index >= 0 && index < 2) {
+        g_StateEnabled[index] = 1;
+    }
 }
 
 /* STATUS: RECONSTRUCTED

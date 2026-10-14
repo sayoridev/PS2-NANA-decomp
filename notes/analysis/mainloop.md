@@ -82,3 +82,16 @@ Default handler: **0x001A8FE0**. Reconstructed in src/system/framehook.c.
 - g_ModeStateA @0x5B3E60: 8 x u16. Getters: +2 (Mode__GetStatus),
 +0xA (Mode__GetState). State__CopyOut exports all 16 bytes.
 - g_ModeStateB @0x5B3E50: sibling block, same updater family.
+
+## Game__Init (@0x141D90) — subsystem map
+
+| Callee | Hypothesis | Evidence |
+| --- | --- | --- |
+| 0x00134DD0 | Memory__InitRegions | args mirror heap-setup syscall pattern |
+| 0x00177FD0 | Schedule__Init | memset 0x4D14 = scheduler context size |
+| 0x00134AE0/0x134B20/0x134B60 | Display__SetMode* | float consts 512.0/448.0/256.0/224.0 (NTSC) |
+| 0x001B96B0 | module loading? | far-away function, tail of init — CHECK NEXT |
+
+GS register usage: `0x12001000` = GS CSR, bit 13 = FIELD (Display__GetField).
+Mode state struct size confirmed: **0x180 bytes per index**, base 0x5B2F00
+(`State__Update` computes base + index*0x180). Enabled flags @0x5A3A98.
