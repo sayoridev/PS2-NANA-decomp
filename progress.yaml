@@ -1,0 +1,50 @@
+# =============================================================================
+# PS2-NANA-decomp — machine-readable progress (single source of truth)
+# Update this file with every meaningful change; TODO.md mirrors it for humans.
+# The progress chart in docs/ is generated from this file by tools/ scripts.
+# =============================================================================
+
+project: PS2-NANA-decomp
+updated: "2026-10-14"
+phase: 0
+
+# Filled during Phase 1/2. Never contains paths to copyrighted data committed
+# to the repo; the local dump path is a private, machine-local value.
+executable:
+  discovered: false
+  local_path: null        # private local path of YOUR dump; never committed
+  serial: null            # e.g. SLUS-##### / SCES-##### / SLPS-#####
+  format: unknown         # expected: ELF (EE), possibly with IRX IOP modules
+  entry_point: null
+  compiler_hints: []
+
+functions:
+  total: 0                # total functions identified in the executable
+  identified: 0           # with a hypothesized name/purpose
+  decompiled: 0           # C/C++ reconstruction written
+  matched: 0              # verified to match original behavior/structure
+  remaining: 0            # total - matched
+
+modules: []               # e.g. { name: "render", status: "pending", functions: 0 }
+
+assets:
+  identified: 0           # asset containers/formats recognized
+  documented: 0           # formats fully documented in docs/asset-formats.md
+
+milestones:
+  - name: "Phase 0 — Project setup"
+    status: in_progress
+  - name: "Phase 1 — Dump inspection"
+    status: pending
+  - name: "Phase 2 — Executable analysis"
+    status: pending
+  - name: "Phase 3 — Decompilation foundation"
+    status: pending
+  - name: "Phase 4 — Game systems"
+    status: pending
+  - name: "Phase 5 — Assets and formats"
+    status: pending
+  - name: "Phase 6 — Build and verification"
+    status: pending
+  - name: "Phase 7 — Continuous progress"
+    status: ongoing

@@ -1,0 +1,71 @@
+# =============================================================================
+# LEGAL PROTECTION — never commit original game data or derived copyrighted files
+# =============================================================================
+*.iso
+*.ISO
+*.bin
+*.BIN
+*.cue
+*.CUE
+*.img
+*.IMG
+*.ccd
+*.sub
+*.mdf
+*.mds
+*.dvd
+*.chd
+dump/
+dumps/
+disc/
+disc_extracted/
+extracted/
+assets_raw/
+roms/
+
+# PS2 executables/modules are binary artifacts of the original game — never commit
+*.elf
+*.ELF
+*.prx
+*.PRX
+*.irx
+*.IRX
+*.IOP
+*.EE
+
+# =============================================================================
+# Build artifacts
+# =============================================================================
+build/
+out/
+*.o
+*.obj
+*.a
+*.d
+*.map
+*.dep
+
+# =============================================================================
+# Tool artifacts
+# =============================================================================
+*.ghidra
+*.rzdb
+.rzin/
+rizin/
+ghidra_projects/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# =============================================================================
+# OS / editor noise
+# =============================================================================
+.DS_Store
+Thumbs.db
+*~
+*.swp
+.vscode/
+.idea/
