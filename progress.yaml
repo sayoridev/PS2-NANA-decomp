@@ -6,38 +6,40 @@
 
 project: PS2-NANA-decomp
 updated: "2026-10-14"
-phase: 0
+phase: 2
 
-# Filled during Phase 1/2. Never contains paths to copyrighted data committed
-# to the repo; the local dump path is a private, machine-local value.
+# Analysis source: maintainer's personal dump (private, never committed).
 executable:
-  discovered: false
+  discovered: true
   local_path: null        # private local path of YOUR dump; never committed
-  serial: null            # e.g. SLUS-##### / SCES-##### / SLPS-#####
-  format: unknown         # expected: ELF (EE), possibly with IRX IOP modules
-  entry_point: null
-  compiler_hints: []
+  serial: SLPM_659.14
+  format: ELF32 LSB MIPS R5900 (eabi64, mips3), statically linked, stripped
+  entry_point: 0x00100008
+  gp_value: 0x005ab270
+  compiler_hints:
+    - "Metrowerks CodeWarrior — MW MIPS C Compiler 2.4.1.01 (PlayStation 2)"
+  overlay_load_base: 0x00b7f800   # hypothesis: OVL/*.BIN load regions
 
 functions:
-  total: 0                # total functions identified in the executable
-  identified: 0           # with a hypothesized name/purpose
-  decompiled: 0           # C/C++ reconstruction written
-  matched: 0              # verified to match original behavior/structure
-  remaining: 0            # total - matched
+  total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
+  identified: 0
+  decompiled: 0
+  matched: 0
+  remaining: 2348
 
-modules: []               # e.g. { name: "render", status: "pending", functions: 0 }
+modules: []
 
 assets:
-  identified: 0           # asset containers/formats recognized
-  documented: 0           # formats fully documented in docs/asset-formats.md
+  identified: 3           # .nkp packages, .rws audio streams, .nkt/.nkf config/dialog
+  documented: 0
 
 milestones:
   - name: "Phase 0 — Project setup"
-    status: in_progress
+    status: completed
   - name: "Phase 1 — Dump inspection"
-    status: pending
+    status: completed
   - name: "Phase 2 — Executable analysis"
-    status: pending
+    status: in_progress
   - name: "Phase 3 — Decompilation foundation"
     status: pending
   - name: "Phase 4 — Game systems"
