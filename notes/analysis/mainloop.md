@@ -115,22 +115,45 @@ Module path table @0x301D80–0x301E74 (10 entries, contiguous). Loader
 location pending: `axt @ 0x301D80` next. "Error could not reboot iop"
 @0x301DA0 suggests IOP reboot (LoadExecPS2-style) before module loading.
 
-## Module loader (found @0x142660)
+## Overlay registry (found @0x142660 — CORRECTED 2026-10-14)
 
-`Module__LoadTable` (0x142660): syscall 0x64 init, then iterates a table at
-**0x1D9AA0** with 12-byte entries:
+**CORRECTION:** 0x142660 is NOT the IOP .irx loader. It is the **game overlay
+mode registry/dispatcher** — mapping game modes (Title, MyRoom, TRAIN,
+WORKING...) to init functions and loaded overlay code pointers.
+
+The table at **0x1C9AA0** has **at least two formats**:
+
+**Format A (first entries, ~12 bytes):** `{flag, name_ptr, init_func_ptr}`
 
 ```javascript
-struct ModuleEntry {
-    u32 status;      // 0 = not loaded, !=0 = loaded/pointer
-    u32 arg;         // argument/data for the module
-    u32 path;        // path string pointer (populated after load)
-};
+{0, 0x301CF8, 0x35E1A0}
+{0, 0x301D08, 0x39AB90}
+{1, 0x301D10, 0x00000000}
+{1, 0x301D18, 0x00000000}
+{0, 0x301D28, 0x39B380}
+{0, 0x301D38, 0x3A9B10}
+{0, 0x301D40, 0x3AA300}
+{0, 0, 0}                    // terminator
 ```
 
-Loop: read entry → if arg==0, end → if status==0, call `Module__LoadPrimary`
-(0x139A90) → else construct path via `String__Format` (0x12C2D0, ref 0x301D88)
-and call `Module__LoadSecondary` (0x139BA0).
+**Format B (from 0x1C9B00, 16 bytes):** `{name_ptr, alt_name_ptr, code_ptr, ...}`
 
-Called from Game__Init chain (0x147110 calls 0x142630, which may trigger this).
-Tabella moduli IOP mappata a 0x301D80–0x301E74; loader table a 0x1D9AA0.
+```javascript
+{"Title", "MyRoom", 0x001B04F0, ...}
+{..., 0x00B82E80, "TRAIN", ...}       // 0xB82E80 = overlay region (0xB7F800+0x4E80)
+{0x001C1A80, ..., "WORKING", 0x00B83140}  // 0xB83140 = overlay region
+```
+
+Overlay code pointers (`0xB8xxxx`) confirm the MWo3 load address 0x00B7F800:
+
+- 0x00B82E80 = 0xB7F800 + 0x4E80
+- 0x00B83140 = 0xB7F800 + 0x5340
+- 0x00B882F0 = 0xB7F800 + 0xA2F0
+- 0x00B82FB0 = 0xB7F800 + 0x57B0
+- 0x00B814B0 = 0xB7F800 + 0x3CB0
+
+The region 0x301D80+ contains **game overlay names**, not /iop/ paths:
+"dvd:", "%s", "Title", "MyRoom", "myroom", "TRAIN", "WORKING"...
+
+**IOP .irx loading remains unfound** — likely inside System__EarlyInit
+syscall wrappers or kernel-side during boot.

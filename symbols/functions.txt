@@ -122,13 +122,17 @@
 #   0x00301E00 mcserv  0x301E10 libsd  0x301E20 sdrdrv  0x301E30 cdvdstm
 #   0x00301E50 rtfssiop  0x301E68 rwa  0x301DA0 "Error could not reboot iop"
 
-# MODULE LOADER (found 2026-10-14)
-#   0x00142660  Module__LoadTable    — iterates table @0x1D9AA0, entry=12 B; calls 0x139A90/0x139BA0
-#   0x00139A90  Module__LoadPrimary  — (a0=arg, a1=path?) primary load
-#   0x00139BA0  Module__LoadSecondary— (a0=path_buf, a1=0) reload/alternative
+# OVERLAY REGISTRY (found 2026-10-14; CORRECTED from 'module loader')
+#   0x00142660  Overlay__Registry    — iterates table @0x1C9AA0; mode dispatch (Title/MyRoom/TRAIN/WORKING)
+#   0x00139A90  Overlay__LoadPrimary — (a0=arg, a1=name?) primary load/init
+#   0x00139BA0  Overlay__LoadSecondary — (a0=buf, a1=0) secondary load
 #   0x00142630  Module__Init         — called by 0x147110 with a0=0; also by LoadTable tail
 #   0x0012C2D0  String__Format       — sprintf-like; constructs path string
 #   0x0013A4D0  File__Open?          — (a0, a1=0x301FA0/0x301FC0, a2=0); opens asset files
 #   0x0013A630  — init called by 0x147110(a0=0x147180, a1=0x206BC0)
 # Data
-#   0x001D9AA0  g_ModuleTable        — loader table, entries 12 B: {status, arg, path}
+#   0x001C9AA0  g_OverlayRegistry    — mode table: {flag, name, init} / {name, alt, code_ptr, ...}
+
+# Overlay names (region 0x301D80+)
+#   0x301D90 "Title"  0x301D98 "MyRoom"/"myroom"  0x301DB0 "TRAIN"  0x301DC0 "WORKING"
+#   (first 7 names at 0x301CF8, 0x301D08, 0x301D10, 0x301D18, 0x301D28, 0x301D38, 0x301D40 — TBD)
