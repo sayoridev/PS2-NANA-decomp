@@ -72,7 +72,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Trace Game__Init callees (0x1B96B0 candidate) — locate IOP .irx + MWo3 overlay loading.
+2. Locate IOP .irx loader via string xrefs (iz~iop → axt) — loader still unfound.
 3. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 
 ## Milestones

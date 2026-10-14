@@ -58,6 +58,10 @@
 0x005B3E50 0 hypothesis g_ModeStateB           # 8 x u16, updated via fcn.0013B960(1,...)
 0x005B3E60 0 hypothesis g_ModeStateA           # 8 x u16, getters + copyout in mode.c
 0x005A2A24 0 hypothesis g_PendingCommandId     # gp-0x7F4C, consumed by System__DispatchPending
+0x00B78000 0 hypothesis Stream__g_Context       # 0x760 B; slots 0xA0-0xB4 = -1, flag 0xB78054
+0x0071F8F7 0 hypothesis g_StreamReady           # set to 1 after stream init
+0x0034CCD0 0 hypothesis g_MsgJumpTable          # 13-entry dispatch table (Msg__Dispatch)
+0x0030_0000 0 hypothesis scratch region          # 0x30xxxx-0x31xxxx message/config/string pool
 0x005A3204 0 hypothesis g_DispatchParam        # read by System__DispatchPending
 0x005B1AD0 0 hypothesis g_DisplayContext       # Display__EndFrame struct
 0x005B2F00 0 hypothesis g_GameState            # Mode__Update state machine struct
@@ -86,7 +90,16 @@
 #   0x00134AE0/0x00134B20/0x00134B60 — Display__SetMode* (512x448 / 256x224 / scale)
 #   0x00132170 / 0x00101150 — ?
 #   0x00142660 / 0x001507B0 / 0x00147110 — ?
-#   0x001B96B0  — far module, candidate for IOP/overlay loading
+#   0x001B96B0  Stream__Init          — context @0xB78000 (0x760 B), 6 slots init -1
 #   0x001010B8  Display__GetField    — GS CSR 0x12001000 bit 13 (FIELD)
 #   0x001003C0  Display__GetContext  — context singleton getter
 #   0x0010EDB0 / 0x0010EE40 — Gs__ReadCsrA/B
+
+# Early init chain (System__EarlyInit @0x141B50, first Game__Init call)
+#   0x00111EE0(0) / 0x00116BD0 / 0x00113A40 / 0x0011D5E0(0) / 0x0011DDB8(2) — low-level inits
+#   0x00141FA0  Config__Parse        — (dst, 0x301C00, 6); buffers 0x301C00/0x301C20; retry loop
+#   Random__Next() used as initial RNG seed
+# Dispatch family
+#   0x001507B0  — registration + init (0x15640, 0x50DBC0)
+#   0x001507F0  Msg__Dispatch?       — 13-case jump table @0x34CCD0, string ptrs in 0x31xxxx pool
+#   0x00142560  — hook sibling (called by Stream__ functions)

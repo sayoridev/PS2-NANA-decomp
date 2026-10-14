@@ -85,6 +85,19 @@ Default handler: **0x001A8FE0**. Reconstructed in src/system/framehook.c.
 
 ## Game__Init (@0x141D90) — subsystem map
 
+Boot order so far:
+
+1. `System__EarlyInit` (0x141B50): low-level inits (0x111EE0/0x116BD0/
+0x113A40/0x11D5E0/0x11DDB8), config parse via 0x141FA0 (buffers
+0x301C00/0x301C20), RNG seeded with first Random__Next().
+2. `Game__Init` (0x141D90): Memory__InitRegions, Schedule__Init,
+Draw__BootInit, Display__SetMode* (512x448 NTSC)...
+3. `Stream__Init` (0x1B96B0): stream manager context @0xB78000
+(0x760 B; 6 handle slots init -1; ready flag 0x71F8F7).
+
+Scratch/message region: **0x30xxxx–0x31xxxx** (config buffers, string pool).
+Msg dispatch: 13-case jump table @0x34CCD0.
+
 | Callee | Hypothesis | Evidence |
 | --- | --- | --- |
 | 0x00134DD0 | Memory__InitRegions | args mirror heap-setup syscall pattern |
