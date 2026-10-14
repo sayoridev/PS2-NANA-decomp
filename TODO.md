@@ -30,8 +30,8 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
 
 ## In progress
 
-- [ ] Entry-point trace and `main` location (rizin/Ghidra)
-- [ ] OVL .BIN load format verification
+- [x] Entry region mapped: pointer table 0x100000–0x10007F; code starts 0x100080
+- [x] OVL format identified: MWo3 (see docs/overlay-format.md)
 
 ## Pending
 
@@ -55,9 +55,9 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 
 ## Next recommended actions
 
-1. Commit updated docs (executable.md, AGENTS.md, TODO.md, progress.yaml).
-2. Trace entry point; identify `main` and the init chain.
-3. Verify OVL .BIN format (extract 3 small ones, `file` + hex header).
+1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
+2. Disassemble from 0x100080; identify `main` and the init chain.
+3. Verify MWo3 header hypothesis on JOBFND2R + all overlays.
 4. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 
 ## Milestones
@@ -66,7 +66,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 | --- | --- | --- |
 | Phase 0 — Project setup | completed | 100% |
 | Phase 1 — Dump inspection | completed | 100% |
-| Phase 2 — Executable analysis | in progress | ~50% |
+| Phase 2 — Executable analysis | in progress | ~65% |
 | Phase 3 — Decompilation foundation | pending | 0% |
 | Phase 4 — Game systems | pending | 0% |
 | Phase 5 — Assets and formats | pending | 0% |

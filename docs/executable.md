@@ -94,10 +94,35 @@ sceMpegGetPicture was aborted`, `libpad: Module version mismatch`
 - Config: `konami.nkt` (runtime config file); `yesno1.nkf` / `yesno10004`
 (dialog resources)
 
+## Entry-point region (0x100000–0x10007F) — system pointer table
+
+Raw bytes at file offset 0x180 (vaddr 0x100000):
+
+- 8 zero bytes, then **30 little-endian pointers** into the `0x7000xxxx`
+region (stride exactly 0x800): `0x70000c28, 0x70001428, … 0x7000fc28`,
+terminated by `0x00000011`.
+- The ELF entry point (0x00100008) points **inside this table** — the words
+are data, not instructions (this explains rizin's "invalid" spam and why
+hand-decode of the first words is nonsensical).
+- XREF evidence: `fcn.00118478` reads table entries (DATA XREF ×3);
+`syscall.0.555070` (a syscall stub) has a CODE XREF to 0x100018;
+`fcn.00555d40` references 0x100018/0x10003c.
+- Interpretation: **system/interface dispatch table** set up for runtime
+service calls (kernel-side targets at 0x7000xxxx). The true executable
+startup code begins at **0x00100080**.
+
+## Overlay loading (see overlay-format.md)
+
+All `OVL/*.BIN` use the **MWo3** format (Metrowerks CodeWarrior Overlay v3):
+magic `MWo3`, load address 0x00b7f800 (matches reserved ELF regions),
+code + relocations + embedded asset-name strings. Overlays call back into
+the main executable (`jal 0x0165dc40` observed in SHOP2R).
+
 ## Open items
 
 - [ ] Confirm true function count + boundaries in Ghidra 12.1.2
 - [ ] Entry-point trace: `pd 30 @ 0x100008` → locate `main` and init chain
-- [ ] OVL .BIN load format check (expect raw MIPS code for 0x00b7f800)
+- [x] OVL format identified: MWo3 (Metrowerks overlay) — see overlay-format.md
+- [ ] Verify MWo3 header fields on all 7 overlays
 - [ ] Import stub table → full list of Sony SDK functions referenced
 - [ ] Locate and document the `A-XX-YY.nkp` dispatch table (file name → loader call)
