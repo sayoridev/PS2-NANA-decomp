@@ -121,3 +121,14 @@
 #   0x00301D80 IOPRP300.IMG  0x301DC0 sio2man  0x301DE0 padman  0x301DF0 mcman
 #   0x00301E00 mcserv  0x301E10 libsd  0x301E20 sdrdrv  0x301E30 cdvdstm
 #   0x00301E50 rtfssiop  0x301E68 rwa  0x301DA0 "Error could not reboot iop"
+
+# MODULE LOADER (found 2026-10-14)
+#   0x00142660  Module__LoadTable    — iterates table @0x1D9AA0, entry=12 B; calls 0x139A90/0x139BA0
+#   0x00139A90  Module__LoadPrimary  — (a0=arg, a1=path?) primary load
+#   0x00139BA0  Module__LoadSecondary— (a0=path_buf, a1=0) reload/alternative
+#   0x00142630  Module__Init         — called by 0x147110 with a0=0; also by LoadTable tail
+#   0x0012C2D0  String__Format       — sprintf-like; constructs path string
+#   0x0013A4D0  File__Open?          — (a0, a1=0x301FA0/0x301FC0, a2=0); opens asset files
+#   0x0013A630  — init called by 0x147110(a0=0x147180, a1=0x206BC0)
+# Data
+#   0x001D9AA0  g_ModuleTable        — loader table, entries 12 B: {status, arg, path}

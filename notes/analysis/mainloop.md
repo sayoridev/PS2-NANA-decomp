@@ -114,3 +114,23 @@ Mode state struct size confirmed: **0x180 bytes per index**, base 0x5B2F00
 Module path table @0x301D80–0x301E74 (10 entries, contiguous). Loader
 location pending: `axt @ 0x301D80` next. "Error could not reboot iop"
 @0x301DA0 suggests IOP reboot (LoadExecPS2-style) before module loading.
+
+## Module loader (found @0x142660)
+
+`Module__LoadTable` (0x142660): syscall 0x64 init, then iterates a table at
+**0x1D9AA0** with 12-byte entries:
+
+```javascript
+struct ModuleEntry {
+    u32 status;      // 0 = not loaded, !=0 = loaded/pointer
+    u32 arg;         // argument/data for the module
+    u32 path;        // path string pointer (populated after load)
+};
+```
+
+Loop: read entry → if arg==0, end → if status==0, call `Module__LoadPrimary`
+(0x139A90) → else construct path via `String__Format` (0x12C2D0, ref 0x301D88)
+and call `Module__LoadSecondary` (0x139BA0).
+
+Called from Game__Init chain (0x147110 calls 0x142630, which may trigger this).
+Tabella moduli IOP mappata a 0x301D80–0x301E74; loader table a 0x1D9AA0.
