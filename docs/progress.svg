@@ -9,28 +9,28 @@
   </style>
   <rect width='100%' height='100%' rx='8' fill='#0d1117'/>
   <text x='16' y='30' class='t'>PS2-NANA-decomp — Progress</text>
-  <text x='16' y='50' class='s'>Phase 2 · updated 2026-10-14</text>
+  <text x='16' y='50' class='s'>Phase 3 · updated 2026-10-14</text>
   <text x='530' y='40' text-anchor='end' class='pct'>0.0%</text>
   <text x='16' y='74' class='s'>Functions: 0/2348 matched</text>
   
   <text x='16' y='103' class='lbl'>Identified</text>
   <rect x='150' y='90' width='340' height='18' rx='3' fill='#2b313c'/>
   <rect x='150' y='90' width='1' height='18' rx='3' fill='#8bc34a'/>
-  <text x='498' y='103' class='val'>10</text>
+  <text x='498' y='103' class='val'>13</text>
   <text x='16' y='129' class='lbl'>Decompiled</text>
   <rect x='150' y='116' width='340' height='18' rx='3' fill='#2b313c'/>
   <rect x='150' y='116' width='0' height='18' rx='3' fill='#2196f3'/>
-  <text x='498' y='129' class='val'>0</text>
+  <text x='498' y='129' class='val'>2</text>
   <text x='16' y='155' class='lbl'>Matched</text>
   <rect x='150' y='142' width='340' height='18' rx='3' fill='#2b313c'/>
   <rect x='150' y='142' width='0' height='18' rx='3' fill='#4caf50'/>
   <text x='498' y='155' class='val'>0</text>
   <text x='16' y='181' class='lbl'>Remaining</text>
   <rect x='150' y='168' width='340' height='18' rx='3' fill='#2b313c'/>
-  <rect x='150' y='168' width='339' height='18' rx='3' fill='#616161'/>
-  <text x='498' y='181' class='val'>2342</text>
+  <rect x='150' y='168' width='337' height='18' rx='3' fill='#616161'/>
+  <text x='498' y='181' class='val'>2333</text>
   <text x='16' y='216' class='s'>Assets: 3 identified · 0 documented</text>
   <text x='16' y='238' class='s'>Milestones</text>
-  <circle cx='22' cy='244' r='5' fill='#4caf50'/><text x='36' y='249' class='ms'>Phase 0 — Project setup — completed</text><circle cx='22' cy='264' r='5' fill='#4caf50'/><text x='36' y='269' class='ms'>Phase 1 — Dump inspection — completed</text><circle cx='22' cy='284' r='5' fill='#ffc107'/><text x='36' y='289' class='ms'>Phase 2 — Executable analysis — in progress</text><circle cx='22' cy='304' r='5' fill='#9e9e9e'/><text x='36' y='309' class='ms'>Phase 3 — Decompilation foundation — pending</text><circle cx='22' cy='324' r='5' fill='#9e9e9e'/><text x='36' y='329' class='ms'>Phase 4 — Game systems — pending</text><circle cx='22' cy='344' r='5' fill='#9e9e9e'/><text x='36' y='349' class='ms'>Phase 5 — Assets and formats — pending</text><circle cx='22' cy='364' r='5' fill='#9e9e9e'/><text x='36' y='369' class='ms'>Phase 6 — Build and verification — pending</text><circle cx='22' cy='384' r='5' fill='#2196f3'/><text x='36' y='389' class='ms'>Phase 7 — Continuous progress — ongoing</text>
+  <circle cx='22' cy='244' r='5' fill='#4caf50'/><text x='36' y='249' class='ms'>Phase 0 — Project setup — completed</text><circle cx='22' cy='264' r='5' fill='#4caf50'/><text x='36' y='269' class='ms'>Phase 1 — Dump inspection — completed</text><circle cx='22' cy='284' r='5' fill='#4caf50'/><text x='36' y='289' class='ms'>Phase 2 — Executable analysis — completed</text><circle cx='22' cy='304' r='5' fill='#9e9e9e'/><text x='36' y='309' class='ms'>Phase 3 — Decompilation foundation — pending</text><circle cx='22' cy='324' r='5' fill='#9e9e9e'/><text x='36' y='329' class='ms'>Phase 4 — Game systems — pending</text><circle cx='22' cy='344' r='5' fill='#9e9e9e'/><text x='36' y='349' class='ms'>Phase 5 — Assets and formats — pending</text><circle cx='22' cy='364' r='5' fill='#9e9e9e'/><text x='36' y='369' class='ms'>Phase 6 — Build and verification — pending</text><circle cx='22' cy='384' r='5' fill='#2196f3'/><text x='36' y='389' class='ms'>Phase 7 — Continuous progress — ongoing</text>
   <text x='16' y='412' class='s'>Generated from progress.yaml — do not edit by hand.</text>
 </svg>

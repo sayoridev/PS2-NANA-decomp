@@ -6,7 +6,7 @@
 
 project: PS2-NANA-decomp
 updated: "2026-10-14"
-phase: 2
+phase: 3
 
 # Analysis source: maintainer's personal dump (private, never committed).
 executable:
@@ -22,10 +22,10 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 10          # bootstrap/system symbols, see symbols/functions.txt
-  decompiled: 0
+  identified: 13          # + main loop and body candidates, see symbols/functions.txt
+  decompiled: 2           # src/system/startup.c: Startup__Entry + Fpu__ClearAll (RECONSTRUCTED)
   matched: 0
-  remaining: 2342
+  remaining: 2333
 
 modules: []
 
@@ -39,7 +39,7 @@ milestones:
   - name: "Phase 1 — Dump inspection"
     status: completed
   - name: "Phase 2 — Executable analysis"
-    status: in_progress
+    status: completed
   - name: "Phase 3 — Decompilation foundation"
     status: pending
   - name: "Phase 4 — Game systems"

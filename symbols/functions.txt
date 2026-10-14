@@ -1,26 +1,46 @@
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
-# Sizes are 0 until measured in Ghidra. All addresses are virtual.
-# Evidence: notes/analysis/startup.md
+# Sizes are 0 until measured in Ghidra. Evidence: notes/analysis/startup.md
+#
+# Bootstrap & system interface
+0x00100080 0 RECONSTRUCTED Startup__Entry      # see src/system/startup.c
+0x001000f0 0 RECONSTRUCTED Fpu__ClearAll       # zeroes $f24..$f31; also called @0x44E1F0
+0x00118478 0 hypothesis  System__InstallHandlers
+0x00118398 0 hypothesis  System__AddHandler    # kernel syscall 0x56 wrapper
+0x00111688 0 hypothesis  System__CalcTableEnd
+0x00119098 0 hypothesis  System__Fatal
+0x00118c98 0 hypothesis  System__BootInit1     # 8 subsystem inits; tails to 0x11A9B0
+0x0011a9b0 0 hypothesis  System__BootInit1b    # tail target of BootInit1 ( unexplored )
+0x0010eba0 0 hypothesis  System__Syscall64     # syscall 0x64 wrapper; 46+ callers (was mislabeled "BootInit2")
+0x00127de0 0 hypothesis  System__BootTail      # crt0 tail target; likely exit path (loop never returns)
 
-0x00100080 0 hypothesis Startup__Entry
-0x001000f0 0 hypothesis Fpu__ClearAll
-0x00118478 0 hypothesis System__InstallHandlers
-0x00118398 0 hypothesis System__AddHandler      # syscall 0x56 wrapper: v1=0x56; syscall
-0x00111688 0 hypothesis System__CalcTableEnd
-0x00119098 0 hypothesis System__Fatal
-0x00118c98 0 hypothesis System__BootInit1       # first boot call from crt0
-0x0010eba0 0 hypothesis System__BootInit2       # called with a0=0
-0x00141ee0 0 hypothesis System__BootInit3       # arg = *(u32*)0x5A3A80
-0x00127de0 0 hypothesis System__BootTail        # tail target (j, not jal)
+# Game core
+0x00141ee0 0 hypothesis  Game__Main            # init then infinite loop
+0x00141f04 0 hypothesis  Game__MainLoop        # body: ~13 fixed calls per iteration
 
-# Syscall IDs observed (v1 value at syscall instruction):
-#   0x3C = heap/stack setup (crt0; returns sp in v0; args gp/heap bounds)
-#   0x3D = post-setup kernel call (args a0=0x1A7900, a1=-1)
-#   0x56 / -0x56 .. 0x59 / -0x59 = handler add/remove pairs (region 0x1183A8+)
-#   Dispatcher @0x1183A8: accepts IDs [0x0D, 0x30), forwards to System__AddHandler
+# Main-loop body candidates (to classify)
+0x0014e8e0 0 unknown func_0014e8e0             # first call in loop (frame update?)
+0x00142390 0 unknown func_00142390
+0x0012b968 0 unknown func_0012b968
+0x0013bde0 0 unknown func_0013bde0
+0x00142510 0 unknown func_00142510
+0x001424c0 0 unknown func_001424b0
+0x0013b310 0 unknown func_0013b310
+0x00177f30 0 unknown func_00177f30
+0x00142570 0 unknown func_00142570
+0x00177f00 0 unknown func_00177f00
+0x00146040 0 unknown func_00146040
+0x00142700 0 unknown func_00142700
+0x00134d50 0 unknown func_00134d50
+
+# Syscall surface
+#   0x3C = heap/stack setup (crt0; returns sp in v0)
+#   0x3D = post-setup kernel call (a0=0x1A7900, a1=-1)
+#   0x56 / -0x56 .. 0x59 / -0x59 = handler add/remove pairs @0x1183A8+
+#   0x5A, 0x5B, 0x74 = wrappers near BootInit1 (0x118D00/0x118D48/0x118CF0)
+#   0x64 .. 0x76 = stub table @0x10EBA0-0x10ECDC (central kernel API)
 
 # Data symbols
 0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs; code embedded @0x1C50B8
-0x005A3A80 0 hypothesis g_BootParamPtr          # u32 read at crt0, passed to BootInit3
+0x005A3A80 0 hypothesis g_BootParamPtr          # u32 read at crt0, passed to Game__Main path

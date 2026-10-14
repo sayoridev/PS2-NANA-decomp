@@ -130,8 +130,8 @@ the main executable (`jal 0x0165dc40` observed in SHOP2R).
 | 0x00119098 | `System__Fatal` | called with a0=1 after error string setup |
 | 0x001C5078 | `g_SystemHandlerTable` | header {13,18,8}; {id, handler} pairs; code stubs embedded @0x1C50B8 |
 | 0x00118C98 | `System__BootInit1` | first boot-phase call from crt0 |
-| 0x0010EBA0 | `System__BootInit2` | called with a0=0 |
-| 0x00141EE0 | `System__BootInit3` | arg = *(u32*)0x5A3A80 |
+| 0x0010EBA0 | `System__Syscall64` | **syscall-0x64 wrapper** at head of stub table 0x10EBA0–0x10ECDC (IDs 0x64–0x76, 46+ callers); NOT a boot phase |
+| 0x00141EE0 | `Game__Main` | init then **infinite main loop** (0x141F04), ~13 fixed calls per iteration |
 | 0x00127DE0 | `System__BootTail` | tail-call target of crt0 |
 
 crt0 verified: $gp = 0x5AB270 set in code (matches .reginfo); syscall 0x3C
