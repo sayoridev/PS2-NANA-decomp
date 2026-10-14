@@ -34,7 +34,10 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
 - [x] crt0 identified at 0x100080 (FPU init + BSS clear loop)
 - [x] System handler-install chain mapped (0x118478 ← table @0x1C5078, cap 49)
 - [x] OVL format identified: MWo3 (see docs/overlay-format.md); small OVLs are thin wrappers
-- [x] First symbols seeded: symbols/functions.txt (6 functions + 1 data symbol)
+- [x] First symbols seeded: symbols/functions.txt (10 functions + 2 data symbols)
+- [x] $gp verified in crt0 code (0x5AB270, matches .reginfo)
+- [x] Boot chain mapped: crt0 → syscall 0x3C/0x3D → BootInit1/2/3 → BootTail
+- [x] rizin raw mode confirmed for overlay disassembly
 
 ## Pending
 
@@ -59,8 +62,8 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Continue crt0 from 0x10014c; locate `main` and the game init chain.
-3. Decode System__InstallHandlerEntry (0x118398) + dump handler table (0x1C5078).
+2. Trace BootInit1/2/3 (0x118C98, 0x10EBA0, 0x141EE0) → locate `main` + MWo3 loader.
+3. Decode remaining handler-table entries.
 4. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 
 ## Milestones
@@ -69,7 +72,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 | --- | --- | --- |
 | Phase 0 — Project setup | completed | 100% |
 | Phase 1 — Dump inspection | completed | 100% |
-| Phase 2 — Executable analysis | in progress | ~75% |
+| Phase 2 — Executable analysis | in progress | ~85% |
 | Phase 3 — Decompilation foundation | in progress | ~10% |
 | Phase 3 — Decompilation foundation | pending | 0% |
 | Phase 4 — Game systems | pending | 0% |

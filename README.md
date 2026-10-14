@@ -4,12 +4,12 @@ Decompilation of the PlayStation 2 game **Nana** (Bandai, 2005), for
 computer science education, video game preservation, and technical research.
 
 > **LEGAL DISCLAIMER**
->
+> >
 > This repository contains **no original game data**. It hosts only
 > independently reconstructed source code, technical documentation, build
 > scripts, symbol maps, and non-copyrightable metadata produced by reverse
 > engineering.
->
+> >
 > **You must own a physical copy of the game and produce your own personal
 > dump to work with or verify this project.** Do not request, upload, share,
 > or redistribute game binaries, ISO images, assets, music, or videos.
@@ -20,18 +20,18 @@ computer science education, video game preservation, and technical research.
 - A legally owned personal dump of the PS2 game (never committed to this repo)
 - Arch Linux (other distros work with equivalent packages)
 - Tools (see [docs/environment.md](docs/environment.md) for exact versions):
-  - `git`, `github-cli`
-  - `python` + `pip` (analysis scripts)
-  - `binutils` (`readelf`, `objdump`), `file`
-  - Ghidra (interactive decompilation)
-  - rizin + rz-ghidra (scriptable disassembly/decompilation)
-  - `7zip`, `fuseiso` (ISO inspection, read-only mount)
-  - PCSX2 (verification — AUR, set up in a later phase)
+- `git`, `github-cli`
+- `python` + `pip` (analysis scripts)
+- `binutils` (`readelf`, `objdump`), `file`
+- Ghidra (interactive decompilation)
+- rizin + rz-ghidra (scriptable disassembly/decompilation)
+- `7zip`, `fuseiso` (ISO inspection, read-only mount)
+- PCSX2 (verification — AUR, set up in a later phase)
 
 ## Repository layout
 
 | Path | Purpose |
-|------|---------|
+| --- | --- |
 | `docs/` | Technical documentation: environment, disc map, executable analysis, conventions, asset formats, build |
 | `notes/` | Raw reverse-engineering notes, one file per area/module |
 | `src/` | Reconstructed source code (created in Phase 3) |
@@ -43,8 +43,12 @@ computer science education, video game preservation, and technical research.
 
 ## Progress
 
-See [TODO.md](TODO.md) and `progress.yaml`. A generated progress chart is
-maintained in `docs/` as the project advances.
+![Decompilation progress](docs/progress.svg)
+
+The chart is generated from [`progress.yaml`](progress.yaml) by
+[`tools/progress_chart.py`](tools/progress_chart.py) and updated automatically
+by a GitHub Action on every push. For the human-readable state see
+[TODO.md](TODO.md).
 
 ## License
 

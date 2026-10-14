@@ -22,7 +22,7 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 6           # bootstrap/system symbols seeded in symbols/functions.txt
+  identified: 10          # bootstrap/system symbols, see symbols/functions.txt
   decompiled: 0
   matched: 0
   remaining: 2342

@@ -118,6 +118,29 @@ magic `MWo3`, load address 0x00b7f800 (matches reserved ELF regions),
 code + relocations + embedded asset-name strings. Overlays call back into
 the main executable (`jal 0x0165dc40` observed in SHOP2R).
 
+## Startup chain (Phase 2, rizin-assisted)
+
+| Address | Hypothesis | Evidence |
+| --- | --- | --- |
+| 0x00100080 | `Startup__Entry` (crt0) | FPU zeroing (`mtc1 f0..f31`), `ctc1 zero,31`, BSS clear loop 0x5A3680–0x1A7900 |
+| 0x001000F0 | `Fpu__ClearAll` | callable `mtc1 f24..f31` block; CALL XREF from fcn.0044e1f0 (reset path) |
+| 0x00118478 | `System__InstallHandlers` | installs 0x10-byte entries from table @0x1C5078 (cap 49), IRQs masked via `mtc0` |
+| 0x00118398 | `System__AddHandler` | **kernel syscall 0x56 wrapper** (`v1=0x56; syscall`); real install done by kernel |
+| 0x00111688 | `System__CalcTableEnd` | end-1 arithmetic before install loop |
+| 0x00119098 | `System__Fatal` | called with a0=1 after error string setup |
+| 0x001C5078 | `g_SystemHandlerTable` | header {13,18,8}; {id, handler} pairs; code stubs embedded @0x1C50B8 |
+| 0x00118C98 | `System__BootInit1` | first boot-phase call from crt0 |
+| 0x0010EBA0 | `System__BootInit2` | called with a0=0 |
+| 0x00141EE0 | `System__BootInit3` | arg = *(u32*)0x5A3A80 |
+| 0x00127DE0 | `System__BootTail` | tail-call target of crt0 |
+
+crt0 verified: $gp = 0x5AB270 set in code (matches .reginfo); syscall 0x3C
+returns sp; syscall 0x3D secondary setup; syscall ID families 0x56..0x59
+(add/remove handler pairs) around 0x1183A8.
+
+Note: `syscall.0.555070` (rizin label) decodes as **data** — likely a dispatch
+table with embedded syscall opcodes. Confirm in Ghidra.
+
 ## Open items
 
 - [ ] Confirm true function count + boundaries in Ghidra 12.1.2

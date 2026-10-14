@@ -2,16 +2,25 @@
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
 # Sizes are 0 until measured in Ghidra. All addresses are virtual.
-#
-# Bootstrap and system-interface symbols seeded from Phase 2 analysis.
-# See notes/analysis/startup.md for evidence and reasoning.
+# Evidence: notes/analysis/startup.md
 
 0x00100080 0 hypothesis Startup__Entry
 0x001000f0 0 hypothesis Fpu__ClearAll
 0x00118478 0 hypothesis System__InstallHandlers
-0x00118398 0 hypothesis System__InstallHandlerEntry
+0x00118398 0 hypothesis System__AddHandler      # syscall 0x56 wrapper: v1=0x56; syscall
 0x00111688 0 hypothesis System__CalcTableEnd
 0x00119098 0 hypothesis System__Fatal
+0x00118c98 0 hypothesis System__BootInit1       # first boot call from crt0
+0x0010eba0 0 hypothesis System__BootInit2       # called with a0=0
+0x00141ee0 0 hypothesis System__BootInit3       # arg = *(u32*)0x5A3A80
+0x00127de0 0 hypothesis System__BootTail        # tail target (j, not jal)
+
+# Syscall IDs observed (v1 value at syscall instruction):
+#   0x3C = heap/stack setup (crt0; returns sp in v0; args gp/heap bounds)
+#   0x3D = post-setup kernel call (args a0=0x1A7900, a1=-1)
+#   0x56 / -0x56 .. 0x59 / -0x59 = handler add/remove pairs (region 0x1183A8+)
+#   Dispatcher @0x1183A8: accepts IDs [0x0D, 0x30), forwards to System__AddHandler
 
 # Data symbols
-0x001C5078 0 hypothesis g_SystemHandlerTable
+0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs; code embedded @0x1C50B8
+0x005A3A80 0 hypothesis g_BootParamPtr          # u32 read at crt0, passed to BootInit3
