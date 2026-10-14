@@ -115,36 +115,35 @@ Module path table @0x301D80–0x301E74 (10 entries, contiguous). Loader
 location pending: `axt @ 0x301D80` next. "Error could not reboot iop"
 @0x301DA0 suggests IOP reboot (LoadExecPS2-style) before module loading.
 
-## Overlay registry (found @0x142660 — CORRECTED 2026-10-14)
+## Game asset & overlay registry (found @0x142660 — FINAL 2026-10-14)
 
-**CORRECTION:** 0x142660 is NOT the IOP .irx loader. It is the **game overlay
-mode registry/dispatcher** — mapping game modes (Title, MyRoom, TRAIN,
-WORKING...) to init functions and loaded overlay code pointers.
+**CORRECTION:** 0x142660 is NOT the IOP .irx loader. It is the **unified
+asset & overlay registry** — mapping game modes and assets to their data.
 
-The table at **0x1C9AA0** has **at least two formats**:
+The table at **0x1C9AA0** has **three formats**:
 
-**Format A (first entries, ~12 bytes):** `{flag, name_ptr, init_func_ptr}`
-
-```javascript
-{0, 0x301CF8, 0x35E1A0}
-{0, 0x301D08, 0x39AB90}
-{1, 0x301D10, 0x00000000}
-{1, 0x301D18, 0x00000000}
-{0, 0x301D28, 0x39B380}
-{0, 0x301D38, 0x3A9B10}
-{0, 0x301D40, 0x3AA300}
-{0, 0, 0}                    // terminator
-```
-
-**Format B (from 0x1C9B00, 16 bytes):** `{name_ptr, alt_name_ptr, code_ptr, ...}`
+**Format A (0x1C9AA0, 12 bytes):** `{flag, name_ptr, nkp_ptr}` — **asset NKP files**
 
 ```javascript
-{"Title", "MyRoom", 0x001B04F0, ...}
-{..., 0x00B82E80, "TRAIN", ...}       // 0xB82E80 = overlay region (0xB7F800+0x4E80)
-{0x001C1A80, ..., "WORKING", 0x00B83140}  // 0xB83140 = overlay region
+{0, "interior",    0x35E1A0}   → NKP file (magic 4E4B501A)
+{0, "shiftbg",     0x39AB90}   → NKP file (magic 4E4B501A)
+{1, "misc_bg",     0x00000000} → no file (flag=1, runtime generated)
+{1, "clothes2",    0x00000000} → no file (flag=1, runtime generated)
+{0, "story/allsc", 0x39B380}   → NKP file (magic 4E4B501A)
+{0, "work",        0x3A9B10}   → ? (pending verify)
+{0, "epi_txt",     0x3AA300}   → ? (pending verify)
+{0, 0, 0}                           // terminator
 ```
 
-Overlay code pointers (`0xB8xxxx`) confirm the MWo3 load address 0x00B7F800:
+**Format B (0x1C9B00, 16 bytes):** `{name, alt_name, overlay_code_ptr, ...}` — **executable overlays**
+
+```javascript
+{"Title",   "MyRoom",  0x001B04F0, ...}
+{...,       0x00B82E80, "TRAIN",   ...}   // 0xB82E80 = overlay region
+{0x001C1A80, ...,       "WORKING", 0x00B83140}
+```
+
+Overlay code pointers confirm MWo3 load address 0x00B7F800:
 
 - 0x00B82E80 = 0xB7F800 + 0x4E80
 - 0x00B83140 = 0xB7F800 + 0x5340
@@ -152,8 +151,7 @@ Overlay code pointers (`0xB8xxxx`) confirm the MWo3 load address 0x00B7F800:
 - 0x00B82FB0 = 0xB7F800 + 0x57B0
 - 0x00B814B0 = 0xB7F800 + 0x3CB0
 
-The region 0x301D80+ contains **game overlay names**, not /iop/ paths:
-"dvd:", "%s", "Title", "MyRoom", "myroom", "TRAIN", "WORKING"...
+**NKP magic discovered:** `4E 4B 50 1A` ("NKP" + 0x1A) at 0x35E1A0, 0x39AB90,
+0x39B380. The 0x1A byte is likely a version or header-size field.
 
-**IOP .irx loading remains unfound** — likely inside System__EarlyInit
-syscall wrappers or kernel-side during boot.
+**IOP .irx loading remains unfound** — likely kernel-side during boot.

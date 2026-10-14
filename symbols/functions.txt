@@ -123,7 +123,7 @@
 #   0x00301E50 rtfssiop  0x301E68 rwa  0x301DA0 "Error could not reboot iop"
 
 # OVERLAY REGISTRY (found 2026-10-14; CORRECTED from 'module loader')
-#   0x00142660  Overlay__Registry    — iterates table @0x1C9AA0; mode dispatch (Title/MyRoom/TRAIN/WORKING)
+#   0x00142660  AssetOverlay__Registry — iterates table @0x1C9AA0; assets (NKP) + overlays (code)
 #   0x00139A90  Overlay__LoadPrimary — (a0=arg, a1=name?) primary load/init
 #   0x00139BA0  Overlay__LoadSecondary — (a0=buf, a1=0) secondary load
 #   0x00142630  Module__Init         — called by 0x147110 with a0=0; also by LoadTable tail
@@ -136,3 +136,11 @@
 # Overlay names (region 0x301D80+)
 #   0x301D90 "Title"  0x301D98 "MyRoom"/"myroom"  0x301DB0 "TRAIN"  0x301DC0 "WORKING"
 #   (first 7 names at 0x301CF8, 0x301D08, 0x301D10, 0x301D18, 0x301D28, 0x301D38, 0x301D40 — TBD)
+
+# NKP file headers discovered (magic 4E4B501A)
+#   0x0035E1A0  interior.nkp    (Format A entry 0)
+#   0x0039AB90  shiftbg.nkp     (Format A entry 1)
+#   0x0039B380  story_allsc.nkp (Format A entry 4)
+#   0x003A9B10  work.nkp        (Format A entry 5, pending verify)
+#   0x003AA300  epi_txt.nkp     (Format A entry 6, pending verify)
+# NKP magic: 4E4B501A = "NKP" + 0x1A (version? header size?)
