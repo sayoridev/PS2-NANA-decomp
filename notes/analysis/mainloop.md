@@ -108,3 +108,9 @@ Msg dispatch: 13-case jump table @0x34CCD0.
 GS register usage: `0x12001000` = GS CSR, bit 13 = FIELD (Display__GetField).
 Mode state struct size confirmed: **0x180 bytes per index**, base 0x5B2F00
 (`State__Update` computes base + index*0x180). Enabled flags @0x5A3A98.
+
+## IOP module loading (in progress)
+
+Module path table @0x301D80–0x301E74 (10 entries, contiguous). Loader
+location pending: `axt @ 0x301D80` next. "Error could not reboot iop"
+@0x301DA0 suggests IOP reboot (LoadExecPS2-style) before module loading.

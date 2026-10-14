@@ -40,6 +40,15 @@ position.
 - Overlay code references main-ELF globals and vice versa — cross-image
 pointers exist, relocated at MWo3 load time.
 
+## 4b. System / COP0 idioms (verified)
+
+- COP0 Status read: `mfc0 v0, $12, 0` — rizin prints rd as a GPR name
+(`mfc0 v1, t4, 0` = Status, since $12 = t4). Bit 16 = BEV.
+- BEV pair: `System__IsBEVSet` (test+sltu) / `System__WaitBEVClear`
+(poll loop) — 112 + 98 xrefs, the two hottest functions.
+- Uncached access via KSEG1: `ptr | 0x20000000` (or with lui v0, 0x2000)
+before lw/sw — DMA/hardware register blocks (e.g. 0x5A4xxx region).
+
 ## 5. Suspect decodes (verify in Ghidra)
 
 Known rizin artifacts seen repeatedly (likely MMI opcodes misdecoded):

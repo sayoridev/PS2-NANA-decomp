@@ -22,7 +22,7 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 46          # + early init chain, stream mgr, msg dispatch
+  identified: 52          # + BEV/DMA primitives, module table mapped
   decompiled: 13          # + display.c (Display__GetField), mode.c (State__Enable)
   matched: 0
   remaining: 2305

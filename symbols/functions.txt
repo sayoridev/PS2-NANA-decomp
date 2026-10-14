@@ -68,6 +68,8 @@
 0x008D3900 0 hypothesis Schedule__g_Context     # 59 task slots x 0x134, timer @base
 0x008DF810 0 hypothesis Schedule__g_FrameCount  # +1 per frame
 0x005BB880 0 hypothesis g_SceneContext          # Scene__Update state machine
+0x001C4990 0 hypothesis g_SystemInitDone      # EnsureInit guard flag
+0x001C6124 0 hypothesis g_SubsystemReady      # set by System__SubsystemInit
 0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs
 0x005A3A80 0 hypothesis g_BootParamPtr         # u32 read at crt0
 0x005AB8C8 0 hypothesis g_ArenaSlots           # 0x200-byte arena, 0x10-byte slots
@@ -103,3 +105,19 @@
 #   0x001507B0  — registration + init (0x15640, 0x50DBC0)
 #   0x001507F0  Msg__Dispatch?       — 13-case jump table @0x34CCD0, string ptrs in 0x31xxxx pool
 #   0x00142560  — hook sibling (called by Stream__ functions)
+
+# Low-level init chain
+#   0x00111EE0  System__EnsureInit    — lazy singleton (guard flag 0x1C4990); 10 callers
+#   0x0011D5E0  System__SubsystemInit — (a0); check 0x11D368(1), EnsureInit, slots in 0x1C6xxx
+#   0x001189E0 / 0x00118A30 / 0x00111780 — EnsureInit callees
+#   0x0011D368 — subsystem pre-check
+
+# Bootstrap primitives (MOST-CALLED functions in the binary)
+#   0x00118A30  System__IsBEVSet       — COP0 Status bit16 (BEV); 112 xrefs
+#   0x001189E0  System__WaitBEVClear   — poll BEV clear; returns waited-flag; 98 xrefs
+#   0x00111780  Dma__Init              — KSEG1 uncached setup (0x5A4xxx | 0x20000000)
+#   0x00118A48  — BootInit1 callee; references 0x30xxxx pool (config init?)
+# IOP module path table (contiguous strings, iterated by loader):
+#   0x00301D80 IOPRP300.IMG  0x301DC0 sio2man  0x301DE0 padman  0x301DF0 mcman
+#   0x00301E00 mcserv  0x301E10 libsd  0x301E20 sdrdrv  0x301E30 cdvdstm
+#   0x00301E50 rtfssiop  0x301E68 rwa  0x301DA0 "Error could not reboot iop"
