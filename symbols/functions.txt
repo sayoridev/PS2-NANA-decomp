@@ -144,3 +144,9 @@
 #   0x003A9B10  work.nkp        (Format A entry 5, pending verify)
 #   0x003AA300  epi_txt.nkp     (Format A entry 6, pending verify)
 # NKP magic: 4E4B501A = "NKP" + 0x1A (version? header size?)
+
+# Ghidra cross-check corrections (2026-10-14)
+#   0x00142640  PreLoop__Init        — REAL one-shot init, called BEFORE loop (arg=1)
+#   0x001425D0  System__InitFrameHook— call at 0x141F54 is DEAD CODE (unreachable);
+#                                       function itself remains real (other callers may exist)
+#   ORDER FIX in loop: System__RunFrameHook (0x142570) runs BEFORE Schedule__FrameTick (0x177F00)

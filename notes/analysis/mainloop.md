@@ -155,3 +155,20 @@ Overlay code pointers confirm MWo3 load address 0x00B7F800:
 0x39B380. The 0x1A byte is likely a version or header-size field.
 
 **IOP .irx loading remains unfound** — likely kernel-side during boot.
+
+## Ghidra cross-validation (2026-10-14) — Game__Main VERIFIED
+
+Ghidra 12.1.2 decompile of the main loop matches the hand reconstruction
+call-for-call. Corrections established by the decompiler:
+
+- The one-shot pre-loop init is **0x142640(arg=1)**, called before the loop.
+The in-loop call to 0x1425D0 seen in rizin output is at 0x141F54 and is
+UNREACHABLE (dead code) — removed by the decompiler with warning
+"Removing unreachable block (ram,0x00141f54)".
+- Execution order in loop tail: System__RunFrameHook **before**
+Schedule__FrameTick.
+- Function prologue at 0x141EE0: `addiu sp,sp,-0x20; sd ra,0x10(sp)`
+(bytes 10 00 BF FF at 0x141EE4 were initially undefined in Ghidra).
+
+Lesson recorded in AGENTS.md: rizin hypotheses must be cross-checked with
+the Ghidra decompiler before being marked VERIFIED.
