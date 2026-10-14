@@ -12,12 +12,12 @@ identified. Evidence: rizin disassembly; see symbols/functions.txt._
 | 5 | 0x00142510 | func_00142510 | pending |  |
 | 6 | 0x001424C0 | func_001424C0 | pending |  |
 | 7 | 0x001424B0 | func_001424B0 | pending |  |
-| 8 | 0x0013B310 | func_0013B310 | pending |  |
+| 8 | 0x0013B310 | `Draw__SetContext2` | hypothesis | ctx accessors 0x1347F0(2)/0x134790(2,val); value from 0x13B780 |
 | — | 0x001425D0 | (first-iteration only) | pending | one-shot inside loop |
-| 9 | 0x00177F30 | func_00177F30 | pending |  |
+| 9 | 0x00177F30 | `Schedule__Update` | hypothesis | task scheduler: struct @0x8D3900 (0x4D14 = 59 slots x 0x134), countdown @base, cb 0x177C80/0x177CCB0 |
 | 10 | 0x00142570 | func_00142570 | pending |  |
-| 11 | 0x00177F00 | func_00177F00 | pending |  |
-| 12 | 0x00146040 | func_00146040 | pending |  |
+| 11 | 0x00177F00 | `Schedule__FrameTick` | hypothesis | calls 0x192C08; global frame counter @0x8DF810++ |
+| 12 | 0x00146040 | `Scene__Update` | hypothesis | state machine @0x5BB880; jump table @0x1B9E20; counters +0xBC; countdown +0xE0; switch on +4 (11+ cases) |
 | 13 | 0x00142700 | func_00142700 | pending |  |
 | 14 | 0x00134D50 | `Display__EndFrame` | hypothesis | struct @0x5B1AD0; fn-ptr call at struct+0 (a0=0); helpers 0x132680/0x1345E0/0x1347F0/0x132630/0x134790; also called by Game__Main init (0x141D90) |
 
@@ -49,3 +49,20 @@ arena allocator init (0x10-byte slots). `fcn.00129CE8` = memset-like
 
 Decodes flagged as rizin artifacts (verify in Ghidra): `ext s0, sp, 0, 1`,
 `xori.b w0, w0, 0xb0`, `mult ac3, ...`, `dpa.w.ph ac0, sp, s3` (likely MMI).
+
+## Scheduler module map
+
+| Address | Hypothesis | Notes |
+| --- | --- | --- |
+| 0x008D3900 | `Schedule__g_Context` | 0x4D14 bytes = 59 slots x 0x134; timer at base |
+| 0x008DF810 | frame counter | +1 per frame (Schedule__FrameTick) |
+| 0x00192BC8 / 0x00192C08 | scheduler internals | called by #9 / #11 |
+| 0x00177C80 / 0x00177CCB0 | task callback helpers | invoked when timer expires |
+
+## Graphic context accessors
+
+| Address | Hypothesis | Notes |
+| --- | --- | --- |
+| 0x001347F0 | `Draw__BeginContext(n)` | called in #8 and Display__EndFrame |
+| 0x00134790 | `Draw__EndContext(n, val)` | pair of the above |
+| 0x00132680 / 0x001345E0 / 0x001347F0 / 0x00132630 / 0x00134790 | display helpers | Display__EndFrame chain |

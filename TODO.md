@@ -56,6 +56,9 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
 
 ## Blocked
 
+- [ ] GitHub Actions disabilitato a livello account/repo (run vuoto, pannello
+"Run time"/pricing). Mitigato con git hook pre-push locale. Fix account:
+Settings → Actions → General → allow all actions. Low priority.
 - [ ] PCSX2 emulator (verification, Phase 6) — AUR; deferred, no action needed now
 - [ ] ps2dev toolchain (Phase 6) — build from source when reconstruction begins
 
@@ -69,7 +72,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Classify remaining 9 main-loop body functions (notes/analysis/mainloop.md — 5 of 14 done).
+2. Classify last 6 main-loop calls — small cluster 0x1424B0–0x142700 (9 of 14 done).
 3. Find MWo3 loader → candidates Game__Main inits (0x141D90, 0x13BB80).
 4. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 

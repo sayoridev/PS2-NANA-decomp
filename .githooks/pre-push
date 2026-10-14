@@ -1,0 +1,12 @@
+#!/bin/sh
+# Regenerate the progress chart before every push (local fallback for CI).
+cd "$(git rev-parse --show-toplevel)" || exit 0
+python tools/progress_chart.py >/dev/null 2>&1 || exit 0
+if ! git diff --quiet -- docs/progress.svg 2>/dev/null; then
+    echo ""
+    echo "NOTE: docs/progress.svg was regenerated from progress.yaml."
+    echo "      Commit it so the README chart stays in sync:"
+    echo "      git add docs/progress.svg && git commit --amend --no-edit"
+    echo ""
+fi
+exit 0

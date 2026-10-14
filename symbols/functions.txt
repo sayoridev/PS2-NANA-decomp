@@ -32,12 +32,12 @@
 0x00142510 0 unknown func_00142510
 0x001424c0 0 unknown func_001424c0
 0x001424b0 0 unknown func_001424b0
-0x0013b310 0 unknown func_0013b310
+0x0013b310 0 hypothesis  Draw__SetContext2      # ctx accessors 0x1347F0/0x134790, param 2
 0x001425d0 0 unknown func_001425d0             # first-iteration one-shot
-0x00177f30 0 unknown func_00177f30
+0x00177f30 0 hypothesis  Schedule__Update       # task scheduler @0x8D3900, 59 slots x 0x134
 0x00142570 0 unknown func_00142570
-0x00177f00 0 unknown func_00177f00
-0x00146040 0 unknown func_00146040
+0x00177f00 0 hypothesis  Schedule__FrameTick    # counter @0x8DF810++ per frame
+0x00146040 0 hypothesis  Scene__Update          # state machine @0x5BB880, jump table @0x1B9E20
 0x00142700 0 unknown func_00142700
 0x00134d50 0 hypothesis  Display__EndFrame     # struct @0x5B1AD0; fn-ptr @+0; end-of-frame routine
 
@@ -56,6 +56,9 @@
 0x005A3A78 0 hypothesis g_FrameCallback        # gp-0x7AF8, per-frame callback
 0x005B1AD0 0 hypothesis g_DisplayContext       # Display__EndFrame struct
 0x005B2F00 0 hypothesis g_GameState            # Mode__Update state machine struct
+0x008D3900 0 hypothesis Schedule__g_Context     # 59 task slots x 0x134, timer @base
+0x008DF810 0 hypothesis Schedule__g_FrameCount  # +1 per frame
+0x005BB880 0 hypothesis g_SceneContext          # Scene__Update state machine
 0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs
 0x005A3A80 0 hypothesis g_BootParamPtr         # u32 read at crt0
 0x005AB8C8 0 hypothesis g_ArenaSlots           # 0x200-byte arena, 0x10-byte slots
