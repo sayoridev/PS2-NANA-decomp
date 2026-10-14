@@ -1,0 +1,17 @@
+# PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
+# Format: address size status name
+# Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
+# Sizes are 0 until measured in Ghidra. All addresses are virtual.
+#
+# Bootstrap and system-interface symbols seeded from Phase 2 analysis.
+# See notes/analysis/startup.md for evidence and reasoning.
+
+0x00100080 0 hypothesis Startup__Entry
+0x001000f0 0 hypothesis Fpu__ClearAll
+0x00118478 0 hypothesis System__InstallHandlers
+0x00118398 0 hypothesis System__InstallHandlerEntry
+0x00111688 0 hypothesis System__CalcTableEnd
+0x00119098 0 hypothesis System__Fatal
+
+# Data symbols
+0x001C5078 0 hypothesis g_SystemHandlerTable
