@@ -130,9 +130,12 @@ the main executable (`jal 0x0165dc40` observed in SHOP2R).
 | 0x00119098 | `System__Fatal` | called with a0=1 after error string setup |
 | 0x001C5078 | `g_SystemHandlerTable` | header {13,18,8}; {id, handler} pairs; code stubs embedded @0x1C50B8 |
 | 0x00118C98 | `System__BootInit1` | first boot-phase call from crt0 |
-| 0x0010EBA0 | `System__Syscall64` | **syscall-0x64 wrapper** at head of stub table 0x10EBA0–0x10ECDC (IDs 0x64–0x76, 46+ callers); NOT a boot phase |
+| 0x0010EBA0 | `System__Syscall64` | syscall-0x64 wrapper at head of stub table 0x10EBA0–0x10ECDC (IDs 0x64–0x76, 46+ callers); NOT a boot phase |
+| 0x0012B968 | `Random__Next` | Knuth LCG (a=6364136223846793005, c=1), 44 xrefs — src/system/random.c |
+| 0x0014E8E0 | `Time__Tick` | frame counter @0x71FDE8 (cap 0x0CDFD7F0) — src/system/time.c |
+| 0x00123C18 | `Random__MulStep` | 64×64 multiply helper for the LCG |
 | 0x00141EE0 | `Game__Main` | init then **infinite main loop** (0x141F04), ~13 fixed calls per iteration |
-| 0x00127DE0 | `System__BootTail` | tail-call target of crt0 |
+| 0x00127DE0 | `System__Exit` | exit-callback lists (ctx+0x148), returns to crt0 @0x100218; 7 external callers |
 
 crt0 verified: $gp = 0x5AB270 set in code (matches .reginfo); syscall 0x3C
 returns sp; syscall 0x3D secondary setup; syscall ID families 0x56..0x59

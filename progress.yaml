@@ -22,10 +22,10 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 13          # + main loop and body candidates, see symbols/functions.txt
-  decompiled: 2           # src/system/startup.c: Startup__Entry + Fpu__ClearAll (RECONSTRUCTED)
+  identified: 18          # + Time/Random/Exit/arena family, see symbols/functions.txt
+  decompiled: 4           # startup.c, time.c, random.c (all RECONSTRUCTED)
   matched: 0
-  remaining: 2333
+  remaining: 2324
 
 modules: []
 

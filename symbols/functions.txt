@@ -1,32 +1,39 @@
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
-# Sizes are 0 until measured in Ghidra. Evidence: notes/analysis/startup.md
-#
+# Sizes are 0 until measured in Ghidra. Evidence: notes/analysis/startup.md,
+# notes/analysis/mainloop.md
+
 # Bootstrap & system interface
-0x00100080 0 RECONSTRUCTED Startup__Entry      # see src/system/startup.c
-0x001000f0 0 RECONSTRUCTED Fpu__ClearAll       # zeroes $f24..$f31; also called @0x44E1F0
+0x00100080 0 RECONSTRUCTED Startup__Entry      # src/system/startup.c
+0x001000f0 0 RECONSTRUCTED Fpu__ClearAll       # src/system/startup.c
 0x00118478 0 hypothesis  System__InstallHandlers
 0x00118398 0 hypothesis  System__AddHandler    # kernel syscall 0x56 wrapper
 0x00111688 0 hypothesis  System__CalcTableEnd
 0x00119098 0 hypothesis  System__Fatal
-0x00118c98 0 hypothesis  System__BootInit1     # 8 subsystem inits; tails to 0x11A9B0
-0x0011a9b0 0 hypothesis  System__BootInit1b    # tail target of BootInit1 ( unexplored )
-0x0010eba0 0 hypothesis  System__Syscall64     # syscall 0x64 wrapper; 46+ callers (was mislabeled "BootInit2")
-0x00127de0 0 hypothesis  System__BootTail      # crt0 tail target; likely exit path (loop never returns)
+0x00118c98 0 hypothesis  System__BootInit1     # 8 subsystem inits; tails to arena init
+0x0011a9d8 0 hypothesis  Memory__ArenaPush     # 0x10-byte slot arena @0x5AB8C8
+0x0011aa58 0 hypothesis  Memory__ArenaIndex    # handles masked & 0x7FFFFFFF
+0x00129ce8 0 hypothesis  Memory__Memset        # (dst, 0, n) — memset-like
+0x00129b30 0 hypothesis  Memory__Memset2       # variant, args (dst, src?, n)
+0x0010eba0 0 hypothesis  System__Syscall64     # syscall 0x64 wrapper; stub table 0x10EBA0+
+0x00127de0 0 hypothesis  System__Exit          # exit-callback lists (ctx+0x148), back to crt0 @0x100218
 
 # Game core
 0x00141ee0 0 hypothesis  Game__Main            # init then infinite loop
 0x00141f04 0 hypothesis  Game__MainLoop        # body: ~13 fixed calls per iteration
 
-# Main-loop body candidates (to classify)
-0x0014e8e0 0 unknown func_0014e8e0             # first call in loop (frame update?)
+# Main-loop body (classification in notes/analysis/mainloop.md)
+0x0014e8e0 0 RECONSTRUCTED Time__Tick          # src/system/time.c — frame counter @0x71FDE8
+0x0012b968 0 RECONSTRUCTED Random__Next        # src/system/random.c — Knuth LCG, 44 xrefs
+0x00123c18 0 hypothesis  Random__MulStep       # 64x64 multiply helper (LCG step)
 0x00142390 0 unknown func_00142390
-0x0012b968 0 unknown func_0012b968
 0x0013bde0 0 unknown func_0013bde0
 0x00142510 0 unknown func_00142510
-0x001424c0 0 unknown func_001424b0
+0x001424c0 0 unknown func_001424c0
+0x001424b0 0 unknown func_001424b0
 0x0013b310 0 unknown func_0013b310
+0x001425d0 0 unknown func_001425d0             # first-iteration one-shot
 0x00177f30 0 unknown func_00177f30
 0x00142570 0 unknown func_00142570
 0x00177f00 0 unknown func_00177f00
@@ -38,9 +45,12 @@
 #   0x3C = heap/stack setup (crt0; returns sp in v0)
 #   0x3D = post-setup kernel call (a0=0x1A7900, a1=-1)
 #   0x56 / -0x56 .. 0x59 / -0x59 = handler add/remove pairs @0x1183A8+
-#   0x5A, 0x5B, 0x74 = wrappers near BootInit1 (0x118D00/0x118D48/0x118CF0)
+#   0x5A, 0x5B, 0x74 = wrappers near BootInit1
 #   0x64 .. 0x76 = stub table @0x10EBA0-0x10ECDC (central kernel API)
 
 # Data symbols
-0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs; code embedded @0x1C50B8
-0x005A3A80 0 hypothesis g_BootParamPtr          # u32 read at crt0, passed to Game__Main path
+0x001C7FD0 0 hypothesis g_SystemContext        # central system struct pointer
+0x0071FDD0 0 hypothesis Time__g_Context        # tick struct; counter +0x18 = 0x71FDE8, cap 0x0CDFD7F0
+0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs
+0x005A3A80 0 hypothesis g_BootParamPtr         # u32 read at crt0
+0x005AB8C8 0 hypothesis g_ArenaSlots           # 0x200-byte arena, 0x10-byte slots
