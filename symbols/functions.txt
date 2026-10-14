@@ -20,8 +20,8 @@
 0x00127de0 0 hypothesis  System__Exit          # exit-callback lists (ctx+0x148), back to crt0 @0x100218
 
 # Game core
-0x00141ee0 0 hypothesis  Game__Main            # init then infinite loop
-0x00141f04 0 hypothesis  Game__MainLoop        # body: ~13 fixed calls per iteration
+0x00141ee0 0 RECONSTRUCTED Game__Main            # src/game/main.c — init then infinite loop
+0x00141f04 0 RECONSTRUCTED Game__MainLoop        # src/game/main.c — 14 verified calls per iteration
 
 # Main-loop body (classification in notes/analysis/mainloop.md)
 0x0014e8e0 0 RECONSTRUCTED Time__Tick          # src/system/time.c — frame counter @0x71FDE8
@@ -29,16 +29,16 @@
 0x00123c18 0 hypothesis  Random__MulStep       # 64x64 signed multiply, low64 result; 9 callers
 0x00142390 0 hypothesis  System__FrameService  # per-frame hook + counters @0x5A3A70-78; calls 0x1314E0
 0x0013bde0 0 hypothesis  Mode__Update          # state machine on struct @0x5B2F00; switch on +0x130
-0x00142510 0 unknown func_00142510
-0x001424c0 0 unknown func_001424c0
-0x001424b0 0 unknown func_001424b0
+0x00142510 0 hypothesis  State__UpdatePair      # fcn.0013B960(0,&0x5B3E60) + (1,&0x5B3E50)
+0x001424c0 0 RECONSTRUCTED Mode__GetStatus       # src/game/mode.c — lhu 0x5B3E62
+0x001424b0 0 RECONSTRUCTED Mode__GetState        # src/game/mode.c — lhu 0x5B3E6A, 32 xrefs
 0x0013b310 0 hypothesis  Draw__SetContext2      # ctx accessors 0x1347F0/0x134790, param 2
-0x001425d0 0 unknown func_001425d0             # first-iteration one-shot
+0x001425d0 0 RECONSTRUCTED System__InitFrameHook # src/system/framehook.c — installs default hook 0x1A8FE0
 0x00177f30 0 hypothesis  Schedule__Update       # task scheduler @0x8D3900, 59 slots x 0x134
-0x00142570 0 unknown func_00142570
+0x00142570 0 PARTIAL       System__RunFrameHook  # src/system/framehook.c — gate/flag/callback
 0x00177f00 0 hypothesis  Schedule__FrameTick    # counter @0x8DF810++ per frame
 0x00146040 0 hypothesis  Scene__Update          # state machine @0x5BB880, jump table @0x1B9E20
-0x00142700 0 unknown func_00142700
+0x00142700 0 PARTIAL       System__DispatchPending # consumes id slot 0x5A2A24; args 0x301E90/0x301EA0
 0x00134d50 0 hypothesis  Display__EndFrame     # struct @0x5B1AD0; fn-ptr @+0; end-of-frame routine
 
 # Syscall surface
@@ -54,6 +54,11 @@
 0x005A3A70 0 hypothesis g_PerfCounterA         # gp-0x7B00, +1 per frame
 0x005A3A74 0 hypothesis g_PerfCounterB         # gp-0x7AFC, +1 per frame
 0x005A3A78 0 hypothesis g_FrameCallback        # gp-0x7AF8, per-frame callback
+0x005A3A64 0 hypothesis g_FrameHook            # {gate,flag,callback} see framehook.c; default handler 0x1A8FE0
+0x005B3E50 0 hypothesis g_ModeStateB           # 8 x u16, updated via fcn.0013B960(1,...)
+0x005B3E60 0 hypothesis g_ModeStateA           # 8 x u16, getters + copyout in mode.c
+0x005A2A24 0 hypothesis g_PendingCommandId     # gp-0x7F4C, consumed by System__DispatchPending
+0x005A3204 0 hypothesis g_DispatchParam        # read by System__DispatchPending
 0x005B1AD0 0 hypothesis g_DisplayContext       # Display__EndFrame struct
 0x005B2F00 0 hypothesis g_GameState            # Mode__Update state machine struct
 0x008D3900 0 hypothesis Schedule__g_Context     # 59 task slots x 0x134, timer @base
@@ -62,3 +67,11 @@
 0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs
 0x005A3A80 0 hypothesis g_BootParamPtr         # u32 read at crt0
 0x005AB8C8 0 hypothesis g_ArenaSlots           # 0x200-byte arena, 0x10-byte slots
+
+# Pending classification (helpers seen during loop analysis)
+#   0x0013B960  State__Update       — (index, struct) updater used by State__UpdatePair
+#   0x00141D90  Game__InitA         — Game__Main init call #1
+#   0x0013BB80  (arg 0)             — Game__Main init call #2
+#   0x00146A20 / 0x001010B8        — InitFrameHook setup calls
+#   0x00131580 / 0x001314E0        — System__FrameService helpers
+#   0x0013B780                     — value getter used by Draw__SetContext2

@@ -22,10 +22,10 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 25          # + scheduler/scene/draw family, see symbols/functions.txt
-  decompiled: 4           # startup.c, time.c, random.c (all RECONSTRUCTED)
+  identified: 31          # main loop 14/14 classified, see symbols/functions.txt
+  decompiled: 10          # startup/time/random/framehook/mode/main (RECONSTRUCTED/PARTIAL)
   matched: 0
-  remaining: 2324
+  remaining: 2317
 
 modules: []
 

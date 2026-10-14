@@ -38,7 +38,7 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
 - [x] $gp verified in crt0 code (0x5AB270, matches .reginfo)
 - [x] Boot chain mapped: crt0 → syscall 0x3C/0x3D → BootInit1/2/3 → BootTail
 - [x] rizin raw mode confirmed for overlay disassembly
-- [x] MAIN LOOP located: Game__MainLoop @0x141F04 (13 body calls)
+- [x] MAIN LOOP located and FULLY CLASSIFIED: Game__MainLoop @0x141F04 (14/14 calls); reconstructed in src/game/main.c
 - [x] First source files: src/system/startup.c (Startup__Entry, Fpu__ClearAll — RECONSTRUCTED)
 - [x] Time__Tick + Random__Next reconstructed (Knuth LCG identified, 44 xrefs)
 - [x] g_SystemContext identified @0x1C7FD0 (central system struct)
@@ -72,9 +72,8 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Classify last 6 main-loop calls — small cluster 0x1424B0–0x142700 (9 of 14 done).
-3. Find MWo3 loader → candidates Game__Main inits (0x141D90, 0x13BB80).
-4. Start Ghidra project; confirm function boundaries for the 2348 estimate.
+2. Trace Game__Main init calls (0x141D90, 0x13BB80) — locate MWo3 loader + subsystem init.
+3. Start Ghidra project; confirm function boundaries for the 2348 estimate.
 
 ## Milestones
 
@@ -83,7 +82,7 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 | Phase 0 — Project setup | completed | 100% |
 | Phase 1 — Dump inspection | completed | 100% |
 | Phase 2 — Executable analysis | completed | 100% |
-| Phase 3 — Decompilation foundation | in progress | ~20% |
+| Phase 3 — Decompilation foundation | in progress | ~35% |
 | Phase 3 — Decompilation foundation | pending | 0% |
 | Phase 4 — Game systems | pending | 0% |
 | Phase 5 — Assets and formats | pending | 0% |

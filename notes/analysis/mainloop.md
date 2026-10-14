@@ -1,7 +1,7 @@
 # Analysis — Game__MainLoop Body Classification
 
-_Game__MainLoop @0x141F04 iterates ~13 fixed calls. Tracked here as they are
-identified. Evidence: rizin disassembly; see symbols/functions.txt._
+_Game__MainLoop @0x141F04 iterates 14 fixed calls — ALL CLASSIFIED ✅
+(2026-10-14). Game__Main reconstructed in src/game/main.c._
 
 | # | Address | Name | Status | Notes |
 | --- | --- | --- | --- | --- |
@@ -9,16 +9,16 @@ identified. Evidence: rizin disassembly; see symbols/functions.txt._
 | 2 | 0x00142390 | `System__FrameService` | hypothesis | lazy hook install; per-frame callback @0x5A3A78; counters @0x5A3A70/0x5A3A74; calls 0x1314E0 |
 | 3 | 0x0012B968 | `Random__Next` | ✅ RECONSTRUCTED | Knuth LCG a=6364136223846793005, c=1 — see src/system/random.c |
 | 4 | 0x0013BDE0 | `Mode__Update` | hypothesis | state machine on struct @0x5B2F00; big switch on field+0x130 (cases 0x4D,0x4C,0x48,0x47,0x46,0x2A,0x29,0x28); uses Memory__Memset |
-| 5 | 0x00142510 | func_00142510 | pending |  |
-| 6 | 0x001424C0 | func_001424C0 | pending |  |
-| 7 | 0x001424B0 | func_001424B0 | pending |  |
+| 5 | 0x00142510 | `State__UpdatePair` | hypothesis | fcn.0013B960(0,&0x5B3E60) + fcn.0013B960(1,&0x5B3E50) |
+| 6 | 0x001424C0 | `Mode__GetStatus` | ✅ RECONSTRUCTED | src/game/mode.c — field @+2, 10 xrefs |
+| 7 | 0x001424B0 | `Mode__GetState` | ✅ RECONSTRUCTED | src/game/mode.c — field @+0xA, 32 xrefs |
 | 8 | 0x0013B310 | `Draw__SetContext2` | hypothesis | ctx accessors 0x1347F0(2)/0x134790(2,val); value from 0x13B780 |
-| — | 0x001425D0 | (first-iteration only) | pending | one-shot inside loop |
+| — | 0x001425D0 | `System__InitFrameHook` | ✅ RECONSTRUCTED | first-iteration one-shot; installs default hook 0x1A8FE0 |
 | 9 | 0x00177F30 | `Schedule__Update` | hypothesis | task scheduler: struct @0x8D3900 (0x4D14 = 59 slots x 0x134), countdown @base, cb 0x177C80/0x177CCB0 |
-| 10 | 0x00142570 | func_00142570 | pending |  |
+| 10 | 0x00142570 | `System__RunFrameHook` | partial | src/system/framehook.c — gate/flag/callback slots |
 | 11 | 0x00177F00 | `Schedule__FrameTick` | hypothesis | calls 0x192C08; global frame counter @0x8DF810++ |
 | 12 | 0x00146040 | `Scene__Update` | hypothesis | state machine @0x5BB880; jump table @0x1B9E20; counters +0xBC; countdown +0xE0; switch on +4 (11+ cases) |
-| 13 | 0x00142700 | func_00142700 | pending |  |
+| 13 | 0x00142700 | `System__DispatchPending` | partial | consumes command id @0x5A2A24; buffers 0x301E90/0x301EA0 |
 | 14 | 0x00134D50 | `Display__EndFrame` | hypothesis | struct @0x5B1AD0; fn-ptr call at struct+0 (a0=0); helpers 0x132680/0x1345E0/0x1347F0/0x132630/0x134790; also called by Game__Main init (0x141D90) |
 
 ## Related discoveries (2026-10-14)
@@ -66,3 +66,19 @@ Decodes flagged as rizin artifacts (verify in Ghidra): `ext s0, sp, 0, 1`,
 | 0x001347F0 | `Draw__BeginContext(n)` | called in #8 and Display__EndFrame |
 | 0x00134790 | `Draw__EndContext(n, val)` | pair of the above |
 | 0x00132680 / 0x001345E0 / 0x001347F0 / 0x00132630 / 0x00134790 | display helpers | Display__EndFrame chain |
+
+## Frame hook struct (verified in code)
+
+| Offset | Field | Address |
+| --- | --- | --- |
+| +0 | gate | 0x5A3A64 |
+| +4 | flag | 0x5A3A68 |
+| +8 | callback | 0x5A3A6C |
+
+Default handler: **0x001A8FE0**. Reconstructed in src/system/framehook.c.
+
+## Mode state structs
+
+- g_ModeStateA @0x5B3E60: 8 x u16. Getters: +2 (Mode__GetStatus),
++0xA (Mode__GetState). State__CopyOut exports all 16 bytes.
+- g_ModeStateB @0x5B3E50: sibling block, same updater family.
