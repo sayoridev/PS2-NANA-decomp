@@ -197,3 +197,20 @@
 0x001CA164 0 hypothesis g_SceneTiming
 0x005BB830 0 hypothesis g_SceneItemModes
 0x005BB8A8 0 hypothesis g_DmaPacketBuf
+
+# Game__Init subsystem calls — NAMED (2026-10-15)
+0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
+0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
+0x00177fd0 0 RECONSTRUCTED Schedule__Init        # scheduler ctx memset 0x4D14
+0x00176c80 0 RECONSTRUCTED Boot__SystemCheck    # (&flag): ret>=0 && flag -> trap(0)+halt
+0x0013b340 0 RECONSTRUCTED Draw__BootInit
+0x0013c5d0 0 RECONSTRUCTED Mode__Init           # XREF to Mode__Update
+0x00134b60 0 RECONSTRUCTED Display__SetMode     # (512,512,448,256,224) NTSC
+0x00134b20 0 RECONSTRUCTED Display__SetAspect   # (1.0, 1.12)
+0x00134ae0 0 RECONSTRUCTED Display__SetDepthRange # (1.1, 10000.0)
+0x00147110 0 RECONSTRUCTED Scene__Init          # memset g_SceneContext + LoadRequest(0)
+0x001507b0 0 hypothesis  Msg__Init              # dispatch family init
+0x001B96B0 0 RECONSTRUCTED Stream__Init         # stream ctx @0xB78000
+0x00139d60 0 hypothesis  (init TBD)
+0x00132170 0 hypothesis  (init TBD)
+0x00101150 0 hypothesis  (display sibling, 14 xrefs)
