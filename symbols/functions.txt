@@ -217,7 +217,7 @@
 
 # Confirmed via Schedule__Update + AssetOverlay__Registry decompiles (2026-10-15)
 0x00101fa0 0 RECONSTRUCTED System__RegisterFrameCallback  # (handler) — cached at gp-0x7AF8 by FrameService
-0x001423e0 0 hypothesis  Registry__OnFrame   # the registered per-frame callback (decompile next)
+0x001423e0 0 RECONSTRUCTED Registry__OnFrame   # per-frame callback; CHAINS to g_PrevFrameCallback; SYNC+EI at end
 0x00139a90 0 RECONSTRUCTED Asset__LoadEmbedded   # (name, nkp_ptr) — flag==0 path
 0x00139ba0 0 RECONSTRUCTED Asset__LoadFromDisc   # (path, 0) — flag==1 path, "dvd:" prefix
 0x0012c2d0 0 RECONSTRUCTED String__Format        # sprintf (varargs dropped by decompiler)
@@ -227,3 +227,9 @@
 0x00177c80 0 hypothesis  Task__Execute
 0x008d8608 0 hypothesis g_ScheduleCurrentSlot
 # Format A registry semantics CONFIRMED: flag=0 embedded NKP, flag=1 disc NKP (lazy name load)
+
+# Frame service architecture COMPLETE (2026-10-15)
+0x00131580 0 RECONSTRUCTED System__SaveContext      # (ctx144)
+0x001314e0 0 RECONSTRUCTED System__RestoreContext   # (ctx144)
+0x005A3778 0 hypothesis  g_PrevFrameCallback        # fn ptr chain (set by RegisterFrameCallback return)
+# Model: DI -> SaveContext -> handler chain -> counters -> RestoreContext -> SYNC -> EI

@@ -48,6 +48,9 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
 
 ## Pending
 
+- [x] ~~Cleanup pass B~~ DONE (2026-10-15): mode_update.c, scene_update.c,
+game_init.c, schedule.c, registry.c, pad.c+pad.h committed clean;
+raw files removed (preserved in git history).
 - [ ] Confirm function count/boundaries in Ghidra; export to `symbols/`
 - [ ] Catalog Metrowerks CodeWarrior codegen idioms (`notes/analysis/codegen.md`)
 - [ ] Import stub table → Sony SDK function list for `src/common/` shims
