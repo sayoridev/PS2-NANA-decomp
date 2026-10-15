@@ -23,7 +23,7 @@ executable:
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
   identified: 83          # + transfer ctx array 0x5ABB54, Pad__TransferTrigger, record flags
-decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
+  decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
   matched: 0
   remaining: 2305
 
