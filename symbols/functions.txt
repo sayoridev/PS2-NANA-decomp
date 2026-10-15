@@ -244,3 +244,11 @@
 0x00129b30 0 RECONSTRUCTED Memory__Copy          # memcpy
 # Button geometry: 18-bit active-low word; 0x3FFFF=none; 0xFFF=standard 12
 # Data: 0x005ABB00 g_PadRpcPort | 0x005ABD40 g_RpcCmdBuf(0x80) | 0x001C6064 retry flag
+
+# Memory allocator family (from Boot__SystemCheck, 2026-10-15)
+0x00116c58 0 RECONSTRUCTED Memory__Alloc        # (size) -> EE buf (SIF DMA capable)
+0x00116dc0 0 RECONSTRUCTED Memory__Free         # (ptr)
+0x001178d8 0 RECONSTRUCTED Rpc__Call2          # (iopBuf, 0, 0, &outFlag) — SifRpc wrapper
+0x001F5AF0 0 hypothesis  g_BootCheckBlob       # 0x360 B DMA'd to IOP for verification
+# NOTE: anti-piracy/integrity mechanism — documented for preservation only.
+# Any bypass discussion is out of scope per CONTRIBUTING.md.
