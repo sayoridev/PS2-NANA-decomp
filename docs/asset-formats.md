@@ -2,7 +2,7 @@
 
 > Filled during Phase 5. Structure documentation only — never file contents.
 
-## NKP — Konami Package (DECODED 2026-10-15)
+## NKP — Konami Package (VERIFIED 2026-10-15)
 
 **Magic:** `4E 4B 50 1A` ("NKP" + 0x1A)
 
@@ -23,11 +23,29 @@ fixed 0x21800 stride observed in `interior`, variable-size tail blocks).
 
 | Size | Field |
 | --- | --- |
-| u32 | id — first resource id of the run (ascending) |
+| u32 | id — first resource id of the RUN (ascending) |
 | u32 | offset — file offset of the run's data |
+
+**Run-length semantics (verified on 3 samples):** entry `i` covers resource
+ids `[id_i, id_{i+1})` — the id delta IS the resource count of the run.
+
+- interior: runs of 11-12 resources, uniform 0x21800 stride (fixed-size
+blocks) then variable-size tail runs
+- story/allsc: PERFECTLY uniform 0x800 stride, exactly 12 ids per run
 
 Consistency rule: index ends at `0x10 + count*8`; first data offset must be
 >= that (verified: 88-entry index ends 0x2D0, first data at 0x800).
+
+**Global id space:** ids do not restart per package (interior starts at
+0x2D8, story/allsc at 0x2238) — the engine numbers resources globally.
+
+**Embedded header vs disc payload:** the story/allsc sample claims 1092
+runs (~2.3 MB payload) but the ELF cannot hold it (image ends 0x5A3680).
+The embedded copy at 0x39B380 is therefore the HEADER+INDEX of the disc
+package STORY/ALLSC.NKP (name matches the on-disc file exactly); the
+flag==0 "embedded" path for big packages means "header embedded, payload
+from disc". `base` = 0x625D7800 (~1.57 GB) is consistent with the disc
+package size (1,650,292,736 B) — likely payload size / load extent.
 
 ### Observed samples
 
@@ -48,7 +66,7 @@ python3 tools/parse_nkp.py STORY_ALLSC.NKP 0 --max 8   # on an extracted copy
 
 ### Open items
 
-- [ ] Semantics of header.base (load addr vs size — samples differ)
+- [x] ~~Semantics of header.base~~ RESOLVED: RAM load base for small packages (0x5B8000), payload size/extent for disc-backed ones (0x625D7800)
 - [ ] Resource record format at the indexed offsets (per-resource header?)
 - [ ] Compression flag detection (any LZ/RLE in resource bodies?)
 - [ ] Index run-length semantics (id delta = resources per run)
