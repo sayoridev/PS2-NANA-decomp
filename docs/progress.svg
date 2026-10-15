@@ -15,12 +15,12 @@
   
   <text x='16' y='103' class='lbl'>Identified</text>
   <rect x='150' y='90' width='340' height='18' rx='3' fill='#2b313c'/>
-  <rect x='150' y='90' width='10' height='18' rx='3' fill='#8bc34a'/>
-  <text x='498' y='103' class='val'>74</text>
+  <rect x='150' y='90' width='12' height='18' rx='3' fill='#8bc34a'/>
+  <text x='498' y='103' class='val'>83</text>
   <text x='16' y='129' class='lbl'>Decompiled</text>
   <rect x='150' y='116' width='340' height='18' rx='3' fill='#2b313c'/>
   <rect x='150' y='116' width='2' height='18' rx='3' fill='#2196f3'/>
-  <text x='498' y='129' class='val'>14</text>
+  <text x='498' y='129' class='val'>18</text>
   <text x='16' y='155' class='lbl'>Matched</text>
   <rect x='150' y='142' width='340' height='18' rx='3' fill='#2b313c'/>
   <rect x='150' y='142' width='0' height='18' rx='3' fill='#4caf50'/>
