@@ -39,13 +39,19 @@ Consistency rule: index ends at `0x10 + count*8`; first data offset must be
 **Global id space:** ids do not restart per package (interior starts at
 0x2D8, story/allsc at 0x2238) — the engine numbers resources globally.
 
-**Embedded header vs disc payload:** the story/allsc sample claims 1092
-runs (~2.3 MB payload) but the ELF cannot hold it (image ends 0x5A3680).
-The embedded copy at 0x39B380 is therefore the HEADER+INDEX of the disc
-package STORY/ALLSC.NKP (name matches the on-disc file exactly); the
-flag==0 "embedded" path for big packages means "header embedded, payload
-from disc". `base` = 0x625D7800 (~1.57 GB) is consistent with the disc
-package size (1,650,292,736 B) — likely payload size / load extent.
+**Embedded header vs disc payload (VERIFIED 2026-10-15):** the story/allsc
+sample's FAT final offset reaches 0x6252C000 (~1.649 GB) — the index
+addresses the FULL disc file STORY/ALLSC.NKP (1,650,292,736 B). The
+embedded copy at 0x39B380 is the shadow FAT; flag==0 "embedded" entries
+for big packages mean "FAT embedded in ELF, payload read from disc at
+the indexed offsets". `base` = 0x625D7800 is the package extent.
+
+**ALLSC structure (two zones):**
+
+- early runs: single 0x800 blocks (small fixed records — scene metadata)
+- late runs: uniform 0xAB800-byte runs = 43,968 ADPCM blocks (~25.6 s of
+audio each at SPU2 rates), 13 resources per run — story audio bulk
+- ids 0x2238..0x60FB (~16K story resources), id delta grows 12->13 per run
 
 ### Observed samples
 

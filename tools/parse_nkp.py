@@ -6,8 +6,7 @@ Usage:
 
 With --elf, <offset> is a vaddr in SLPM_659.14 (delta 0xFFE80 applied).
 Without --elf, <offset> is a plain file offset (e.g. inside an extracted .NKP).
-
-Reads ONLY the structural header/index — never extracts game data.
+--max N limits printed entries (default 16; use a huge N for all).
 """
 import sys
 import struct
@@ -15,12 +14,9 @@ import struct
 DELTA = 0xFFE80
 
 def parse(data, off, max_entries=16):
-    magic = data[off:off+4]
-    if magic != b"NKPx1a".replace(b"x", b""):
-        # robust check: 4E 4B 50 1A
-        if data[off:off+3] != b"NKP" or data[off+3] != 0x1A:
-            print(f"!! no NKP magic at 0x{off:X} ({magic!r})")
-            return
+    if data[off:off+3] != b"NKP" or data[off+3] != 0x1A:
+        print(f"!! no NKP magic at 0x{off:X}")
+        return
     base    = struct.unpack_from("<I", data, off + 4)[0]
     flags   = struct.unpack_from("<I", data, off + 8)[0]
     count   = struct.unpack_from("<I", data, off + 0xC)[0]
@@ -40,13 +36,17 @@ def parse(data, off, max_entries=16):
         print(f"... ({count - max_entries} more entries)")
 
 def main():
-    path = sys.argv[1]
-    off = int(sys.argv[2], 16)
-    is_elf = "--elf" in sys.argv
-    if is_elf:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    path = args[0]
+    off = int(args[1], 16)
+    max_entries = 16
+    for i, a in enumerate(sys.argv[1:]):
+        if a == "--max":
+            max_entries = int(sys.argv[1:][i + 1])
+    if "--elf" in sys.argv:
         off -= DELTA
     data = open(path, "rb").read()
-    parse(data, off)
+    parse(data, off, max_entries)
 
 if __name__ == "__main__":
     main()
