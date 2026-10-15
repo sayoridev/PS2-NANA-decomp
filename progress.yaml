@@ -22,7 +22,7 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 172         # + voice bank table (25 banks), BGM modes, deferred callback executor
+  identified: 175         # + BGM table (30 entries), voice id math, string pool
   decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
   matched: 0
   remaining: 2305

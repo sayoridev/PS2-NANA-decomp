@@ -89,3 +89,27 @@ Well-documented externally; no reverse engineering needed.
 
 Small text/config formats. `yesno1.nkf`, `konami.nkt` observed in strings.
 Structure pending.
+
+## RWS — RWA Audio Stream (bank model VERIFIED 2026-10-15)
+
+RWS files are VOICE/BANK containers addressed by code-side tables:
+
+| Stream set | Files | Table | Contents |
+| --- | --- | --- | --- |
+| `RWAV/V000–V024.RWS` | 25 | `g_VoiceBankTable` @0x001F6070 (25 x {min,max}) | voice lines: bank i = ids [i*500, i*500+499]; **12,311 lines total** (last bank 311) |
+| `RWAB/BGM_001–030.RWS` | 30 | BGM table @0x001F5E5C (30 x {name, path, param}) | background music, one file per entry |
+
+- Voice IDs are global across banks (bank = id / 500, line = id % 500).
+- `TaskCmd__04/05` (Voice__Play) resolve id -> bank via the range table,
+then stream the corresponding `.RWS` through the RWA.IRX driver.
+- RWS internal record format (line header inside a bank file): pending —
+first bytes of V000.RWS needed (extract from personal dump when in Phase 5).
+
+## Audio address-space summary (code <-> disc cross-reference)
+
+```javascript
+Bgm__Play(idx)      -> BGM table[30]        -> RWAB/BGM_{idx+1:03d}.RWS
+Voice__Play(id)     -> VoiceBankTable[25]   -> RWAV/V{id/500:03d}.RWS
+VoiceBank2 (cmd 07) -> gp table 0x5A3388    -> system SE bank (RWA_SE1?)
+Pad__SetOutputs     -> RWA.IRX via SIF DMA  -> DualShock 2 actuators
+```
