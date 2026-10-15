@@ -152,16 +152,35 @@
 #   ORDER FIX in loop: System__RunFrameHook (0x142570) runs BEFORE Schedule__FrameTick (0x177F00)
 
 # Pad driver family (discovered via Mode__Update decompile, 2026-10-15)
-0x0011b500 0 hypothesis  Pad__ReadStatus      # (slot, 0) -> mode byte (+0x12E)
-0x0011b668 0 hypothesis  Pad__TestButton      # (slot, 0) -> 1/0 (also 2)
+0x0011b500 0 RECONSTRUCTED Pad__ReadStatus      # (slot, sub) -> status byte; 'c'(99)=no pad; calls 0x11B2D8
+0x0011b668 0 RECONSTRUCTED Pad__TestButton     # (slot,0) -> record[+0x71] data-ready flag (0 if pad absent)
 0x0011be78 0 hypothesis  Pad__TestButton2
 0x0011be18 0 hypothesis  Pad__TestButton3     # gates 0x48 -> 0x4C
 0x0011ba60 0 hypothesis  Pad__TestCombo       # (slot, 0, 1, 3)
 0x0011b928 0 hypothesis  Pad__TestAnalog      # (slot, 0, n, mask64)
 0x0011bbe0 0 hypothesis  Pad__Query           # (slot, 0, buf6)
 0x0011b488 0 hypothesis  Pad__Check           # (slot, 0, buf)
-0x0011bb18 0 hypothesis  Pad__SetOutputs      # (slot, 0, &out2) — ramp out (rumble?)
+0x0011bb18 0 RECONSTRUCTED Pad__SetOutputs     # RUMBLE: 6B actuator payload to transfer ctx, cmd=1 len=6
 # gp globals (from Mode__Update decompile)
 0x005A34A8 0 hypothesis g_PadRepeatDelay      # gp+0xFFFF8438
 0x005A34AC 0 hypothesis g_PadRepeatInterval   # gp+0xFFFF843C
 # Mode__Update: state block field map confirmed — see notes/analysis/mode_update_doc.md
+
+# Pad internals (from Pad__ReadStatus decompile, 2026-10-15)
+0x0011b2d8 0 RECONSTRUCTED Pad__GetStateRaw    # (slot, sub, &out128): double-buffered pad record, 2x128B per (slot,sub)
+0x005ABB60 0 hypothesis g_PadContextArray      # slot*0x70 + sub*0x1C; +0x10 = present flag
+# Pad status enum (Konami internal): 'c'(99)=absent, 5=(6&&2 remap), 6=intermediate,
+#   7=button-held (Mode__Update: cmdCounter++ on 7), 2=sub-state/existence byte
+
+# Pad buffer structure (from GetStateRaw decompile, 2026-10-15)
+#   ctx = 0x5ABB50 + slot*0x70 + sub*0x1C   (REAL base 0x5ABB50)
+#   buf = ctx + (readIdx(+0x58) < writeIdx(+0xD8)) ? 0x80 : 0
+#   record = 128 bytes copied to caller; indices per-buffer (0x58 / 0xD8)
+0x0010f3d8 0 hypothesis  Cache__InvalidateRange  # (start, end) — DMA pad data cache refresh
+# BEV primitives CONFIRMED in pad read path (2026-10-15):
+#   0x001189E0 = System__WaitBEVClear, 0x00118A30 = System__IsBEVSet
+
+# Confirmed via Pad__SetOutputs/TestButton decompiles (2026-10-15)
+0x0011af20 0 hypothesis  Pad__TransferTrigger  # (slot, sub) — sends output cmd to IOP, 1=ok
+0x005ABB54 0 hypothesis g_PadTransferCtxPtrs    # transfer context ptr per (slot,sub), +4=cmd +8=len +0xC=payload6
+# Pad record layout (128B): +0x70 = actuator-ready flag, +0x71 = data-ready flag
