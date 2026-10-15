@@ -214,3 +214,16 @@
 0x00139d60 0 hypothesis  (init TBD)
 0x00132170 0 hypothesis  (init TBD)
 0x00101150 0 hypothesis  (display sibling, 14 xrefs)
+
+# Confirmed via Schedule__Update + AssetOverlay__Registry decompiles (2026-10-15)
+0x00101fa0 0 RECONSTRUCTED System__RegisterFrameCallback  # (handler) — cached at gp-0x7AF8 by FrameService
+0x001423e0 0 hypothesis  Registry__OnFrame   # the registered per-frame callback (decompile next)
+0x00139a90 0 RECONSTRUCTED Asset__LoadEmbedded   # (name, nkp_ptr) — flag==0 path
+0x00139ba0 0 RECONSTRUCTED Asset__LoadFromDisc   # (path, 0) — flag==1 path, "dvd:" prefix
+0x0012c2d0 0 RECONSTRUCTED String__Format        # sprintf (varargs dropped by decompiler)
+0x00192bc8 0 hypothesis  Schedule__TickA
+0x0017ccb0 0 hypothesis  Schedule__TickB
+0x00177140 0 hypothesis  Schedule__WalkSlots
+0x00177c80 0 hypothesis  Task__Execute
+0x008d8608 0 hypothesis g_ScheduleCurrentSlot
+# Format A registry semantics CONFIRMED: flag=0 embedded NKP, flag=1 disc NKP (lazy name load)

@@ -22,7 +22,7 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 101         # + boot init chain fully named, heap regions, boot trap handler
+  identified: 110         # + scheduler slot model, registry load semantics, frame callback
   decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
   matched: 0
   remaining: 2305
