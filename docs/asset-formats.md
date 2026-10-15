@@ -108,10 +108,16 @@ then stream the corresponding `.RWS` through the RWA.IRX driver.
 16-byte block (offsets 0x01,0x11,0x21,...) — 16-byte records with a
 fixed marker; consistent with an ADPCM-family (VAG-like) frame layout:
 [state/flags byte(s)] + 15 payload bytes, or scrambled variant
-- ~63,934 bytes per voice line if uniformly divided (500 lines) — not
-clean, so an index/TOC likely exists (possibly at END of file —
-Konami convention); awaiting tail dump
-- RWA.IRX parses it; EE side just streams blocks via the channel protocol
+- TAIL VERIFIED (2026-10-15): uniform ADPCM frames to EOF — NO TOC,
+NO footer, NO padding. File sizes are exact multiples of 16
+(V000: 1,996,800 blocks; BGM_002: 241,280 blocks).
+- Frames: 16-byte blocks, byte[1] = constant 0x02 marker (both voice
+and BGM), byte[0] varies (frame state). 2-byte header + 14 payload
+is the working hypothesis; exact bit layout needs RWA.IRX analysis.
+- Per-line boundaries: 500 lines per bank but blocks/500 is NOT an
+integer -> variable-length lines indexed EXTERNALLY (hypothesis:
+STORY/ALLSC.NKP global id space 0x2238+, 13,104 ids).
+- RWA.IRX decodes; EE side streams blocks via the channel protocol.
 
 ## Audio address-space summary (code <-> disc cross-reference)
 
