@@ -14,8 +14,12 @@
 
 /* ---- RPC / timing / stream primitives ---- */
 extern s64  Job__Poll(void);                    /* @0x00177EF0: 0 = idle */
+extern void Sound__UpdateBegin(void);           /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
+extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
+extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
+extern void Command__Requeue(s32 cmd, s32 a, s32 b); /* @0x00177C20: write next free queue slot */
 extern void Schedule__Kick(int);                /* @0x00177ED0 (arg 6)      */
-extern void Sound__DeferBgmA(s32, s32);         /* @0x00177C20 */
+extern void Sound__DeferBgmA(s32, s32);         /* @0x00177C20 = Command__Requeue(1,a,b) */
 extern void Sound__DeferBgmB(s32, s32);         /* @0x00177BC0 */
 extern void Sound__WaitCh0(int);                /* @0x00177710 */
 extern void Sound__WaitCh1(int);                /* @0x001776B0 */
@@ -270,16 +274,16 @@ void Stream__ResumeCh(int ch){ if (g_Sound.streamCh[ch] && Job__Poll() == 0) { S
 /* ================= dispatcher ================= */
 
 #define SOUND_CMD_QUEUE   ((volatile s32 *)0x008D3904)
-#define SOUND_CUR_SLOT    (*(volatile s32 *)0x008D8608)
+#define SOUND_EXEC_SLOT   (*(volatile s32 *)0x008D8608)  /* consumer cursor */
+#define SOUND_WRITE_SLOT  (*(volatile s32 *)0x008D8604)  /* producer cursor (requeue) */
 #define SOUND_COUNTDOWN   (*(volatile s32 *)0x008D3900)
-#define SOUND_TICK_A      ((void (*)(void))0x00192BC8)
-#define SOUND_TICK_B      ((void (*)(void))0x0017CCB0)
+extern void Sound__TickB(void);                 /* @0x0017CCB0 — tail update */
 
 /* STATUS: RECONSTRUCTED
  * ADDRESS: 0x00177C80 — executes one queued command per tick. */
 void Sound__ProcessCommand(void)
 {
-    int i = SOUND_CUR_SLOT * 0x134;
+    int i = SOUND_EXEC_SLOT * 0x134;
     bool done = false;
 
     switch (*(volatile s32 *)(i + 0x8d3904)) {
@@ -306,8 +310,8 @@ void Sound__ProcessCommand(void)
     }
     if (done) {
         *(volatile s32 *)(i + 0x8d3904) = 0;
-        SOUND_CUR_SLOT++;
-        if (SOUND_CUR_SLOT > 0x3f) SOUND_CUR_SLOT = 0;
+        SOUND_EXEC_SLOT++;
+        if (SOUND_EXEC_SLOT > 0x3f) SOUND_EXEC_SLOT = 0;
     }
 }
 
@@ -318,19 +322,19 @@ void Sound__Update(void)
         SOUND_COUNTDOWN--;
         if (SOUND_COUNTDOWN < 1) SOUND_COUNTDOWN = 0;
     }
-    SOUND_TICK_A();
-    fcn_00189468();
+    Sound__UpdateBegin();
+    Job__PollAll();
     Sound__JobMachine();                          /* @0x00177140 */
     if (SOUND_COUNTDOWN == 0 &&
-        *(volatile s32 *)(SOUND_CUR_SLOT * 0x134 + 0x8d3904) != 0) {
+        *(volatile s32 *)(SOUND_EXEC_SLOT * 0x134 + 0x8d3904) != 0) {
         Sound__ProcessCommand();
     }
-    SOUND_TICK_B();
+    Sound__TickB();
 }
 
 /* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F00 — main-loop call. */
 void Sound__FrameTick(void)
 {
-    ((void (*)(void))0x00192C08)();
+    Sound__UpdateEnd();
     (*(volatile s32 *)0x008D8610)++;
 }

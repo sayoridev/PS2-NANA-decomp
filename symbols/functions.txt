@@ -221,8 +221,8 @@
 0x00139a90 0 RECONSTRUCTED Asset__LoadEmbedded   # (name, nkp_ptr) — flag==0 path
 0x00139ba0 0 RECONSTRUCTED Asset__LoadFromDisc   # (path, 0) — flag==1 path, "dvd:" prefix
 0x0012c2d0 0 RECONSTRUCTED String__Format        # sprintf (varargs dropped by decompiler)
-0x00192bc8 0 hypothesis  Schedule__TickA
-0x0017ccb0 0 hypothesis  Schedule__TickB
+0x00192bc8 0 RECONSTRUCTED Sound__UpdateBegin   # g_SoundUpdating=1; Rwa__BeginUpdate(0x18F878)
+0x0017ccb0 0 hypothesis  Sound__TickB           # tail update
 0x00177140 0 hypothesis  Schedule__WalkSlots
 0x00177c80 0 hypothesis  Task__Execute
 0x008d8608 0 hypothesis g_ScheduleCurrentSlot
@@ -397,3 +397,17 @@
 0x00188e38 0 hypothesis  File__Close
 0x00128f60 0 hypothesis  Memory__AllocLocal      # (size) -> EE buf
 # FACT: 0xB7F800 (MWo3 overlay region) doubles as asset staging buffer for disc loads
+
+# Sound update bracket + job registry (2026-10-15)
+0x00192c08 0 RECONSTRUCTED Sound__UpdateEnd     # Rwa__EndUpdate(0x18F910); flag=0; g_SoundFrameCount++
+0x0018f878 0 RECONSTRUCTED Rwa__BeginUpdate     # (rwa, 0)
+0x0018f910 0 RECONSTRUCTED Rwa__EndUpdate       # (rwa, 0)
+0x0019d6b8 0 hypothesis  Sound__UpdateA         # mid-update pass
+0x0019cae0 0 hypothesis  Sound__UpdateB
+0x00189468 0 RECONSTRUCTED Job__PollAll         # walk job registry list @0x8DD298 {next,count,cb@+0x14};
+                                               # completed jobs get vmethod +0x3C
+0x008dd298 0 RECONSTRUCTED g_JobRegistry        # linked list of job registries
+0x00177c20 0 RECONSTRUCTED Command__Requeue     # (cmd,a,b): write slot 0x8D8604 (wrap 64) — producer cursor
+0x008d8604 0 RECONSTRUCTED g_CmdWriteSlot       # producer cursor (exec cursor = 0x8D8608)
+0x005a349c 0 hypothesis  g_SoundUpdating        # gp+0xFFFF822C
+0x005a3498 0 hypothesis  g_SoundFrameCount      # gp+0xFFFF8228
