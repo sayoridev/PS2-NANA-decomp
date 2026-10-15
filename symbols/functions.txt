@@ -278,14 +278,14 @@
 0x0017b280 0 RECONSTRUCTED Bgm__StopAll         # stops stream ch0/ch1, resets BGM state
 0x0017aa70 0 RECONSTRUCTED Voice__Play           # (voiceId): bank table 0x1F6070 (25 banks = V000-V024.RWS), mode 1
 0x0017a890 0 RECONSTRUCTED Voice__PlayLoop       # same, mode 4 (loop?)
-0x0017a800 0 hypothesis TaskCmd__06
+0x0017a800 0 RECONSTRUCTED Voice__Stop            # cmd 06: stop voice ch2, reset voice state
 0x00179dc0 0 RECONSTRUCTED VoiceBank2__Play     # (id, arg): gp table 0x5A3388 (system SE bank?), 1 range
-0x00179bf0 0 hypothesis TaskCmd__08
-0x00179ab0 0 hypothesis TaskCmd__09
+0x00179bf0 0 RECONSTRUCTED Bank2__PlayLoop       # cmd 08: loop mode (4) play on SE channel
+0x00179ab0 0 RECONSTRUCTED Bank2__StopAll        # cmd 09: stop SE ch3, reset bank2 state
 0x00176fc0 0 RECONSTRUCTED Job__Start           # 7 args: creates async job type 0x11 (handler 0x176DF0); queues if busy
-0x001788e0 0 hypothesis TaskCmd__0C
-0x00178800 0 hypothesis TaskCmd__0D
-0x00178710 0 hypothesis TaskCmd__0E
+0x001788e0 0 RECONSTRUCTED Stream__OpenChannel   # cmd 0C: channels[i] = Stream__Open(rwaHandle)
+0x00178800 0 RECONSTRUCTED Stream__Configure     # cmd 0D: send 0x24B config packet to channel
+0x00178710 0 RECONSTRUCTED Stream__SetParam      # cmd 0E: send param cmd (type 3, sub 2)
 0x00178680 0 hypothesis TaskCmd__0F
 0x001785f0 0 hypothesis TaskCmd__10h
 0x00178560 0 hypothesis TaskCmd__11h
@@ -326,3 +326,31 @@
 0x005a3388 0 hypothesis g_SeBankTable           # gp+0xFFFF8118: system SE range table
 # Model: Schedule__Update = SOUND COMMAND PROCESSOR; 64 slots x 0x134 = pending
 #   command queue; one command per tick; countdown = sound tick timer.
+
+# Audio address-space tables DECODED (2026-10-15)
+0x001f5e5c 0 RECONSTRUCTED g_BgmTable           # 30 x {name, path, param} -> BGM_001..030.RWS
+0x00351c88 0 hypothesis g_BgmStringPool        # name/path string pairs for BGM table
+0x001f6070 0 RECONSTRUCTED g_VoiceBankTable    # 25 x {min,max}: bank i = ids [i*500, +499]
+# Totals: 12,311 voice lines (24x500 + 311); 30 BGM tracks; bank->file V{bank:03d}.RWS
+
+# Stream primitives (from cmd 0C/0D/0E decompiles, 2026-10-15)
+0x001a2e00 0 RECONSTRUCTED Stream__Open           # (rwaHandle, 0,0,0,0) -> channel handle
+0x001a3080 0 RECONSTRUCTED Stream__SendConfig     # (handle, cfg0x24)
+0x001a2ae8 0 RECONSTRUCTED Stream__CmdSend        # (handle, {ptr,count} command envelope)
+0x008d86d0 0 RECONSTRUCTED g_StreamChannels       # [4]: ch0/ch1 BGM, ch2 voice, ch3 SE
+0x008d8624 0 hypothesis  g_RwaRootHandle          # RWA driver root
+# Sound state: single struct 0x008D8624..0x008D86E0 (BGM block 0x8D8628,
+#   voice block 0x8D8658, bank2 block 0x8D867C, channels @0x8D86D0)
+# Defer helpers: 0x177900, 0x177890, 0x177830 (busy re-queue variants)
+# String pool CONFIRMED: 'BGM_002' -> 'rwab/BGM_002.rws' (lowercase disc paths)
+
+# Sound VM COMPLETE — 16/16 commands named (2026-10-15)
+0x001a3180 0 RECONSTRUCTED Stream__Control         # (handle, op): 1=stop 2=fadeout 3=pause
+0x001a3060 0 RECONSTRUCTED Stream__Resume          # (handle, 1)
+0x00178680 0 RECONSTRUCTED Stream__Pause           # cmd 0F
+0x001785f0 0 RECONSTRUCTED Stream__FadeStop        # cmd 10 (+ 0x16FB0 fade prep)
+0x00178560 0 RECONSTRUCTED Stream__StopCh          # cmd 11
+0x001784c0 0 RECONSTRUCTED Stream__CloseCh         # cmd 12
+0x00178340 0 RECONSTRUCTED Stream__ResumeCh        # cmd 13
+0x0016fb0  0 hypothesis  Sound__FadePrep
+# Renames applied in src: Schedule__Update -> Sound__Update, etc. (see sound.c)
