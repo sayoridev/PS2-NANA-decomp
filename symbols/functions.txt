@@ -246,9 +246,19 @@
 # Data: 0x005ABB00 g_PadRpcPort | 0x005ABD40 g_RpcCmdBuf(0x80) | 0x001C6064 retry flag
 
 # Memory allocator family (from Boot__SystemCheck, 2026-10-15)
-0x00116c58 0 RECONSTRUCTED Memory__Alloc        # (size) -> EE buf (SIF DMA capable)
-0x00116dc0 0 RECONSTRUCTED Memory__Free         # (ptr)
+0x00116c58 0 RECONSTRUCTED Iop__Alloc          # RPC to IOP allocator server 0x5A7E00; returns IOP RAM addr
+0x00116dc0 0 RECONSTRUCTED Iop__Free           # RPC release of IOP buffer
 0x001178d8 0 RECONSTRUCTED Rpc__Call2          # (iopBuf, 0, 0, &outFlag) — SifRpc wrapper
 0x001F5AF0 0 hypothesis  g_BootCheckBlob       # 0x360 B DMA'd to IOP for verification
 # NOTE: anti-piracy/integrity mechanism — documented for preservation only.
 # Any bypass discussion is out of scope per CONTRIBUTING.md.
+
+# Boot check mechanism REFINED (2026-10-15)
+# g_BootCheckBlob @0x001F5AF0 = embedded 864-byte IOP module (FULL ELF:
+#   magic 7F454C46, entry 0x0008FF80, phoff 0x34, 2 program headers).
+# Flow: Iop__Alloc(0x360) -> DMA blob EE->IOP -> Rpc__Call2(module,0,0,&flag)
+#       -> flag &= ~3 -> Iop__Free. The verification RUNS ON THE IOP agent.
+# Documented for preservation; bypass out of scope per CONTRIBUTING.md.
+0x001F5AF0 0 RECONSTRUCTED g_BootCheckIopModule   # 0x360-byte embedded IOP checker ELF
+0x0013e2c0 0 hypothesis  IopCmd__InitA           # 2 xrefs to Iop__Alloc (pad cmd bufs)
+0x00140180 0 hypothesis  IopCmd__InitB

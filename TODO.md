@@ -74,6 +74,9 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 
 ## Next recommended actions
 
+- [x] ~~Boot chain mapping~~ DONE (2026-10-15): 100% verified incl.
+Boot__SystemCheck = runtime-deployed IOP checker module (864 B ELF).
+
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
 2. Locate IOP .irx loader via string xrefs (iz~iop → axt) — loader still unfound.
 3. ~~Ghidra setup~~ DONE. Next decompile targets: Pad__ReadStatus (11b500) family,
