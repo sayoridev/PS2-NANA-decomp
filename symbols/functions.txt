@@ -150,3 +150,18 @@
 #   0x001425D0  System__InitFrameHook— call at 0x141F54 is DEAD CODE (unreachable);
 #                                       function itself remains real (other callers may exist)
 #   ORDER FIX in loop: System__RunFrameHook (0x142570) runs BEFORE Schedule__FrameTick (0x177F00)
+
+# Pad driver family (discovered via Mode__Update decompile, 2026-10-15)
+0x0011b500 0 hypothesis  Pad__ReadStatus      # (slot, 0) -> mode byte (+0x12E)
+0x0011b668 0 hypothesis  Pad__TestButton      # (slot, 0) -> 1/0 (also 2)
+0x0011be78 0 hypothesis  Pad__TestButton2
+0x0011be18 0 hypothesis  Pad__TestButton3     # gates 0x48 -> 0x4C
+0x0011ba60 0 hypothesis  Pad__TestCombo       # (slot, 0, 1, 3)
+0x0011b928 0 hypothesis  Pad__TestAnalog      # (slot, 0, n, mask64)
+0x0011bbe0 0 hypothesis  Pad__Query           # (slot, 0, buf6)
+0x0011b488 0 hypothesis  Pad__Check           # (slot, 0, buf)
+0x0011bb18 0 hypothesis  Pad__SetOutputs      # (slot, 0, &out2) — ramp out (rumble?)
+# gp globals (from Mode__Update decompile)
+0x005A34A8 0 hypothesis g_PadRepeatDelay      # gp+0xFFFF8438
+0x005A34AC 0 hypothesis g_PadRepeatInterval   # gp+0xFFFF843C
+# Mode__Update: state block field map confirmed — see notes/analysis/mode_update_doc.md

@@ -73,7 +73,8 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 
 1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
 2. Locate IOP .irx loader via string xrefs (iz~iop → axt) — loader still unfound.
-3. Start Ghidra project; confirm function boundaries for the 2348 estimate.
+3. ~~Ghidra setup~~ DONE. Next decompile targets: Pad__ReadStatus (11b500) family,
+Scene__Update (146040), Game__Init (141d90), Schedule__Update (177f30), AssetOverlay__Registry (142660).
 
 ## Milestones
 

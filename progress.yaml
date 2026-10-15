@@ -22,8 +22,8 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 62          # + unified asset/overlay registry, NKP magic discovered
-  decompiled: 13          # + display.c (Display__GetField), mode.c (State__Enable)
+  identified: 74          # + pad driver family 0x11Bxxx, mode struct field map
+  decompiled: 14          # + FULL Mode__Update decompile (R5900 raw, pending cleanup)
   matched: 0
   remaining: 2305
 
