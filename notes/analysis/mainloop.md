@@ -14,7 +14,7 @@ _Game__MainLoop @0x141F04 iterates 14 fixed calls — ALL CLASSIFIED ✅
 | 7 | 0x001424B0 | `Mode__GetState` | ✅ RECONSTRUCTED | src/game/mode.c — field @+0xA, 32 xrefs |
 | 8 | 0x0013B310 | `Draw__SetContext2` | hypothesis | ctx accessors 0x1347F0(2)/0x134790(2,val); value from 0x13B780 |
 | — | 0x001425D0 | `System__InitFrameHook` | ✅ RECONSTRUCTED | first-iteration one-shot; installs default hook 0x1A8FE0 |
-| 9 | 0x00177F30 | `Schedule__Update` | hypothesis | task scheduler: struct @0x8D3900 (0x4D14 = 59 slots x 0x134), countdown @base, cb 0x177C80/0x177CCB0 |
+| 9 | 0x00177F30 | `Schedule__Update` | hypothesis | task scheduler: struct @0x8D3900 (0x4D14 = 64 slots x 0x134 (wrap at 0x40, corrected via Task__Execute)), countdown @base, cb 0x177C80/0x177CCB0 |
 | 10 | 0x00142570 | `System__RunFrameHook` | partial | src/system/framehook.c — gate/flag/callback slots |
 | 11 | 0x00177F00 | `Schedule__FrameTick` | hypothesis | calls 0x192C08; global frame counter @0x8DF810++ |
 | 12 | 0x00146040 | `Scene__Update` | hypothesis | state machine @0x5BB880; jump table @0x1B9E20; counters +0xBC; countdown +0xE0; switch on +4 (11+ cases) |
@@ -54,7 +54,7 @@ Decodes flagged as rizin artifacts (verify in Ghidra): `ext s0, sp, 0, 1`,
 
 | Address | Hypothesis | Notes |
 | --- | --- | --- |
-| 0x008D3900 | `Schedule__g_Context` | 0x4D14 bytes = 59 slots x 0x134; timer at base |
+| 0x008D3900 | `Schedule__g_Context` | 0x4D14 bytes = 64 slots x 0x134 (wrap at 0x40, corrected via Task__Execute); timer at base |
 | 0x008DF810 | frame counter | +1 per frame (Schedule__FrameTick) |
 | 0x00192BC8 / 0x00192C08 | scheduler internals | called by #9 / #11 |
 | 0x00177C80 / 0x00177CCB0 | task callback helpers | invoked when timer expires |

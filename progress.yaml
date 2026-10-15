@@ -5,7 +5,7 @@
 # =============================================================================
 
 project: PS2-NANA-decomp
-updated: "2026-10-14"
+updated: "2026-10-15"
 phase: 3
 
 # Analysis source: maintainer's personal dump (private, never committed).
@@ -22,7 +22,7 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-  identified: 129         # + IOP allocator RPC, embedded checker module
+  identified: 152         # + task VM (16 cmds, 18 handlers), job machine, GS pipeline regs
   decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
   matched: 0
   remaining: 2305
