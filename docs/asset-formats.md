@@ -2,37 +2,56 @@
 
 > Filled during Phase 5. Structure documentation only — never file contents.
 
-## NKP — Konami Package (confirmed 2026-10-14)
+## NKP — Konami Package (DECODED 2026-10-15)
 
-**Magic:** `4E 4B 50 1A` (bytes: `N K P 0x1A`)
+**Magic:** `4E 4B 50 1A` ("NKP" + 0x1A)
 
-Observed headers (from maintainer's personal dump, structural analysis only):
+Container with an id-to-offset index (FAT). Resources are stored
+sequentially; ids are grouped in runs (blocks of ~11 resources at
+fixed 0x21800 stride observed in `interior`, variable-size tail blocks).
 
-| File | Vaddr | Bytes 0–15 |
+### Header (16 bytes)
+
+| Offset | Type | Field | Notes |
+| --- | --- | --- | --- |
+| +0x00 | char[4] | magic | `NKP\x1A` |
+| +0x04 | u32 | base | load address / base vaddr (0x005B8000 in `interior`; large values in big packages — possibly size/base depending on kind) |
+| +0x08 | u32 | flags | 0 in all samples |
+| +0x0C | u32 | count | index entry count |
+
+### Index (count x 8 bytes, from +0x10)
+
+| Size | Field |
+| --- | --- |
+| u32 | id — first resource id of the run (ascending) |
+| u32 | offset — file offset of the run's data |
+
+Consistency rule: index ends at `0x10 + count*8`; first data offset must be
+>= that (verified: 88-entry index ends 0x2D0, first data at 0x800).
+
+### Observed samples
+
+| Package | count | Notes |
 | --- | --- | --- |
-| interior | 0x35E1A0 | `4E 4B 50 1A 00 80 5B 00 00 00 00 00 58 00 00 00` |
-| shiftbg | 0x39AB90 | `4E 4B 50 1A 00 48 51 00 00 00 00 00 14 00 00 00` |
-| story/allsc | 0x39B380 | `4E 4B 50 1A 00 78 5D 62 00 00 00 00 44 04 00 00` |
+| interior (@0x35E1A0) | 0x58 (88) | ids 0x2D8.., uniform 0x21800 stride then variable tail |
+| shiftbg (@0x39AB90) | 0x14 (20) | compact |
+| story/allsc (@0x39B380) | 0x444 (1092) | the 1.65 GB disc package; large offsets |
 
-**Header hypothesis (16 bytes):**
+### Tool
+
+`tools/parse_nkp.py` — parses header + index (structure only):
 
 ```javascript
-+0x00  u32  magic   = 0x1A504B4E (LE: 4E4B501A)
-+0x04  u32  field1  = ? (0x005B8000, 0x00514800, 0x625D7800)
-+0x08  u32  field2  = 0x00000000 in all samples
-+0x0C  u32  count   = ? (0x00000058, 0x00000014, 0x00000444)
+python3 tools/parse_nkp.py SLPM_659.14 0x35e1a0 --elf
+python3 tools/parse_nkp.py STORY_ALLSC.NKP 0 --max 8   # on an extracted copy
 ```
 
-The `count` field (0x0C) varies significantly: 0x58 (88), 0x14 (20), 0x444
-(1092). Likely number of entries in an index table following the header.
+### Open items
 
-**Open items:**
-
-- [ ] Decode field1 semantics (size? base address? compression?)
-- [ ] Verify count = number of sub-files / entries
-- [ ] Map the index table structure (entry size, fields)
-- [ ] Check if NKP is a flat concatenation or has offset table
-- [ ] Compare with root-level .NKP packages (CHMAKE.NKP, CLOTHES2.NKP, etc.)
+- [ ] Semantics of header.base (load addr vs size — samples differ)
+- [ ] Resource record format at the indexed offsets (per-resource header?)
+- [ ] Compression flag detection (any LZ/RLE in resource bodies?)
+- [ ] Index run-length semantics (id delta = resources per run)
 
 ## MWo3 — Metrowerks Overlay v3
 

@@ -233,3 +233,14 @@
 0x001314e0 0 RECONSTRUCTED System__RestoreContext   # (ctx144)
 0x005A3778 0 hypothesis  g_PrevFrameCallback        # fn ptr chain (set by RegisterFrameCallback return)
 # Model: DI -> SaveContext -> handler chain -> counters -> RestoreContext -> SYNC -> EI
+
+# Pad family COMPLETE (2026-10-15) — I/O architecture verified
+0x0011bcb8 0 RECONSTRUCTED Pad__GetButtonsRaw      # (slot) -> raw 18-bit active-low word
+0x0011bd68 0 RECONSTRUCTED Pad__GetButtonsMasked   # (slot, sub, mask)
+0x0011b5b0 0 hypothesis  Pad__RpcWake             # (slot, sub, 2) after RPC result 1
+0x00112868 0 RECONSTRUCTED Rpc__Call               # (port, fn, ..., sndBuf, sndSize, rcvBuf, rcvSize, 0)
+0x0010f218 0 RECONSTRUCTED Cache__FlushRange       # writeback (EE->IOP direction)
+0x00111608 0 hypothesis  Thread__Delay            # (ticks)
+0x00129b30 0 RECONSTRUCTED Memory__Copy          # memcpy
+# Button geometry: 18-bit active-low word; 0x3FFFF=none; 0xFFF=standard 12
+# Data: 0x005ABB00 g_PadRpcPort | 0x005ABD40 g_RpcCmdBuf(0x80) | 0x001C6064 retry flag
