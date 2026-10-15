@@ -354,3 +354,31 @@
 0x00178340 0 RECONSTRUCTED Stream__ResumeCh        # cmd 13
 0x0016fb0  0 hypothesis  Sound__FadePrep
 # Renames applied in src: Schedule__Update -> Sound__Update, etc. (see sound.c)
+
+# RWA stream protocol (2026-10-15)
+0x0018e350 0 hypothesis  Stream__OpenImpl        # (ctx@0x8E3C40, rwa, p3, p2, p4, p5) -> handle
+0x008e3c40 0 hypothesis g_StreamMgr             # stream manager context
+0x001a7b18 0 RECONSTRUCTED Stream__StageConfig   # (ch+0x2C0, cfg) — stage into pending slot
+0x001a7b58 0 RECONSTRUCTED Stream__StageCmd      # (ch+0x2C0, env) — stage command + ring counter
+0x001a7b88 0 RECONSTRUCTED Stream__Notify        # (ch+0x2C0) — doorbell to IOP
+0x0012ca60 0 RECONSTRUCTED String__Copy         # (dst, src)
+0x00123990 0 hypothesis  Float__Unpack          # float conversions for 22.10 fixed packing
+0x00125a70 0 hypothesis  Float__ToFixed10
+0x0018fe98 0 hypothesis  Stream__ReleaseDma     # (handle, n) x2 on close (flag&1)
+0x0018deb0 0 hypothesis  Stream__CloseFinal
+# PROTOCOL FACTS: channel struct 0x1040 bytes; cmd staging @ +0x1F8..+0x294;
+#   pending slot @ +0x2C0 (2C8/2CC = ring values); shared ring counter @ +0x1040.
+#   Volumes/pitch: 22.10 fixed point (i<<10 | f*1024).
+
+# Channel manager (from Stream__OpenImpl, 2026-10-15)
+0x0018f598 0 hypothesis  Channel__AllocDefault   # (mgr, flags, buf, size)
+0x0018e660 0 hypothesis  Channel__Init           # (ch, mgr, flags, b0)
+0x0018f6f8 0 hypothesis  Channel__SizeQuery      # (mgr, type&7, &out)
+0x0019c508 0 hypothesis  Id__Register            # (&guidPair, id) — GUID @0x35D198/0x35D1A0
+0x0018f9a8 0 hypothesis  Rwa__GetDefault         # () default rwa handle
+0x0018d768 0 hypothesis  Rwa__Validate           # (id, mgr) — 0 = reject
+0x001927e8 0 hypothesis  Alloc__DmaBuffer        # (size, flags 0x1080B)
+0x00192810 0 hypothesis  Free__DmaBuffer
+0x005a3430 0 hypothesis g_StreamByNameFlag
+0x005a3930 0 hypothesis g_ChannelList           # global channel object list
+# Channel object: vtable @ +0x00 (+0x28 open), rwa @ +0x24, list node +0x14/+0x18

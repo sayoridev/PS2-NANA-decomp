@@ -102,8 +102,16 @@ RWS files are VOICE/BANK containers addressed by code-side tables:
 - Voice IDs are global across banks (bank = id / 500, line = id % 500).
 - `TaskCmd__04/05` (Voice__Play) resolve id -> bank via the range table,
 then stream the corresponding `.RWS` through the RWA.IRX driver.
-- RWS internal record format (line header inside a bank file): pending —
-first bytes of V000.RWS needed (extract from personal dump when in Phase 5).
+- RWS internal format (2026-10-15, first look at V000.RWS, 31,967,232 B):
+- NO magic, NO header at offset 0 — high-entropy data from byte 0
+- STRONG 16-byte periodicity: constant byte 0x02 at offset +1 of every
+16-byte block (offsets 0x01,0x11,0x21,...) — 16-byte records with a
+fixed marker; consistent with an ADPCM-family (VAG-like) frame layout:
+[state/flags byte(s)] + 15 payload bytes, or scrambled variant
+- ~63,934 bytes per voice line if uniformly divided (500 lines) — not
+clean, so an index/TOC likely exists (possibly at END of file —
+Konami convention); awaiting tail dump
+- RWA.IRX parses it; EE side just streams blocks via the channel protocol
 
 ## Audio address-space summary (code <-> disc cross-reference)
 
