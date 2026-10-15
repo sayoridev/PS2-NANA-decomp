@@ -23,9 +23,9 @@ extern void State__UpdatePair(void);    /* @0x00142510 */
 extern u16  Mode__GetStatus(void);      /* src/game/mode.c */
 extern u16  Mode__GetState(void);       /* src/game/mode.c */
 extern void Draw__SetContext2(void);    /* @0x0013B310 */
-extern void Sound__Update(void);        /* @0x00177F30 — sound command processor */
+extern void Schedule__Update(void);     /* src/game/sound.c */
 extern void System__RunFrameHook(void); /* src/system/framehook.c */
-extern void Sound__FrameTick(void);     /* @0x00177F00 */
+extern void Schedule__FrameTick(void);  /* src/game/sound.c */
 extern void Scene__Update(void);        /* @0x00146040 */
 extern void System__DispatchPending(void); /* @0x00142700 (PARTIAL) */
 extern void Display__EndFrame(void);    /* @0x00134D50 */

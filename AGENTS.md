@@ -292,6 +292,11 @@ binaries; no force-push to `main`.
 - Metrics: functions identified/decompiled/matched/remaining, modules,
 assets understood, milestone completion.
 
+- Maintenance snapshot 2026-10-15: `Schedule__WalkSlots` reconstructed;
+  scheduler symbols renamed per Ghidra; duplicate `schedule_update.c` removed.
+- Maintenance snapshot 2026-10-15: `Schedule__Update` reconstructed;
+  crt0 BSS range fixed; raw files retained pending one-by-one replacement.
+
 ---
 
 ## 16. Known issues, assumptions, resolved questions
@@ -323,4 +328,4 @@ assets understood, milestone completion.
 
 ---
 
-*Maintained by the project supervisor and AI assistant. Last updated: 2026-10-14.*
+*Maintained by the project supervisor and AI assistant. Last updated: 2026-10-15.*

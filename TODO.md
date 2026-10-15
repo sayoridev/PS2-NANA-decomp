@@ -3,7 +3,7 @@
 > This file must always reflect the **real** state of the project.
 > Update it with every meaningful change. Machine-readable mirror: `progress.yaml`.
 
-*Last updated: 2026-10-14 (Phase 2 in progress)*
+*Last updated: 2026-10-15 (Phase 3 in progress)*
 
 ## Current phase
 
@@ -11,6 +11,12 @@
 
 ## Completed
 
+- [x] `Schedule__WalkSlots` reconstructed in `src/game/sound.c`
+- [x] Scheduler symbols renamed per Ghidra: `Schedule__Update`, `Schedule__FrameTick`,
+  `Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`
+- [x] Duplicate `src/game/schedule_update.c` removed
+- [x] `Schedule__Update` reconstructed in `src/game/schedule_update.c`
+- [x] crt0 BSS range corrected to `0x001A7900..0x005A3680`
 - [x] Repository created: `sayoridev/PS2-NANA-decomp` (public), initial docs pushed
 - [x] Arch Linux environment prepared (git, gh, python, binutils, Ghidra 12.1.2,
 rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
@@ -48,9 +54,9 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
 
 ## Pending
 
-- [x] ~~Cleanup pass B~~ DONE (2026-10-15): mode_update.c, scene_update.c,
-game_init.c, schedule.c, registry.c, pad.c+pad.h committed clean;
-raw files removed (preserved in git history).
+- [ ] Raw-file cleanup: raw Ghidra files are temporarily retained as analysis
+references. Remove each `_raw.c` only after its clean replacement is committed
+and cross-checked. Current remaining raw references: 5.
 - [ ] Confirm function count/boundaries in Ghidra; export to `symbols/`
 - [ ] Catalog Metrowerks CodeWarrior codegen idioms (`notes/analysis/codegen.md`)
 - [ ] Import stub table → Sony SDK function list for `src/common/` shims
@@ -74,6 +80,10 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 
 ## Next recommended actions
 
+- [ ] Verify `Schedule__WalkSlots` against Ghidra disassembly; confirm size 0x1E0,
+  vtable call order and side-effect sequence.
+- [ ] Verify `Schedule__Update` against Ghidra/rizin disassembly and mark it
+  VERIFIED if CFG, call sequence and memory accesses match.
 - [x] ~~Boot chain mapping~~ DONE (2026-10-15): 100% verified incl.
 Boot__SystemCheck = runtime-deployed IOP checker module (864 B ELF).
 

@@ -25,8 +25,8 @@ typedef u32 vaddr_t;            /* EE virtual address */
 #define PS2_USER_RAM_BASE       0x00100000u
 #define PS2_GP_VALUE            0x005AB270u     /* verified in crt0 + .reginfo */
 #define PS2_OVL_LOAD_BASE       0x00B7F800u     /* MWo3 overlay load address */
-#define PS2_MAINLOOP_BSS_START  0x005A3680u     /* crt0 BSS clear range */
-#define PS2_MAINLOOP_BSS_END    0x001A7900u
+#define PS2_MAINLOOP_BSS_START  0x001A7900u     /* crt0 BSS clear range */
+#define PS2_MAINLOOP_BSS_END    0x005A3680u
 
 /* EE kernel syscall IDs observed in SLPM_659.14 (semantics partly unknown) */
 #define PS2_SYSCALL_HEAP_SETUP  0x3Cu   /* crt0: args gp/heap bounds; returns sp in v0 */

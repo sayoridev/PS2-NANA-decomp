@@ -1,11 +1,15 @@
 # Symbols
 
-Symbol maps produced during Phase 2/3:
+Current symbol files:
 
-- `functions.txt` — one per line: `address size status name`
-- `functions.csv` — same data, spreadsheet-friendly
-- `globals.txt`, `globals.csv` — data symbols
+- `functions.txt` — one entry per line: `address size status name`
 
-All addresses are virtual addresses of the original EE ELF (base recorded in
-`docs/executable.md`). Status: `unknown | hypothesis | VERIFIED | PARTIAL |
-RECONSTRUCTED | STUB`.
+Planned exports, once Ghidra boundaries are stable:
+
+- `functions.csv` — spreadsheet-friendly function table
+- `globals.txt` / `globals.csv` — data-only symbol tables
+
+All addresses are virtual addresses of the original EE ELF. Function sizes are
+still incomplete until the Ghidra boundary pass is exported.
+
+Status values: `unknown | hypothesis | VERIFIED | PARTIAL | RECONSTRUCTED | STUB`.

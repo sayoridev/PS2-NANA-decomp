@@ -14,7 +14,7 @@
 
 /* ---- RPC / timing / stream primitives ---- */
 extern s64  Job__Poll(void);                    /* @0x00177EF0: 0 = idle */
-extern void Sound__UpdateBegin(void);           /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
+extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
 extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
 extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
 extern void Command__Requeue(s32 cmd, s32 a, s32 b); /* @0x00177C20: write next free queue slot */
@@ -71,6 +71,27 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  Job__Create(s32 desc, int type, s32 handler, int); /* @0x00188910 */
 extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
+extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
+extern u32  g_JobState;                         /* @0x007D20D8 */
+extern u32  g_JobFrames;                        /* @0x007D20DC */
+extern void fcn_00177EB0(void);                 /* @0x00177EB0 — name pending */
+
+typedef struct Schedule__Job Schedule__Job;
+typedef struct Schedule__JobVtable Schedule__JobVtable;
+
+struct Schedule__Job {
+    s32 _pad[0x50 / 4];
+    Schedule__JobVtable *vtable;                /* +0x50 */
+};
+
+struct Schedule__JobVtable {
+    void (*_reserved[11])(void);                /* +0x00..+0x28 */
+    void (*method_2C)(Schedule__Job *);         /* +0x2C */
+    void (*method_30)(Schedule__Job *, s32, s32); /* +0x30 */
+    void (*method_34)(void);                    /* +0x34 */
+    void (*method_38)(Schedule__Job *, s32, s32, s32); /* +0x38 */
+    s32  (*method_3C)(Schedule__Job *, s32);    /* +0x3C */
+};
 
 /* ================= command implementations ================= */
 
@@ -234,6 +255,104 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
     return 1;
 }
 
+/* STATUS: RECONSTRUCTED (manual MIPS decode; Ghidra decompile comparison pending)
+ * ADDRESS: 0x00177140
+ * PURPOSE: advance the deferred-callback job state machine once per frame.
+ *          The global context starts at 0x007D1FC0; the current job vtable is
+ *          read through job+0x50. */
+void Schedule__WalkSlots(void)
+{
+    Schedule__Job *job = (Schedule__Job *)(u32)g_CurrentJob;
+    s32 local_out;
+    s32 result;
+
+    if (job == 0) {
+        return;
+    }
+
+    g_JobFrames++;
+    result = job->vtable->method_3C(job, 0);
+
+    switch ((s32)g_JobState) {
+    case 1:
+        if (result != 2) {
+            return;
+        }
+        if (Job__Poll() != 0) {
+            return;
+        }
+
+        job->vtable->method_30(job,
+                               *(s32 *)0x007D1FCC,
+                               *(s32 *)0x007D1FD0);
+        g_JobState = 2;
+        Schedule__Kick(6);
+        break;
+
+    case 2:
+        break;
+
+    case 3:
+        if (Job__Poll() != 0) {
+            return;
+        }
+
+        job->vtable->method_2C(job);
+        g_CurrentJob = 0;
+        g_JobCb = 0;
+        g_JobCbArg = 0;
+        *(s32 *)0x007D1FCC = 0;
+        *(s32 *)0x007D1FD0 = 0;
+        g_JobState = 0;
+        Schedule__Kick(6);
+        fcn_00177EB0();
+        break;
+
+    case 4:
+        if (g_JobFrames < 30) {
+            return;
+        }
+        if (Job__Poll() != 0) {
+            return;
+        }
+
+        job->vtable->method_2C(job);
+        g_JobFrames = 0;
+        g_JobState = 5;
+        break;
+
+    case 5:
+        if (g_JobFrames < 30) {
+            return;
+        }
+        if (Job__Poll() != 0) {
+            return;
+        }
+
+        g_CurrentJob = Job__Create(0x007D1FD4,
+                                   0x11,
+                                   0x00176DF0,
+                                   0);
+        Schedule__Kick(6);
+
+        job = (Schedule__Job *)(u32)g_CurrentJob;
+        if (job == 0) {
+            return;
+        }
+
+        job->vtable->method_38(job,
+                               (s32)&local_out,
+                               *(s32 *)0x007D20D4,
+                               1);
+        g_JobFrames = 0;
+        g_JobState = 1;
+        break;
+
+    default:
+        break;
+    }
+}
+
 /* cmd 0C-0x13 — stream channel management (channel idx in arg) */
 void Stream__OpenChannel(int ch)
 {
@@ -277,7 +396,7 @@ void Stream__ResumeCh(int ch){ if (g_Sound.streamCh[ch] && Job__Poll() == 0) { S
 #define SOUND_EXEC_SLOT   (*(volatile s32 *)0x008D8608)  /* consumer cursor */
 #define SOUND_WRITE_SLOT  (*(volatile s32 *)0x008D8604)  /* producer cursor (requeue) */
 #define SOUND_COUNTDOWN   (*(volatile s32 *)0x008D3900)
-extern void Sound__TickB(void);                 /* @0x0017CCB0 — tail update */
+extern void Schedule__TickB(void);              /* @0x0017CCB0 — tail update */
 
 /* STATUS: RECONSTRUCTED
  * ADDRESS: 0x00177C80 — executes one queued command per tick. */
@@ -316,24 +435,24 @@ void Sound__ProcessCommand(void)
 }
 
 /* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F30 — main-loop call. */
-void Sound__Update(void)
+void Schedule__Update(void)
 {
     if (SOUND_COUNTDOWN > 0) {
         SOUND_COUNTDOWN--;
         if (SOUND_COUNTDOWN < 1) SOUND_COUNTDOWN = 0;
     }
-    Sound__UpdateBegin();
+    Schedule__TickA();
     Job__PollAll();
-    Sound__JobMachine();                          /* @0x00177140 */
+    Schedule__WalkSlots();                        /* @0x00177140 */
     if (SOUND_COUNTDOWN == 0 &&
         *(volatile s32 *)(SOUND_EXEC_SLOT * 0x134 + 0x8d3904) != 0) {
         Sound__ProcessCommand();
     }
-    Sound__TickB();
+    Schedule__TickB();
 }
 
 /* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F00 — main-loop call. */
-void Sound__FrameTick(void)
+void Schedule__FrameTick(void)
 {
     Sound__UpdateEnd();
     (*(volatile s32 *)0x008D8610)++;

@@ -71,7 +71,7 @@ void Startup__Entry(void)
         "ctc1 $zero, $31\n\t"
         ::: "memory");
 
-    /* 2. Clear BSS [0x5A3680, 0x1A7900). Original: align-to-16 loop, then
+    /* 2. Clear BSS [0x001A7900, 0x005A3680). Original: align-to-16 loop, then
      *    byte loop for the tail. (Some decodes in that range, e.g.
      *    "ext zero, v0, 0, 1", are suspicious rizin artifacts — verify raw
      *    bytes in Ghidra before promoting status.) */

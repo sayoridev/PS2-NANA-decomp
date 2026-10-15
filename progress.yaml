@@ -5,7 +5,7 @@
 # =============================================================================
 
 project: PS2-NANA-decomp
-updated: "2026-10-14"
+updated: "2026-10-15"
 phase: 3
 
 # Analysis source: maintainer's personal dump (private, never committed).
@@ -22,10 +22,10 @@ executable:
 
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
-identified: 190         # + sound VM 16/16, stream control ops, state struct layout
-  decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
+  identified: 190         # pending Ghidra confirmation
+  decompiled: 46          # clean reconstructed functions; raw references not summed
   matched: 0
-  remaining: 2305
+  remaining: 2302         # 2348 - 46 clean reconstructions; estimate
 
 modules: []
 
@@ -41,7 +41,7 @@ milestones:
   - name: "Phase 2 — Executable analysis"
     status: completed
   - name: "Phase 3 — Decompilation foundation"
-    status: pending
+    status: in_progress
   - name: "Phase 4 — Game systems"
     status: pending
   - name: "Phase 5 — Assets and formats"

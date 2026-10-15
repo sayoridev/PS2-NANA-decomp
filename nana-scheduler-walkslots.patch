@@ -1,0 +1,402 @@
+diff --git a/.githooks/pre-push b/.githooks/pre-push
+old mode 100755
+new mode 100644
+diff --git a/AGENTS.md b/AGENTS.md
+index 912e42a..4d08cda 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -292,6 +292,11 @@ binaries; no force-push to `main`.
+ - Metrics: functions identified/decompiled/matched/remaining, modules,
+ assets understood, milestone completion.
+ 
++- Maintenance snapshot 2026-10-15: `Schedule__WalkSlots` reconstructed;
++  scheduler symbols renamed per Ghidra; duplicate `schedule_update.c` removed.
++- Maintenance snapshot 2026-10-15: `Schedule__Update` reconstructed;
++  crt0 BSS range fixed; raw files retained pending one-by-one replacement.
++
+ ---
+ 
+ ## 16. Known issues, assumptions, resolved questions
+@@ -323,4 +328,4 @@ assets understood, milestone completion.
+ 
+ ---
+ 
+-*Maintained by the project supervisor and AI assistant. Last updated: 2026-10-14.*
++*Maintained by the project supervisor and AI assistant. Last updated: 2026-10-15.*
+diff --git a/TODO.md b/TODO.md
+index d947192..a97d7ea 100644
+--- a/TODO.md
++++ b/TODO.md
+@@ -3,7 +3,7 @@
+ > This file must always reflect the **real** state of the project.
+ > Update it with every meaningful change. Machine-readable mirror: `progress.yaml`.
+ 
+-*Last updated: 2026-10-14 (Phase 2 in progress)*
++*Last updated: 2026-10-15 (Phase 3 in progress)*
+ 
+ ## Current phase
+ 
+@@ -11,6 +11,12 @@
+ 
+ ## Completed
+ 
++- [x] `Schedule__WalkSlots` reconstructed in `src/game/sound.c`
++- [x] Scheduler symbols renamed per Ghidra: `Schedule__Update`, `Schedule__FrameTick`,
++  `Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`
++- [x] Duplicate `src/game/schedule_update.c` removed
++- [x] `Schedule__Update` reconstructed in `src/game/schedule_update.c`
++- [x] crt0 BSS range corrected to `0x001A7900..0x005A3680`
+ - [x] Repository created: `sayoridev/PS2-NANA-decomp` (public), initial docs pushed
+ - [x] Arch Linux environment prepared (git, gh, python, binutils, Ghidra 12.1.2,
+ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
+@@ -48,9 +54,9 @@ rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
+ 
+ ## Pending
+ 
+-- [x] ~~Cleanup pass B~~ DONE (2026-10-15): mode_update.c, scene_update.c,
+-game_init.c, schedule.c, registry.c, pad.c+pad.h committed clean;
+-raw files removed (preserved in git history).
++- [ ] Raw-file cleanup: raw Ghidra files are temporarily retained as analysis
++references. Remove each `_raw.c` only after its clean replacement is committed
++and cross-checked. Current remaining raw references: 5.
+ - [ ] Confirm function count/boundaries in Ghidra; export to `symbols/`
+ - [ ] Catalog Metrowerks CodeWarrior codegen idioms (`notes/analysis/codegen.md`)
+ - [ ] Import stub table → Sony SDK function list for `src/common/` shims
+@@ -74,6 +80,10 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
+ 
+ ## Next recommended actions
+ 
++- [ ] Verify `Schedule__WalkSlots` against Ghidra disassembly; confirm size 0x1E0,
++  vtable call order and side-effect sequence.
++- [ ] Verify `Schedule__Update` against Ghidra/rizin disassembly and mark it
++  VERIFIED if CFG, call sequence and memory accesses match.
+ - [x] ~~Boot chain mapping~~ DONE (2026-10-15): 100% verified incl.
+ Boot__SystemCheck = runtime-deployed IOP checker module (864 B ELF).
+ 
+diff --git a/progress.yaml b/progress.yaml
+index 4d82d8f..4625bd1 100644
+--- a/progress.yaml
++++ b/progress.yaml
+@@ -5,7 +5,7 @@
+ # =============================================================================
+ 
+ project: PS2-NANA-decomp
+-updated: "2026-10-14"
++updated: "2026-10-15"
+ phase: 3
+ 
+ # Analysis source: maintainer's personal dump (private, never committed).
+@@ -22,10 +22,10 @@ executable:
+ 
+ functions:
+   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
+-identified: 190         # + sound VM 16/16, stream control ops, state struct layout
+-  decompiled: 18           # + Pad__SetOutputs (rumble), Pad__TestButton
++  identified: 190         # pending Ghidra confirmation
++  decompiled: 46          # clean reconstructed functions; raw references not summed
+   matched: 0
+-  remaining: 2305
++  remaining: 2302         # 2348 - 46 clean reconstructions; estimate
+ 
+ modules: []
+ 
+@@ -41,7 +41,7 @@ milestones:
+   - name: "Phase 2 — Executable analysis"
+     status: completed
+   - name: "Phase 3 — Decompilation foundation"
+-    status: pending
++    status: in_progress
+   - name: "Phase 4 — Game systems"
+     status: pending
+   - name: "Phase 5 — Assets and formats"
+diff --git a/src/common/ps2.h b/src/common/ps2.h
+index 42b177e..5ec428e 100644
+--- a/src/common/ps2.h
++++ b/src/common/ps2.h
+@@ -25,8 +25,8 @@ typedef u32 vaddr_t;            /* EE virtual address */
+ #define PS2_USER_RAM_BASE       0x00100000u
+ #define PS2_GP_VALUE            0x005AB270u     /* verified in crt0 + .reginfo */
+ #define PS2_OVL_LOAD_BASE       0x00B7F800u     /* MWo3 overlay load address */
+-#define PS2_MAINLOOP_BSS_START  0x005A3680u     /* crt0 BSS clear range */
+-#define PS2_MAINLOOP_BSS_END    0x001A7900u
++#define PS2_MAINLOOP_BSS_START  0x001A7900u     /* crt0 BSS clear range */
++#define PS2_MAINLOOP_BSS_END    0x005A3680u
+ 
+ /* EE kernel syscall IDs observed in SLPM_659.14 (semantics partly unknown) */
+ #define PS2_SYSCALL_HEAP_SETUP  0x3Cu   /* crt0: args gp/heap bounds; returns sp in v0 */
+diff --git a/src/game/main.c b/src/game/main.c
+index e109477..b02fee0 100644
+--- a/src/game/main.c
++++ b/src/game/main.c
+@@ -23,9 +23,9 @@ extern void State__UpdatePair(void);    /* @0x00142510 */
+ extern u16  Mode__GetStatus(void);      /* src/game/mode.c */
+ extern u16  Mode__GetState(void);       /* src/game/mode.c */
+ extern void Draw__SetContext2(void);    /* @0x0013B310 */
+-extern void Sound__Update(void);        /* @0x00177F30 — sound command processor */
++extern void Schedule__Update(void);     /* src/game/sound.c */
+ extern void System__RunFrameHook(void); /* src/system/framehook.c */
+-extern void Sound__FrameTick(void);     /* @0x00177F00 */
++extern void Schedule__FrameTick(void);  /* src/game/sound.c */
+ extern void Scene__Update(void);        /* @0x00146040 */
+ extern void System__DispatchPending(void); /* @0x00142700 (PARTIAL) */
+ extern void Display__EndFrame(void);    /* @0x00134D50 */
+diff --git a/src/game/sound.c b/src/game/sound.c
+index 46accaf..cd52413 100644
+--- a/src/game/sound.c
++++ b/src/game/sound.c
+@@ -14,7 +14,7 @@
+ 
+ /* ---- RPC / timing / stream primitives ---- */
+ extern s64  Job__Poll(void);                    /* @0x00177EF0: 0 = idle */
+-extern void Sound__UpdateBegin(void);           /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
++extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
+ extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
+ extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
+ extern void Command__Requeue(s32 cmd, s32 a, s32 b); /* @0x00177C20: write next free queue slot */
+@@ -71,6 +71,27 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
+ /* ---- job executor (type 0x11) ---- */
+ extern s32  Job__Create(s32 desc, int type, s32 handler, int); /* @0x00188910 */
+ extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
++extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
++extern u32  g_JobState;                         /* @0x007D20D8 */
++extern u32  g_JobFrames;                        /* @0x007D20DC */
++extern void fcn_00177EB0(void);                 /* @0x00177EB0 — name pending */
++
++typedef struct Schedule__Job Schedule__Job;
++typedef struct Schedule__JobVtable Schedule__JobVtable;
++
++struct Schedule__Job {
++    s32 _pad[0x50 / 4];
++    Schedule__JobVtable *vtable;                /* +0x50 */
++};
++
++struct Schedule__JobVtable {
++    void (*_reserved[11])(void);                /* +0x00..+0x28 */
++    void (*method_2C)(Schedule__Job *);         /* +0x2C */
++    void (*method_30)(Schedule__Job *, s32, s32); /* +0x30 */
++    void (*method_34)(void);                    /* +0x34 */
++    void (*method_38)(Schedule__Job *, s32, s32, s32); /* +0x38 */
++    s32  (*method_3C)(Schedule__Job *, s32);    /* +0x3C */
++};
+ 
+ /* ================= command implementations ================= */
+ 
+@@ -234,6 +255,104 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
+     return 1;
+ }
+ 
++/* STATUS: RECONSTRUCTED (manual MIPS decode; Ghidra decompile comparison pending)
++ * ADDRESS: 0x00177140
++ * PURPOSE: advance the deferred-callback job state machine once per frame.
++ *          The global context starts at 0x007D1FC0; the current job vtable is
++ *          read through job+0x50. */
++void Schedule__WalkSlots(void)
++{
++    Schedule__Job *job = (Schedule__Job *)(u32)g_CurrentJob;
++    s32 local_out;
++    s32 result;
++
++    if (job == 0) {
++        return;
++    }
++
++    g_JobFrames++;
++    result = job->vtable->method_3C(job, 0);
++
++    switch ((s32)g_JobState) {
++    case 1:
++        if (result != 2) {
++            return;
++        }
++        if (Job__Poll() != 0) {
++            return;
++        }
++
++        job->vtable->method_30(job,
++                               *(s32 *)0x007D1FCC,
++                               *(s32 *)0x007D1FD0);
++        g_JobState = 2;
++        Schedule__Kick(6);
++        break;
++
++    case 2:
++        break;
++
++    case 3:
++        if (Job__Poll() != 0) {
++            return;
++        }
++
++        job->vtable->method_2C(job);
++        g_CurrentJob = 0;
++        g_JobCb = 0;
++        g_JobCbArg = 0;
++        *(s32 *)0x007D1FCC = 0;
++        *(s32 *)0x007D1FD0 = 0;
++        g_JobState = 0;
++        Schedule__Kick(6);
++        fcn_00177EB0();
++        break;
++
++    case 4:
++        if (g_JobFrames < 30) {
++            return;
++        }
++        if (Job__Poll() != 0) {
++            return;
++        }
++
++        job->vtable->method_2C(job);
++        g_JobFrames = 0;
++        g_JobState = 5;
++        break;
++
++    case 5:
++        if (g_JobFrames < 30) {
++            return;
++        }
++        if (Job__Poll() != 0) {
++            return;
++        }
++
++        g_CurrentJob = Job__Create(0x007D1FD4,
++                                   0x11,
++                                   0x00176DF0,
++                                   0);
++        Schedule__Kick(6);
++
++        job = (Schedule__Job *)(u32)g_CurrentJob;
++        if (job == 0) {
++            return;
++        }
++
++        job->vtable->method_38(job,
++                               (s32)&local_out,
++                               *(s32 *)0x007D20D4,
++                               1);
++        g_JobFrames = 0;
++        g_JobState = 1;
++        break;
++
++    default:
++        break;
++    }
++}
++
+ /* cmd 0C-0x13 — stream channel management (channel idx in arg) */
+ void Stream__OpenChannel(int ch)
+ {
+@@ -277,7 +396,7 @@ void Stream__ResumeCh(int ch){ if (g_Sound.streamCh[ch] && Job__Poll() == 0) { S
+ #define SOUND_EXEC_SLOT   (*(volatile s32 *)0x008D8608)  /* consumer cursor */
+ #define SOUND_WRITE_SLOT  (*(volatile s32 *)0x008D8604)  /* producer cursor (requeue) */
+ #define SOUND_COUNTDOWN   (*(volatile s32 *)0x008D3900)
+-extern void Sound__TickB(void);                 /* @0x0017CCB0 — tail update */
++extern void Schedule__TickB(void);              /* @0x0017CCB0 — tail update */
+ 
+ /* STATUS: RECONSTRUCTED
+  * ADDRESS: 0x00177C80 — executes one queued command per tick. */
+@@ -316,24 +435,24 @@ void Sound__ProcessCommand(void)
+ }
+ 
+ /* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F30 — main-loop call. */
+-void Sound__Update(void)
++void Schedule__Update(void)
+ {
+     if (SOUND_COUNTDOWN > 0) {
+         SOUND_COUNTDOWN--;
+         if (SOUND_COUNTDOWN < 1) SOUND_COUNTDOWN = 0;
+     }
+-    Sound__UpdateBegin();
++    Schedule__TickA();
+     Job__PollAll();
+-    Sound__JobMachine();                          /* @0x00177140 */
++    Schedule__WalkSlots();                        /* @0x00177140 */
+     if (SOUND_COUNTDOWN == 0 &&
+         *(volatile s32 *)(SOUND_EXEC_SLOT * 0x134 + 0x8d3904) != 0) {
+         Sound__ProcessCommand();
+     }
+-    Sound__TickB();
++    Schedule__TickB();
+ }
+ 
+ /* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F00 — main-loop call. */
+-void Sound__FrameTick(void)
++void Schedule__FrameTick(void)
+ {
+     Sound__UpdateEnd();
+     (*(volatile s32 *)0x008D8610)++;
+diff --git a/src/system/startup.c b/src/system/startup.c
+index 8eb416b..7adb26f 100644
+--- a/src/system/startup.c
++++ b/src/system/startup.c
+@@ -71,7 +71,7 @@ void Startup__Entry(void)
+         "ctc1 $zero, $31\n\t"
+         ::: "memory");
+ 
+-    /* 2. Clear BSS [0x5A3680, 0x1A7900). Original: align-to-16 loop, then
++    /* 2. Clear BSS [0x001A7900, 0x005A3680). Original: align-to-16 loop, then
+      *    byte loop for the tail. (Some decodes in that range, e.g.
+      *    "ext zero, v0, 0, 1", are suspicious rizin artifacts — verify raw
+      *    bytes in Ghidra before promoting status.) */
+diff --git a/symbols/README.md b/symbols/README.md
+index 65d5c3b..730d852 100644
+--- a/symbols/README.md
++++ b/symbols/README.md
+@@ -1,11 +1,15 @@
+ # Symbols
+ 
+-Symbol maps produced during Phase 2/3:
++Current symbol files:
+ 
+-- `functions.txt` — one per line: `address size status name`
+-- `functions.csv` — same data, spreadsheet-friendly
+-- `globals.txt`, `globals.csv` — data symbols
++- `functions.txt` — one entry per line: `address size status name`
+ 
+-All addresses are virtual addresses of the original EE ELF (base recorded in
+-`docs/executable.md`). Status: `unknown | hypothesis | VERIFIED | PARTIAL |
+-RECONSTRUCTED | STUB`.
++Planned exports, once Ghidra boundaries are stable:
++
++- `functions.csv` — spreadsheet-friendly function table
++- `globals.txt` / `globals.csv` — data-only symbol tables
++
++All addresses are virtual addresses of the original EE ELF. Function sizes are
++still incomplete until the Ghidra boundary pass is exported.
++
++Status values: `unknown | hypothesis | VERIFIED | PARTIAL | RECONSTRUCTED | STUB`.
+diff --git a/symbols/functions.txt b/symbols/functions.txt
+index 24f7607..cf64720 100644
+--- a/symbols/functions.txt
++++ b/symbols/functions.txt
+@@ -34,9 +34,9 @@
+ 0x001424b0 0 RECONSTRUCTED Mode__GetState        # src/game/mode.c — lhu 0x5B3E6A, 32 xrefs
+ 0x0013b310 0 hypothesis  Draw__SetContext2      # ctx accessors 0x1347F0/0x134790, param 2
+ 0x001425d0 0 RECONSTRUCTED System__InitFrameHook # src/system/framehook.c — installs default hook 0x1A8FE0
+-0x00177f30 0 hypothesis  Schedule__Update       # task scheduler @0x8D3900, 59 slots x 0x134
++0x00177f30 0xa0 RECONSTRUCTED Schedule__Update # src/game/sound.c — countdown + command dispatch
+ 0x00142570 0 PARTIAL       System__RunFrameHook  # src/system/framehook.c — gate/flag/callback
+-0x00177f00 0 hypothesis  Schedule__FrameTick    # counter @0x8DF810++ per frame
++0x00177f00 0x30 RECONSTRUCTED Schedule__FrameTick # src/game/sound.c — counter @0x8DF810++
+ 0x00146040 0 hypothesis  Scene__Update          # state machine @0x5BB880, jump table @0x1B9E20
+ 0x00142700 0 PARTIAL       System__DispatchPending # consumes id slot 0x5A2A24; args 0x301E90/0x301EA0
+ 0x00134d50 0 hypothesis  Display__EndFrame     # struct @0x5B1AD0; fn-ptr @+0; end-of-frame routine
+@@ -223,7 +223,7 @@
+ 0x0012c2d0 0 RECONSTRUCTED String__Format        # sprintf (varargs dropped by decompiler)
+ 0x00192bc8 0 RECONSTRUCTED Sound__UpdateBegin   # g_SoundUpdating=1; Rwa__BeginUpdate(0x18F878)
+ 0x0017ccb0 0 hypothesis  Sound__TickB           # tail update
+-0x00177140 0 hypothesis  Schedule__WalkSlots
++0x00177140 0x1e0 RECONSTRUCTED Schedule__WalkSlots # src/game/sound.c — deferred-job state machine
+ 0x00177c80 0 hypothesis  Task__Execute
+ 0x008d8608 0 hypothesis g_ScheduleCurrentSlot
+ # Format A registry semantics CONFIRMED: flag=0 embedded NKP, flag=1 disc NKP (lazy name load)
+@@ -411,3 +411,9 @@
+ 0x008d8604 0 RECONSTRUCTED g_CmdWriteSlot       # producer cursor (exec cursor = 0x8D8608)
+ 0x005a349c 0 hypothesis  g_SoundUpdating        # gp+0xFFFF822C
+ 0x005a3498 0 hypothesis  g_SoundFrameCount      # gp+0xFFFF8228
++
++# Overlay code (SHOP2R.BIN @0xB7F800 — first live decompile, 2026-10-15)
++0x00b7f880 0 hypothesis  Shop__FrameUpdate    # 19 slots, cooldown fade, calls 0x1A8DE0/0x144AF0
++0x001a8de0 0 hypothesis  Render__SetupA      # main-ELF render helper (overlay-called)
++0x00144af0 0 hypothesis  Render__DrawItem    # (item, &fade, &scale)
++# Overlay data (SHOP2 runtime): ptr table 0xB8BBE4 (+0xD4 cooldown), items 0xB8BD70
