@@ -69,3 +69,7 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+
+# Progress chart: generated locally, NOT tracked (bot commits on main
+# would break subsequent pushes — see docs/ghidra.md project notes).
+docs/progress.svg

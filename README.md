@@ -43,12 +43,8 @@ computer science education, video game preservation, and technical research.
 
 ## Progress
 
-![Decompilation progress](docs/progress.svg)
-
-The chart is generated from [`progress.yaml`](progress.yaml) by
-[`tools/progress_chart.py`](tools/progress_chart.py) and updated automatically
-by a GitHub Action on every push. For the human-readable state see
-[TODO.md](TODO.md).
+See [TODO.md](TODO.md) and `progress.yaml`. A generated progress chart is
+maintained in `docs/` as the project advances.
 
 ## License
 
