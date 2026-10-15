@@ -1,4 +1,4 @@
-# Overlay Format — MWo3 (Metrowerks CodeWarrior Overlay v3)
+# Overlay Format — MWo3 (Metrowerks CodeWarrior Overlay v3) — VERIFIED 2026-10-15
 
 > Documented from structural analysis of the maintainer's personal dump.
 > Structure only; no file contents are stored in this repo.
@@ -63,3 +63,16 @@ at load time (hence relocation area)
 - [ ] Decode 0x10 / 0x14 field semantics
 - [ ] Confirm runtime loader location in main ELF (who parses MWo3? main code or RTFSSIOP.IRX?)
 - [ ] Check whether strings region is referenced by pointer table inside code
+
+## Live analysis — SHOP2R.BIN first function (0x00B7F880)
+
+`Shop__FrameUpdate` (XREF[7] within overlay): iterates 19 shop item slots
+(idx 1..19); per slot with cooldown > 0: decrements, computes visual scale
+`(t/2)*32` and fade `t*255/25` (25-tick fade-out), calls main-ELF render
+helpers 0x001A8DE0 and 0x001444AF0 with overlay globals.
+Overlay runtime areas observed:
+
+- 0xB8BBE4: pointer table (slot state), +0xD4 = cooldown counters
+- 0xB8BD70: item info pointer table
+- 0xB8BC50: base index global; 0xB8C024/0xB8C028: render globals
+- 0xB83300/0xB83610: fade/scale structs passed to render helpers
