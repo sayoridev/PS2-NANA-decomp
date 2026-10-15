@@ -15,8 +15,8 @@
   
   <text x='16' y='103' class='lbl'>Identified</text>
   <rect x='150' y='90' width='340' height='18' rx='3' fill='#2b313c'/>
-  <rect x='150' y='90' width='15' height='18' rx='3' fill='#8bc34a'/>
-  <text x='498' y='103' class='val'>110</text>
+  <rect x='150' y='90' width='16' height='18' rx='3' fill='#8bc34a'/>
+  <text x='498' y='103' class='val'>113</text>
   <text x='16' y='129' class='lbl'>Decompiled</text>
   <rect x='150' y='116' width='340' height='18' rx='3' fill='#2b313c'/>
   <rect x='150' y='116' width='2' height='18' rx='3' fill='#2196f3'/>
