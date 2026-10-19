@@ -80,14 +80,19 @@ The matching strategy is deliberately pragmatic:
 
 ## 📈 progress snapshot
 
+<p align="center">
+<img src="docs/progress.png" alt="PS2-NANA-decomp progress" width="820">
+</p>
+
 ```yaml
 estimated_total_functions: 2348
-clean_reconstructed: 74
+clean_reconstructed: 80
 binary_matched: 0
 phase: 3
 phase_name: Decompilation foundation
 ```
 
+The progress image is auto-generated on every push from `progress.yaml`.
 Numbers are still estimates until the final Ghidra boundary export replaces
 the rizin-based inventory.
 
