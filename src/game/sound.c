@@ -69,8 +69,6 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
-extern s32  fcn_00129B30(s32, s32);             /* @0x00129B30 — copy helper */
-extern s32  fcn_00129CE8(s32, s32);             /* @0x00129CE8 — clear helper */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
@@ -344,6 +342,48 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
     return 1;
 }
 
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00129B30, size 0x1B8
+ * PURPOSE: memory move with overlap handling. Semantically equivalent to
+ *          memmove(dst, src, n), returning dst. */
+s32 fcn_00129B30(s32 dst, s32 src, s32 n)
+{
+    u8 *out = (u8 *)(u32)dst;
+    const u8 *in = (const u8 *)(u32)src;
+
+    if (n <= 0) {
+        return dst;
+    }
+
+    if (src < dst && dst < src + n) {
+        out += n;
+        in += n;
+        while (n-- > 0) {
+            *--out = *--in;
+        }
+    } else {
+        while (n-- > 0) {
+            *out++ = *in++;
+        }
+    }
+    return dst;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00129CE8, size 0xC0
+ * PURPOSE: byte fill. Semantically equivalent to memset(dst, value, n),
+ *          returning dst. */
+s32 fcn_00129CE8(s32 dst, s32 value, s32 n)
+{
+    u8 *out = (u8 *)(u32)dst;
+    u8 fill = (u8)value;
+
+    while (n-- > 0) {
+        *out++ = fill;
+    }
+    return dst;
+}
+
 /* Intrusive 16-byte-aligned allocator used by the scheduler task queue.
  * Node layout:
  *   +0x00 value/tag
@@ -451,12 +491,13 @@ s32 FUN_00177480(s32 size, s32 value)
 {
     s32 payload = FUN_00177550(size, value);
 
-    fcn_00129CE8(payload, 0);
+    fcn_00129CE8(payload, 0, size);
     return payload;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)
  * ADDRESS: 0x001774D0, size 0x7C */
+/* value is also passed to the copy helper as its length. */
 s32 FUN_001774D0(s32 payload, s32 size, s32 value)
 {
     s32 new_payload;
@@ -471,7 +512,7 @@ s32 FUN_001774D0(s32 payload, s32 size, s32 value)
 
     new_payload = FUN_00177550(size, value);
     if (payload != 0) {
-        fcn_00129B30(new_payload, payload);
+        fcn_00129B30(new_payload, payload, value);
         FUN_00177400(payload);
     }
     return new_payload;

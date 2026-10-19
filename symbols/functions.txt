@@ -317,6 +317,8 @@
 0x00177830 0x60 RECONSTRUCTED FUN_00177830 # src/game/sound.c — queue task cmd 14, two args
 0x00177890 0x70 RECONSTRUCTED FUN_00177890 # src/game/sound.c — queue task cmd 13, copy name
 0x00177900 0x58 RECONSTRUCTED FUN_00177900 # src/game/sound.c — queue task cmd 12
+0x00129b30 0x1b8 RECONSTRUCTED fcn_00129B30 # src/game/sound.c — memmove(dst,src,n)
+0x00129ce8 0xc0 RECONSTRUCTED fcn_00129CE8 # src/game/sound.c — memset(dst,value,n)
 0x00177400 0x74 RECONSTRUCTED FUN_00177400 # src/game/sound.c — allocator free/coalesce
 0x00177480 0x4c RECONSTRUCTED FUN_00177480 # src/game/sound.c — allocator zeroed alloc
 0x001774d0 0x7c RECONSTRUCTED FUN_001774D0 # src/game/sound.c — allocator realloc/copy/free

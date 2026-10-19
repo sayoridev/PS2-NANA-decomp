@@ -11,6 +11,8 @@
 
 ## Completed
 
+- [x] Memory helpers reconstructed: `fcn_00129B30` (memmove), `fcn_00129CE8` (memset)
+- [x] Scheduler intrusive allocator reconstructed: `FUN_00177550`, `FUN_00177400`, `FUN_00177480`, `FUN_001774D0`
 - [x] Task queue helpers reconstructed: `fcn_0012CA60`, `FUN_00177830`, `FUN_00177890`, `FUN_00177900`
 - [x] Task queue wrappers reconstructed: `FUN_00177650`, `FUN_001776B0`, `FUN_00177710`, `FUN_00177770`, `FUN_001777D0`
 - [x] `Job__Handler11` reconstructed in `src/game/sound.c`
