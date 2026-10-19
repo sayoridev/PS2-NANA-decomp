@@ -61,3 +61,43 @@ Known rizin artifacts seen repeatedly (likely MMI opcodes misdecoded):
 `ext` writing to $zero is implausible for CW; likely rizin misdecode.
 Check raw bytes before relying on it.
 - `v3mulu zero, zero, zero` at Startup__Entry head — likewise suspicious.
+
+## 6. Branch-likely opcodes
+
+- Opcode `0x14`/`0x15` (`beql`/`bnel`) appears in scheduler code, e.g.
+`0x00188B88` (`FUN_00188A98`) and `0x00189838` (`fcn_00189830`).
+- The instruction in the delay slot executes only when the branch is taken.
+- Do not model these as plain `beq`/`bne` without preserving delay-slot
+semantics.
+
+## 7. Custom multi-register calls
+
+- `0x00177320` and `0x00177960` pass extra parameters in `$t0-$t3` instead
+of the normal o32 stack spill area.
+- Example: `Task__QueuePending` receives `p5`, callback and callback argument
+in `$t0-$t2`.
+- Standard C prototypes are not sufficient to reproduce these calls exactly;
+ABI-specific stubs or verified compiler extensions are required.
+
+## 8. Delay-slot argument/state setup
+
+- `Job__Handler11` stores `g_JobState = 3` in the delay slot before
+`Schedule__Kick(6)`, so the state is visible before the callee body.
+- The allocator wrapper at `0x001774D0` loads the move/copy length from the
+inherited third argument; do not “clean up” the call into a two-argument
+form.
+
+## 9. Intrusive allocator and queue offsets
+
+- Scheduler allocator nodes use fixed offsets:
+`value +0x00`, `prev +0x04`, `next +0x08`, `payload/marker +0x0C`.
+- Task slots use base `0x008D3900`, stride `0x134`, command `+0x04`, payload
+words `+0x110/+0x114`.
+
+## 10. SWAR string/memory loops
+
+- `0x0012CA60` implements `strcpy` with zero-word detection.
+- `0x00129B30` implements `memmove` with overlap-aware reverse copy.
+- `0x00129CE8` implements byte-wise `memset`.
+- The vectorized control flow is compiler-specific; C reconstructions preserve
+observable behavior, not instruction-for-instruction shape.

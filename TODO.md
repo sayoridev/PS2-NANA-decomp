@@ -1,121 +1,91 @@
-# TODO — Project State
+# TODO — PS2-NANA-decomp
 
-> This file must always reflect the **real** state of the project.
-> Update it with every meaningful change. Machine-readable mirror: `progress.yaml`.
+*Last updated: 2026-10-19 (Phase 3 in progress)*
 
-*Last updated: 2026-10-15 (Phase 3 in progress)*
-
-## Current phase
-
-**Phase 3 — Decompilation Foundation**
+Milestones: [progress.yaml](progress.yaml) is the source of truth; this file is
+the human-readable mirror.
 
 ## Completed
 
-- [x] Memory helpers reconstructed: `fcn_00129B30` (memmove), `fcn_00129CE8` (memset)
-- [x] Scheduler intrusive allocator reconstructed: `FUN_00177550`, `FUN_00177400`, `FUN_00177480`, `FUN_001774D0`
-- [x] Task queue helpers reconstructed: `fcn_0012CA60`, `FUN_00177830`, `FUN_00177890`, `FUN_00177900`
-- [x] Task queue wrappers reconstructed: `FUN_00177650`, `FUN_001776B0`, `FUN_00177710`, `FUN_00177770`, `FUN_001777D0`
-- [x] `Job__Handler11` reconstructed in `src/game/sound.c`
-- [x] `fcn_0012D018` reconstructed in `src/game/sound.c`
-- [x] `fcn_00188A98` reconstructed in `src/game/sound.c`
-- [x] `fcn_00189830` reconstructed in `src/game/sound.c`
-- [x] `Job__Create` reconstructed in `src/game/sound.c`
-- [x] `Schedule__Init` reconstructed in `src/game/sound.c`
+- [x] Dump inspection and personal-dump policy (never commit the dump)
+- [x] ELF analysis: entry, sections, `.reginfo`, compiler comment
+- [x] First-pass function inventory with rizin (`aaa` + `afl`)
+- [x] `.nkp` / `.rws` signatures identified
+- [x] MWo3 overlay container documented
+- [x] Documented memory layout and Game Code layout
+- [x] Identified crt0 chain: `ResetEE → bootstrap → _start → main`
+- [x] Identified `main` @ `0x0013B8B0`
+- [x] Identified main-loop address region
+- [x] `Game__Main` reconstructed @ `0x0013B930`
+- [x] `Game__Init` reconstructed @ `0x00146350`
+- [x] First overlay (JOBFND2R) parsed and documented
+- [x] Boot-time handler installer identified @ `0x00101148`
+- [x] `Mode__GetState` reconstructed
+- [x] `Mode__GetStatus` reconstructed
+- [x] `State__Enable` reconstructed
+- [x] `State__CopyOut` reconstructed
+- [x] `Mode__Update` reconstructed
+- [x] `Scene__Update` reconstructed @ `0x00146040`
+- [x] `AssetOverlay__Registry` reconstructed @ `0x001446E0`
+- [x] Pad input family reconstructed (11 functions)
+- [x] `Sound__ProcessCommand` reconstructed
+- [x] `Schedule__OnJobDone` reconstructed @ `0x00177EB0`
 - [x] Scheduler primitives reconstructed: `Job__ForceFlag`, `Schedule__Kick`, `Job__Poll`
-- [x] `Schedule__OnJobDone` reconstructed in `src/game/sound.c`
-- [x] `Schedule__WalkSlots` reconstructed in `src/game/sound.c`
-- [x] Scheduler symbols renamed per Ghidra: `Schedule__Update`, `Schedule__FrameTick`,
-`Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`
+- [x] `Schedule__Init` reconstructed @ `0x00177FD0`
+- [x] `Schedule__WalkSlots` reconstructed @ `0x00177140`
+- [x] Scheduler symbols renamed per Ghidra (`Schedule__Update`, `Schedule__FrameTick`, `Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`)
 - [x] Duplicate `src/game/schedule_update.c` removed
-- [x] `Schedule__Update` reconstructed in `src/game/schedule_update.c`
-- [x] crt0 BSS range corrected to `0x001A7900..0x005A3680`
-- [x] Repository created: `sayoridev/PS2-NANA-decomp` (public), initial docs pushed
-- [x] Arch Linux environment prepared (git, gh, python, binutils, Ghidra 12.1.2,
-rizin 0.8.2 + rz-ghidra, 7-Zip, fuseiso)
-- [x] Phase 1 — Dump inspection:
-- [x] Serial identified: **SLPM_659.14** (Japan, Konami/KCEJ, master 2005-02-02)
-- [x] Boot confirmed via SYSTEM.CNF (`BOOT2 = cdrom0:\SLPM_659.14;1`, NTSC)
-- [x] SHA-256 of dump recorded: `44919209…120419`
-- [x] Disc mapped: 120 files, 7 dirs (see `docs/disc-map.md`)
-- [x] Dominant asset identified: `STORY/ALLSC.NKP` (1.65 GB)
-- [x] Phase 2 (partial) — Executable identification:
-- [x] ELF32 LSB MIPS **R5900**, entry 0x00100008, statically linked, stripped
-- [x] **Compiler: Metrowerks CodeWarrior (MW MIPS C Compiler 2.4.1.01)**
-- [x] $gp = 0x005ab270 (from .reginfo)
-- [x] Merged single-section layout; OVL slots at 0x00b7f800
-- [x] Function inventory estimate: **2348** (rizin)
-- [x] Loader/SDK strings mapped (PsII wrappers, /iop/*.irx, A-XX-YY.nkp scheme)
+- [x] `Job__Create` reconstructed @ `0x00188910`
+- [x] `fcn_00189830` reconstructed (deferred-job manager accessor)
+- [x] `fcn_00188A98` reconstructed (job class resolver)
+- [x] `Job__Handler11` reconstructed @ `0x00176DF0`
+- [x] Task queue wrappers reconstructed: `FUN_00177650`, `FUN_001776B0`, `FUN_00177710`, `FUN_00177770`, `FUN_001777D0`, `FUN_00177830`, `FUN_00177890`, `FUN_00177900`
+- [x] Scheduler intrusive allocator reconstructed: `FUN_00177550`, `FUN_00177400`, `FUN_00177480`, `FUN_001774D0`
+- [x] Memory helpers reconstructed: `fcn_00129B30` (`memmove`), `fcn_00129CE8` (`memset`)
+- [x] `fcn_0012D018` reconstructed (`strncpy` semantics)
+- [x] `fcn_0012CA60` reconstructed (`strcpy` semantics)
+- [x] Raw-file cleanup completed; all five tracked `_raw.c` references removed after clean replacements were verified
+- [x] Progress chart generator implemented and documented (`tools/progress_chart.py`)
+- [x] Codegen catalog extended with verified branch-likely, custom-register ABI, delay-slot and memory-loop idioms
+- [x] Initial syscall wrapper map added in `src/common/ps2_syscalls.h`
 
 ## In progress
 
-- [x] Entry region mapped: pointer table 0x100000–0x10007F; code starts 0x100080
-- [x] crt0 identified at 0x100080 (FPU init + BSS clear loop)
-- [x] System handler-install chain mapped (0x118478 ← table @0x1C5078, cap 49)
-- [x] OVL format identified: MWo3 (see docs/overlay-format.md); small OVLs are thin wrappers
-- [x] First symbols seeded: symbols/functions.txt (10 functions + 2 data symbols)
-- [x] $gp verified in crt0 code (0x5AB270, matches .reginfo)
-- [x] Boot chain mapped: crt0 → syscall 0x3C/0x3D → BootInit1/2/3 → BootTail
-- [x] rizin raw mode confirmed for overlay disassembly
-- [x] MAIN LOOP located and FULLY CLASSIFIED: Game__MainLoop @0x141F04 (14/14 calls); reconstructed in src/game/main.c
-- [x] First source files: src/system/startup.c (Startup__Entry, Fpu__ClearAll — RECONSTRUCTED)
-- [x] Time__Tick + Random__Next reconstructed (Knuth LCG identified, 44 xrefs)
-- [x] g_SystemContext identified @0x1C7FD0 (central system struct)
-- [x] System__Exit resolved (exit-callback lists, back to crt0)
-- [x] Arena allocator init found in BootInit1 tail (0x5AB8C8, 0x10-byte slots)
-- [x] Codegen idiom catalog started: notes/analysis/codegen.md
+- [ ] **Phase 3 — Decompilation foundation**
+- [x] crt0 / startup chain reconstructed
+- [x] BSS range fixed to `0x001A7900..0x005A3680`
+- [x] Main loop reconstructed
+- [x] Sound/scheduler command VM largely reconstructed
+- [ ] Complete remaining scheduler dependencies (`fcn_00177320`, `Task__QueuePending`, subsystem init helpers)
+- [ ] ABI-specific stubs or verified compiler extensions for custom `$t0-$t3` calls
 
-## Pending
+## Pending — blocked by Ghidra/export confirmation
 
-- [ ] Raw-file cleanup: raw Ghidra files are temporarily retained as analysis
-references. Remove each `_raw.c` only after its clean replacement is committed
-and cross-checked. Current remaining raw references: 5.
-- [ ] Confirm function count/boundaries in Ghidra; export to `symbols/`
-- [ ] Catalog Metrowerks CodeWarrior codegen idioms (`notes/analysis/codegen.md`)
-- [ ] Import stub table → Sony SDK function list for `src/common/` shims
-- [ ] Locate `.nkp` dispatch table(s) in code
-- [ ] Progress chart generator in `tools/` (renders `progress.yaml` → `docs/progress.svg`)
+- [ ] Confirm function count and boundaries in Ghidra; replace rizin estimate `2348` with an exported count.
+- [ ] Export/update `symbols/functions.txt` from Ghidra with reliable function sizes.
+- [ ] Verify `Schedule__Update`, `Schedule__WalkSlots`, `Schedule__Init`, `Job__Create` and allocator helpers against full Ghidra decompile; promote to `VERIFIED` only after CFG/call/side-effect checks pass.
+- [ ] Add `functions.csv`, `globals.txt` and `globals.csv` after the Ghidra boundary pass is exported.
 
-## Blocked
+## Pending — blocked by dump content
 
-- [ ] GitHub Actions disabilitato a livello account/repo (run vuoto, pannello
-"Run time"/pricing). Mitigato con git hook pre-push locale. Fix account:
-Settings → Actions → General → allow all actions. Low priority.
-- [ ] PCSX2 emulator (verification, Phase 6) — AUR; deferred, no action needed now
-- [ ] ps2dev toolchain (Phase 6) — build from source when reconstruction begins
+- [ ] Locate and document `.nkp` dispatch tables. The current uploaded analysis dump contains no `.nkp` file, only a minimal subset including `BGM_002.RWS`; complete this after a fuller local dump is available.
 
-## Discovered issues
+## Pending — next analysis targets
 
-- `file` reports "not stripped" but `.symtab`/`.strtab` are empty → treat as
-stripped (documented in `docs/executable.md`).
-- Merged code+data section makes rizin auto-analysis noisy (data probed as
-code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
+- [ ] Reconstruct ABI-specific scheduler initializer `fcn_00177320` after choosing a safe custom-call strategy.
+- [ ] Reconstruct `Task__QueuePending` after solving its seven-argument `$a0-$a3/$t0-$t2` convention.
+- [ ] Classify `fcn_00192AA0`, `fcn_00192D50`, `fcn_0019F788`, `fcn_001A39E8`, `fcn_00177320`, `fcn_0017CCF0` called by `Schedule__Init`.
+- [ ] Classify `fcn_00177EB0` rename confidence against Ghidra project state (currently `Schedule__OnJobDone` hypothesis supported by flag writer/reader pair).
+- [ ] Continue replacing remaining `extern` declarations in `sound.c` with verified function bodies one module at a time.
 
 ## Next recommended actions
 
-- [ ] Verify `Schedule__WalkSlots` against Ghidra disassembly; confirm size 0x1E0,
-vtable call order and side-effect sequence.
-- [ ] Verify `Schedule__Update` against Ghidra/rizin disassembly and mark it
-VERIFIED if CFG, call sequence and memory accesses match.
-- [x] ~~Boot chain mapping~~ DONE (2026-10-15): 100% verified incl.
-Boot__SystemCheck = runtime-deployed IOP checker module (864 B ELF).
+1. Provide or run Ghidra/rizin disassembly for `fcn_00177320` and `Task__QueuePending` so the custom ABI strategy can be finalized safely.
+2. Import/inspect a fuller local dump containing `.nkp` assets before attempting NKP dispatch-table analysis.
+3. Keep scheduler reconstructions at `RECONSTRUCTED` until the Ghidra decompile comparison is performed.
 
-1. Commit updated docs (disc-map, executable, overlay-format, AGENTS, TODO, progress).
-2. Locate IOP .irx loader via string xrefs (iz~iop → axt) — loader still unfound.
-3. ~~Ghidra setup~~ DONE. Next decompile targets: Pad__ReadStatus (11b500) family,
-Scene__Update (146040), Game__Init (141d90), Schedule__Update (177f30), AssetOverlay__Registry (142660).
+## Suggested commit sequence
 
-## Milestones
-
-| Milestone | Status | Progress |
-| --- | --- | --- |
-| Phase 0 — Project setup | completed | 100% |
-| Phase 1 — Dump inspection | completed | 100% |
-| Phase 2 — Executable analysis | completed | 100% |
-| Phase 3 — Decompilation foundation | in progress | ~40% |
-| Phase 3 — Decompilation foundation | pending | 0% |
-| Phase 4 — Game systems | pending | 0% |
-| Phase 5 — Assets and formats | pending | 0% |
-| Phase 6 — Build and verification | pending | 0% |
-| Phase 7 — Continuous progress | ongoing | — |
-
-*Percentages are estimates until measurable units stabilize (function count pending Ghidra confirmation).*
+- `decomp: reconstruct scheduler memory helpers` (previous delivered batch)
+- `todo: complete raw cleanup and scheduler documentation baseline`
+- Then resume normal decomp on ABI-specific scheduler initializers.
