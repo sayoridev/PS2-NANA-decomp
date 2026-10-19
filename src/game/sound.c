@@ -70,7 +70,6 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
-extern void fcn_0012D018(s32, s32, s32);       /* @0x0012D018 — prefix copy helper */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
@@ -342,6 +341,27 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
         Task__QueuePending(p1, p2, p3, p4, p5, cb, cbArg);
     }
     return 1;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x0012D018, size 0x1BC
+ * PURPOSE: bounded string copy with zero padding. Semantically equivalent to
+ *          strncpy(dst, src, n), returning dst. */
+s32 fcn_0012D018(s32 dst, s32 src, s32 n)
+{
+    char *out = (char *)(u32)dst;
+    const char *in = (const char *)(u32)src;
+    s32 remaining = n;
+
+    while (remaining > 0 && *in != '\0') {
+        *out++ = *in++;
+        remaining--;
+    }
+    while (remaining > 0) {
+        *out++ = '\0';
+        remaining--;
+    }
+    return dst;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)
