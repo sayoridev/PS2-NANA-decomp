@@ -11,6 +11,7 @@
 
 ## Completed
 
+- [x] Task queue helpers reconstructed: `fcn_0012CA60`, `FUN_00177830`, `FUN_00177890`, `FUN_00177900`
 - [x] Task queue wrappers reconstructed: `FUN_00177650`, `FUN_001776B0`, `FUN_00177710`, `FUN_00177770`, `FUN_001777D0`
 - [x] `Job__Handler11` reconstructed in `src/game/sound.c`
 - [x] `fcn_0012D018` reconstructed in `src/game/sound.c`

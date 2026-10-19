@@ -342,6 +342,36 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
     return 1;
 }
 
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x0012CA60, size 0x118
+ * PURPOSE: optimized string copy. Semantically equivalent to strcpy(dst, src),
+ *          returning dst. */
+s32 fcn_0012CA60(s32 dst, s32 src)
+{
+    char *out = (char *)(u32)dst;
+    const char *in = (const char *)(u32)src;
+
+    while ((*out++ = *in++) != '\0') {
+    }
+    return dst;
+}
+
+/* Queue a 308-byte task slot with two payload words. */
+static void Task__QueueSlot2(s32 arg1, s32 arg2, s32 cmd)
+{
+    s32 slot = (*(volatile s32 *)0x008E8604);
+    s32 next = slot + 1;
+
+    if (next < 64) {
+        (*(volatile s32 *)0x008E8604) = next;
+        (*(volatile s32 *)(u32)(0x008D3900 + next * 0x134 + 0x04)) = cmd;
+        (*(volatile s32 *)(u32)(0x008D3900 + next * 0x134 + 0x110)) = arg1;
+        (*(volatile s32 *)(u32)(0x008D3900 + next * 0x134 + 0x114)) = arg2;
+    } else {
+        (*(volatile s32 *)0x008D8604) = 0;
+    }
+}
+
 /* Queue a 308-byte task slot. The producer cursor is 0x008E8604; slots start
  * at 0x008D3900 with stride 0x134. cmd is stored at slot+4, arg at slot+0x110. */
 static void Task__QueueSlot(s32 arg, s32 cmd)
@@ -356,6 +386,40 @@ static void Task__QueueSlot(s32 arg, s32 cmd)
     } else {
         (*(volatile s32 *)0x008D8604) = 0;
     }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177830, size 0x60 */
+void FUN_00177830(s32 arg1, s32 arg2)
+{
+    Task__QueueSlot2(arg1, arg2, 14);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177890, size 0x70 */
+void FUN_00177890(s32 arg1, s32 arg2)
+{
+    s32 slot = (*(volatile s32 *)0x008E8604);
+    s32 next = slot + 1;
+
+    if (next < 64) {
+        s32 slot_addr;
+
+        (*(volatile s32 *)0x008E8604) = next;
+        slot_addr = 0x008D3900 + next * 0x134;
+        (*(volatile s32 *)(u32)(slot_addr + 0x04)) = 13;
+        (*(volatile s32 *)(u32)(slot_addr + 0x110)) = arg2;
+        fcn_0012CA60(slot_addr + 0x08, arg1);
+    } else {
+        (*(volatile s32 *)0x008D8604) = 0;
+    }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177900, size 0x58 */
+void FUN_00177900(s32 arg)
+{
+    Task__QueueSlot(arg, 12);
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)
