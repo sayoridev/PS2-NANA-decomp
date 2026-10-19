@@ -16,12 +16,7 @@
 extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
 extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
 extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
-extern void Sound__WaitCh0(int);                /* @0x00177710 */
-extern void Sound__WaitCh1(int);                /* @0x001776B0 */
-extern void Sound__WaitCh2(s32);                /* @0x00177710 variant ch2  */
-extern void Sound__WaitCh3(s32);                /* @0x001776B0 variant ch3  */
 extern s32  Stream__Open(s32 rwa, int,int,int,int); /* @0x001A2E00 */
-extern void Stream__CloseWait(s32 h, int, int); /* @0x0018F600 */
 extern void Stream__SendConfig(s32 h, void *cfg0x24); /* @0x001A3080 */
 extern void Stream__SendCmd(s32 h, void *env);  /* @0x001A2AE8 */
 extern s64  Rpc__Call(s32 port, s32 fn, s32, s32, s32, s32, s32, s32); /* @0x00112868 */
@@ -69,6 +64,13 @@ void Command__Requeue(s32, s32);
 void Sound__DeferBgmA(s32, s32);
 void Stream__Resume(s32, int);
 void Stream__Control(s32, int);
+void Sound__WaitCh0(int);
+void Sound__WaitCh1(int);
+void Sound__WaitCh2(s32);
+void Sound__WaitCh3(s32);
+void Stream__CloseWait(s32, int, int);
+extern void fcn_0018DEB0(s32, s32, s32, s32);
+extern void fcn_0018FE98(s32, s32);
 extern s32  fcn_00190CD0(s32);                  /* @0x00190CD0 — object probe */
 extern void fcn_00190C40(s32, s32, s32);        /* @0x00190C40 — object init */
 extern s32  fcn_00191300(s32, s32, s32, s32, s32); /* @0x00191300 — ABI-sensitive registration, fifth arg in t0 */
@@ -1297,6 +1299,91 @@ void Stream__Control(s32 handle, int op)
     (void)handle;
     (void)op;
     Stream__Notify(handle + 0x2C0);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00177710, size 0x60 — alias */
+void Sound__WaitCh0(int arg)
+{
+    FUN_00177710(arg);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001776B0, size 0x60 — alias */
+void Sound__WaitCh1(int arg)
+{
+    FUN_001776B0(arg);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00177710, size 0x60 — ch2 alias */
+void Sound__WaitCh2(s32 arg)
+{
+    FUN_00177710(arg);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001776B0, size 0x60 — ch3 alias */
+void Sound__WaitCh3(s32 arg)
+{
+    FUN_001776B0(arg);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x0018F600, size 0xF4
+ * PURPOSE: detach a stream channel, run its optional close callback, clear
+ *          linked queue nodes, notify shutdown stages and relink the command
+ *          list. */
+void Stream__CloseWait(s32 handle, int arg1, int arg2)
+{
+    volatile s32 *ctx = (volatile s32 *)(u32)handle;
+    s32 vtable;
+    s32 callback;
+    s32 node;
+    s32 cursor;
+
+    vtable = ctx[0];
+    callback = (*(volatile s32 *)(u32)(vtable + 0x34));
+    if (callback != 0) {
+        ((void (*)(s32))(u32)callback)(handle);
+    }
+
+    node = ctx[5];
+    if (node != 0) {
+        s32 link = ctx[6];
+
+        (*(volatile s32 *)(u32)link) = node;
+        (*(volatile s32 *)(u32)(node + 4)) = link;
+        ctx[6] = 0;
+        ctx[5] = 0;
+    }
+
+    cursor = ctx[3];
+    if (cursor != handle + 12) {
+        while (cursor != handle + 12) {
+            s32 next = (*(volatile s32 *)(u32)cursor);
+            s32 prev_slot = (*(volatile s32 *)(u32)(cursor + 4));
+
+            (*(volatile s32 *)(u32)prev_slot) = next;
+            (*(volatile s32 *)(u32)(next + 4)) =
+                (*(volatile s32 *)(u32)(cursor + 4));
+            cursor = next;
+        }
+    }
+
+    if ((ctx[7] & 0x01) != 0) {
+        fcn_0018FE98(handle, 1);
+        fcn_0018FE98(handle, 2);
+    }
+
+    {
+        s32 cmd_head = ctx[2];
+        s32 cmd_node = ctx[1];
+
+        (*(volatile s32 *)(u32)cmd_head) = cmd_node;
+        (*(volatile s32 *)(u32)(cmd_node + 4)) = cmd_head;
+        fcn_0018DEB0(handle, arg1, arg2, cmd_head);
+    }
 }
 
 /* STATUS: RECONSTRUCTED

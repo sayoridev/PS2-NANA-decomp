@@ -7,6 +7,7 @@ the human-readable mirror.
 
 ## Completed
 
+- [x] `Stream__CloseWait` reconstructed; `Sound__WaitCh0..3` aliases added
 - [x] Stream stage/notify layer reconstructed: `Stream__StageConfig`, `Stream__StageCmd`, `Stream__StageResume`, `Stream__Notify`, `Stream__StageParam`, `Stream__Resume`, `Stream__Control`, `Sound__DeferBgmB`, `Command__Requeue`, `Sound__DeferBgmA`
 - [x] Progress chart restyled as PNG and wired to regenerate on push
 - [x] Subsystem worker init reconstructed: `fcn_001A4EB8`, `FUN_001A4F08`, `FUN_001A4F38`

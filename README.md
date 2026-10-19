@@ -86,7 +86,7 @@ The matching strategy is deliberately pragmatic:
 
 ```yaml
 estimated_total_functions: 2348
-clean_reconstructed: 90
+clean_reconstructed: 91
 binary_matched: 0
 phase: 3
 phase_name: Decompilation foundation
