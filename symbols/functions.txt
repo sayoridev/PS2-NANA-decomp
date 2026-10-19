@@ -1,4 +1,3 @@
-functions.txt
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
@@ -203,6 +202,7 @@ functions.txt
 0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
 0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
 0x0017ccf0 0x1d8 RECONSTRUCTED fcn_0017CCF0 # src/game/sound.c — scheduler subsystem context init
+0x00192d50 0x7c RECONSTRUCTED fcn_00192D50 # src/game/sound.c — register fallback job classes
 0x00177fd0 0x100 RECONSTRUCTED Schedule__Init # src/game/sound.c — scheduler/RWA init
 0x00176c80 0 RECONSTRUCTED Boot__SystemCheck    # (&flag): ret>=0 && flag -> trap(0)+halt
 0x0013b340 0 RECONSTRUCTED Draw__BootInit
@@ -268,6 +268,9 @@ functions.txt
 # Scheduler job machine + task VM (2026-10-15)
 0x00177ef0 0x10 RECONSTRUCTED Job__Poll # src/game/sound.c — countdown != 0 means busy
 0x0012d018 0x1bc RECONSTRUCTED fcn_0012D018 # src/game/sound.c — strncpy(dst,src,n)
+0x0018a9e0 0x08 RECONSTRUCTED fcn_0018A9E0 # src/game/sound.c — subsystem handle singleton
+0x0018a9f0 0x08 RECONSTRUCTED FUN_0018A9F0 # src/game/sound.c — handle field getter +0x64
+0x0018a9f8 0x08 RECONSTRUCTED FUN_0018A9F8 # src/game/sound.c — handle field setter +0x68
 0x00188910 0x188 RECONSTRUCTED Job__Create # src/game/sound.c — find/reuse deferred-job slot
 0x00188a98 0x138 RECONSTRUCTED fcn_00188A98 # src/game/sound.c — resolve job class from descriptor
 0x00189830 0x08 RECONSTRUCTED fcn_00189830 # src/game/sound.c — deferred-job manager accessor

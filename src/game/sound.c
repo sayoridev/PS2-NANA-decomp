@@ -69,14 +69,15 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
+extern s32  fcn_00190AF8(s32, s32);             /* @0x00190AF8 — job class registration */
+extern s32  fcn_0018DB90(s32, s32);             /* @0x0018DB90 — job class registration */
+extern s32  fcn_00199DD8(s32, s32);             /* @0x00199DD8 — job class registration */
 extern void fcn_001A4C98(s32, s32, s32, s32);   /* @0x001A4C98 — subsystem init */
-extern s32  fcn_0018A9E0(void);                 /* @0x0018A9E0 — subsystem handle */
 extern void fcn_001A4EB8(s32);                  /* @0x001A4EB8 — subsystem init */
 extern s32  fcn_001A0D30(s32, s32, s32);        /* @0x001A0D30 — object factory */
 extern s32  fcn_001A6610(s32, s32, s32, s32);   /* @0x001A6610 — record factory */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
-extern s32  fcn_00192D50(void);                 /* @0x00192D50 — name pending */
 extern s32  fcn_0019F788(void);                 /* @0x0019F788 — name pending */
 extern void fcn_001A39E8(void);                 /* @0x001A39E8 — name pending */
 extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
@@ -123,6 +124,45 @@ void Schedule__Kick(int countdown)
 s32 Job__Poll(void)
 {
     return (*(volatile s32 *)0x008D3900);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x0018A9E0, size 0x08
+ * PURPOSE: return the scheduler subsystem handle singleton. */
+s32 fcn_0018A9E0(void)
+{
+    return (*(volatile s32 *)0x008DD380);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x0018A9F0, size 0x08 */
+s32 FUN_0018A9F0(s32 handle)
+{
+    return (*(volatile s32 *)(u32)(handle + 0x64));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x0018A9F8, size 0x08 */
+void FUN_0018A9F8(s32 handle, s32 value)
+{
+    (*(volatile s32 *)(u32)(handle + 0x68)) = value;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00192D50, size 0x7C
+ * PURPOSE: register the three fallback job classes used by the scheduler. */
+s32 fcn_00192D50(void)
+{
+    if (fcn_00190AF8(0x001F8350, 3) != 1) {
+        return 0;
+    }
+    if (fcn_0018DB90(0x001F8348, 1) != 1) {
+        return 0;
+    }
+    if (fcn_00199DD8(0x001F8360, 1) != 1) {
+        return 0;
+    }
+    return 1;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)

@@ -7,6 +7,8 @@ the human-readable mirror.
 
 ## Completed
 
+- [x] `fcn_00192D50` reconstructed (fallback job class registration)
+- [x] Subsystem handle accessors reconstructed: `fcn_0018A9E0`, `FUN_0018A9F0`, `FUN_0018A9F8`
 - [x] `fcn_0017CCF0` reconstructed (scheduler subsystem context init)
 - [x] Dump inspection and personal-dump policy (never commit the dump)
 - [x] ELF analysis: entry, sections, `.reginfo`, compiler comment
