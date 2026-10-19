@@ -16,19 +16,14 @@
 extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
 extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
 extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
-extern void Command__Requeue(s32 cmd, s32 a, s32 b); /* @0x00177C20: write next free queue slot */
-extern void Sound__DeferBgmA(s32, s32);         /* @0x00177C20 = Command__Requeue(1,a,b) */
-extern void Sound__DeferBgmB(s32, s32);         /* @0x00177BC0 */
 extern void Sound__WaitCh0(int);                /* @0x00177710 */
 extern void Sound__WaitCh1(int);                /* @0x001776B0 */
 extern void Sound__WaitCh2(s32);                /* @0x00177710 variant ch2  */
 extern void Sound__WaitCh3(s32);                /* @0x001776B0 variant ch3  */
 extern s32  Stream__Open(s32 rwa, int,int,int,int); /* @0x001A2E00 */
-extern void Stream__Control(s32 h, int op);     /* @0x001A3180: 1=stop 2=fade 3=pause */
 extern void Stream__CloseWait(s32 h, int, int); /* @0x0018F600 */
 extern void Stream__SendConfig(s32 h, void *cfg0x24); /* @0x001A3080 */
 extern void Stream__SendCmd(s32 h, void *env);  /* @0x001A2AE8 */
-extern void Stream__Resume(s32 h, int);         /* @0x001A3060 */
 extern s64  Rpc__Call(s32 port, s32 fn, s32, s32, s32, s32, s32, s32); /* @0x00112868 */
 extern void Memory__Memset(void *, s32, s32);   /* @0x00129CE8 */
 extern void Memory__Copy(void *, void *, s32);  /* @0x00129B30 */
@@ -69,6 +64,11 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
+void Sound__DeferBgmB(s32, s32);
+void Command__Requeue(s32, s32);
+void Sound__DeferBgmA(s32, s32);
+void Stream__Resume(s32, int);
+void Stream__Control(s32, int);
 extern s32  fcn_00190CD0(s32);                  /* @0x00190CD0 — object probe */
 extern void fcn_00190C40(s32, s32, s32);        /* @0x00190C40 — object init */
 extern s32  fcn_00191300(s32, s32, s32, s32, s32); /* @0x00191300 — ABI-sensitive registration, fifth arg in t0 */
@@ -762,6 +762,66 @@ static void Task__QueueSlot2(s32 arg1, s32 arg2, s32 cmd)
     }
 }
 
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A7B18, size 0x40
+ * PURPOSE: stage a stream-channel config payload. */
+void Stream__StageConfig(s32 slot, s32 cfg)
+{
+    s32 flags = (*(volatile s32 *)(u32)slot);
+
+    flags = (flags | 0x04) & ~0x08;
+    (*(volatile s32 *)(u32)slot) = flags;
+    (*(volatile s32 *)(u32)(slot + 0x08)) = cfg;
+    (*(volatile s32 *)(u32)(slot + 0x10)) = 0x3F800000;
+    (*(volatile s32 *)(u32)(slot + 0x04)) = 1;
+    (*(volatile s32 *)(u32)(slot + 0x14)) = 0;
+    (*(volatile s32 *)(u32)(slot + 0x0C)) = 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A7B58, size 0x18 */
+void Stream__StageCmd(s32 slot, s32 env)
+{
+    s32 flags = (*(volatile s32 *)(u32)slot);
+
+    (*(volatile s32 *)(u32)(slot + 0x0C)) = env;
+    (*(volatile s32 *)(u32)slot) = flags | 0x08;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A7B70, size 0x18 */
+void Stream__StageResume(s32 slot, s32 arg)
+{
+    s32 flags = (*(volatile s32 *)(u32)slot);
+
+    (*(volatile s32 *)(u32)(slot + 0x14)) = arg;
+    (*(volatile s32 *)(u32)slot) = flags | 0x40;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A7B88, size 0x18 */
+void Stream__Notify(s32 slot)
+{
+    s32 flags = (*(volatile s32 *)(u32)slot);
+
+    (*(volatile s32 *)(u32)(slot + 0x04)) = 1;
+    (*(volatile s32 *)(u32)slot) = flags | 0x80;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A7BA0, size 0x30
+ * NOTE: original receives float_bits in $f4/$t4; keep that ABI caveat in
+ * mind before using this from custom-convention call sites. */
+void Stream__StageParam(s32 slot, s32 src, s32 float_bits)
+{
+    s32 flags = (*(volatile s32 *)(u32)slot);
+
+    if (((*(volatile s32 *)(u32)src) & 0x01) == 0) {
+        (*(volatile s32 *)(u32)(slot + 0x10)) = float_bits;
+        (*(volatile s32 *)(u32)slot) = flags | 0x20;
+    }
+}
+
 /* Queue a 308-byte task slot. The producer cursor is 0x008E8604; slots start
  * at 0x008D3900 with stride 0x134. cmd is stored at slot+4, arg at slot+0x110. */
 static void Task__QueueSlot(s32 arg, s32 cmd)
@@ -1200,6 +1260,44 @@ void Stream__ResumeCh(int ch){ if (g_Sound.streamCh[ch] && Job__Poll() == 0) { S
 #define SOUND_WRITE_SLOT  (*(volatile s32 *)0x008D8604)  /* producer cursor (requeue) */
 #define SOUND_COUNTDOWN   (*(volatile s32 *)0x008D3900)
 extern void Schedule__TickB(void);              /* @0x0017CCB0 — tail update */
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00177BC0, size 0x60 */
+void Sound__DeferBgmB(s32 arg1, s32 arg2)
+{
+    Task__QueueSlot2(arg1, arg2, 2);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x00177C20, size 0x58 */
+void Command__Requeue(s32 arg1, s32 arg2)
+{
+    Task__QueueSlot2(arg1, arg2, 1);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: alias of Command__Requeue */
+void Sound__DeferBgmA(s32 arg1, s32 arg2)
+{
+    Command__Requeue(arg1, arg2);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A3060, size 0x20 */
+void Stream__Resume(s32 handle, int unused)
+{
+    (void)unused;
+    Stream__StageResume(handle + 0x2C0, 1);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A3180, size 0x20 */
+void Stream__Control(s32 handle, int op)
+{
+    (void)handle;
+    (void)op;
+    Stream__Notify(handle + 0x2C0);
+}
 
 /* STATUS: RECONSTRUCTED
  * ADDRESS: 0x00177C80 — executes one queued command per tick. */

@@ -202,6 +202,8 @@
 0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
 0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
 0x0017ccf0 0x1d8 RECONSTRUCTED fcn_0017CCF0 # src/game/sound.c — scheduler subsystem context init
+0x0019f788 0x70 RECONSTRUCTED fcn_0019F788 # src/game/sound.c — conditional subsystem init
+0x001a39e8 0x6c RECONSTRUCTED fcn_001A39E8 # src/game/sound.c — conditional subsystem fallback/teardown
 0x00192d50 0x7c RECONSTRUCTED fcn_00192D50 # src/game/sound.c — register fallback job classes
 0x00177fd0 0x100 RECONSTRUCTED Schedule__Init # src/game/sound.c — scheduler/RWA init
 0x00176c80 0 RECONSTRUCTED Boot__SystemCheck    # (&flag): ret>=0 && flag -> trap(0)+halt
@@ -268,6 +270,9 @@
 # Scheduler job machine + task VM (2026-10-15)
 0x00177ef0 0x10 RECONSTRUCTED Job__Poll # src/game/sound.c — countdown != 0 means busy
 0x0012d018 0x1bc RECONSTRUCTED fcn_0012D018 # src/game/sound.c — strncpy(dst,src,n)
+0x001a4eb8 0x50 RECONSTRUCTED fcn_001A4EB8 # src/game/sound.c — subsystem worker init/sleep
+0x001a4f08 0x2c RECONSTRUCTED FUN_001A4F08 # src/game/sound.c — subsystem record setter
+0x001a4f38 0x2c RECONSTRUCTED FUN_001A4F38 # src/game/sound.c — subsystem record getter
 0x0018a9e0 0x08 RECONSTRUCTED fcn_0018A9E0 # src/game/sound.c — subsystem handle singleton
 0x0018a9f0 0x08 RECONSTRUCTED FUN_0018A9F0 # src/game/sound.c — handle field getter +0x64
 0x0018a9f8 0x08 RECONSTRUCTED FUN_0018A9F8 # src/game/sound.c — handle field setter +0x68
@@ -314,7 +319,7 @@
 0x0018f600 0 RECONSTRUCTED Stream__Close          # (handle, 0, 0) — wait end + close
 0x00177710 0 hypothesis  Sound__WaitCh0          # defer while ch0 busy
 0x001776b0 0 hypothesis  Sound__WaitCh1
-0x00177c20 0 hypothesis  Task__Defer             # re-queue when job busy
+0x00177c20 0x58 RECONSTRUCTED Command__Requeue # src/game/sound.c — requeue command cmd 1
 0x00177960 0 hypothesis  Task__QueuePending      # append to pending list
 0x00177ec0 0x10 RECONSTRUCTED Job__ForceFlag # src/game/sound.c — completion flag
 0x00176df0 0x58 RECONSTRUCTED Job__Handler11 # src/game/sound.c — op5 deferred callback
@@ -343,7 +348,7 @@
 0x00177b60 0 hypothesis  Sound__DeferCh2A       # cmd04 busy defer
 0x00177b00 0 hypothesis  Sound__DeferCh2B       # cmd05 busy defer
 0x00177aa0 0 hypothesis  Sound__DeferBank2
-0x00177bc0 0 hypothesis  Sound__DeferBgmB
+0x00177bc0 0x60 RECONSTRUCTED Sound__DeferBgmB # src/game/sound.c — defer BGM cmd 2
 0x008d86d8 0 hypothesis g_VoiceStreamHandle     # third stream channel (voice)
 0x001f6070 0 RECONSTRUCTED g_VoiceBankTable     # 25 x {minId,maxId} -> V000-V024.RWS mapping
 0x005a3388 0 hypothesis g_SeBankTable           # gp+0xFFFF8118: system SE range table
@@ -381,9 +386,13 @@
 # RWA stream protocol (2026-10-15)
 0x0018e350 0 hypothesis  Stream__OpenImpl        # (ctx@0x8E3C40, rwa, p3, p2, p4, p5) -> handle
 0x008e3c40 0 hypothesis g_StreamMgr             # stream manager context
-0x001a7b18 0 RECONSTRUCTED Stream__StageConfig   # (ch+0x2C0, cfg) — stage into pending slot
-0x001a7b58 0 RECONSTRUCTED Stream__StageCmd      # (ch+0x2C0, env) — stage command + ring counter
-0x001a7b88 0 RECONSTRUCTED Stream__Notify        # (ch+0x2C0) — doorbell to IOP
+0x001a7b18 0x40 RECONSTRUCTED Stream__StageConfig # src/game/sound.c — stage stream config payload
+0x001a7b70 0x18 RECONSTRUCTED Stream__StageResume # src/game/sound.c — stage stream resume arg
+0x001a7ba0 0x30 RECONSTRUCTED Stream__StageParam # src/game/sound.c — stage stream param float
+0x001a3060 0x20 RECONSTRUCTED Stream__Resume # src/game/sound.c — wrapper stage resume
+0x001a3180 0x20 RECONSTRUCTED Stream__Control # src/game/sound.c — wrapper stream notify
+0x001a7b58 0x18 RECONSTRUCTED Stream__StageCmd # src/game/sound.c — stage stream command env
+0x001a7b88 0x18 RECONSTRUCTED Stream__Notify # src/game/sound.c — mark stream slot notify
 0x0012ca60 0 RECONSTRUCTED String__Copy         # (dst, src)
 0x00123990 0 hypothesis  Float__Unpack          # float conversions for 22.10 fixed packing
 0x00125a70 0 hypothesis  Float__ToFixed10
