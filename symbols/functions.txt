@@ -367,7 +367,7 @@
 # Totals: 12,311 voice lines (24x500 + 311); 30 BGM tracks; bank->file V{bank:03d}.RWS
 
 # Stream primitives (from cmd 0C/0D/0E decompiles, 2026-10-15)
-0x001a2e00 0 RECONSTRUCTED Stream__Open           # (rwaHandle, 0,0,0,0) -> channel handle
+0x001a2e00 0x34 RECONSTRUCTED Stream__Open # src/game/sound.c — public open wrapper
 0x001a3080 0 RECONSTRUCTED Stream__SendConfig     # (handle, cfg0x24)
 0x001a2ae8 0 RECONSTRUCTED Stream__CmdSend        # (handle, {ptr,count} command envelope)
 0x008d86d0 0 RECONSTRUCTED g_StreamChannels       # [4]: ch0/ch1 BGM, ch2 voice, ch3 SE
@@ -394,6 +394,9 @@
 0x001a7b18 0x40 RECONSTRUCTED Stream__StageConfig # src/game/sound.c — stage stream config payload
 0x001a7b70 0x18 RECONSTRUCTED Stream__StageResume # src/game/sound.c — stage stream resume arg
 0x001a7ba0 0x30 RECONSTRUCTED Stream__StageParam # src/game/sound.c — stage stream param float
+0x001a2e70 0x6c RECONSTRUCTED FUN_001A2E70 # src/game/sound.c — open default stream root
+0x001a2ee0 0x1c RECONSTRUCTED FUN_001A2EE0 # src/game/sound.c — close stream root
+0x001a2f00 0xa0 RECONSTRUCTED FUN_001A2F00 # src/game/sound.c — open stream root with subchannels
 0x001a3060 0x20 RECONSTRUCTED Stream__Resume # src/game/sound.c — wrapper stage resume
 0x001a3180 0x20 RECONSTRUCTED Stream__Control # src/game/sound.c — wrapper stream notify
 0x001a31a0 0x34 RECONSTRUCTED FUN_001A31A0 # src/game/sound.c — stream status accessor

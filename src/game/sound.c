@@ -16,7 +16,6 @@
 extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
 extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
 extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
-extern s32  Stream__Open(s32 rwa, int,int,int,int); /* @0x001A2E00 */
 extern void Stream__SendConfig(s32 h, void *cfg0x24); /* @0x001A3080 */
 extern void Stream__SendCmd(s32 h, void *env);  /* @0x001A2AE8 */
 extern s64  Rpc__Call(s32 port, s32 fn, s32, s32, s32, s32, s32, s32); /* @0x00112868 */
@@ -89,6 +88,12 @@ extern s32  GetThreadId(void);                  /* @0x0010E810 */
 extern void SleepThread(void);                  /* @0x0010E840 */
 extern void fcn_001A2080(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x001A2080 — custom ABI */
 extern void fcn_0010F218(s32, s32);            /* @0x0010F218 — sync primitive init */
+extern s32  fcn_0018E350(s32, s32, s32, s32, s32, s32); /* @0x0018E350 — custom-ABI open core */
+extern s32  fcn_0018D6A0(s32, s32, s32);        /* @0x0018D6A0 — root allocator */
+extern s32  fcn_0018D3D0(s32, s32, s32, s32, s32, s32); /* @0x0018D3D0 — custom-ABI stream factory */
+extern void fcn_001A2560(s32);                  /* @0x001A2560 — stream init hook */
+extern void fcn_0018CDA8(s32);                  /* @0x0018CDA8 — stream root close */
+extern s32  fcn_0018CF88(s32, s32, s32, s32, s32); /* @0x0018CF88 — subchannel setup */
 extern s32  fcn_001A0D30(s32, s32, s32);        /* @0x001A0D30 — object factory */
 extern s32  fcn_001A6610(s32, s32, s32, s32);   /* @0x001A6610 — record factory */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
@@ -1482,6 +1487,79 @@ void FUN_001A3340(s32 handle, s32 source)
     SleepThread();
     (*(volatile s32 *)(u32)(source + 0x0C)) =
         (*(volatile s32 *)(u32)((u32)mirror + 0x0C));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A2E00, size 0x34
+ * PURPOSE: public stream-open entry; forwards to the custom-ABI core. */
+s32 Stream__Open(s32 rwa, int b, int c, int d, int t0_arg)
+{
+    return fcn_0018E350(0x008E3C40, rwa, c, b, d, t0_arg);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A2E70, size 0x6C
+ * PURPOSE: allocate and open the default stream root. */
+s32 FUN_001A2E70(void)
+{
+    s32 root;
+    s32 handle;
+
+    root = fcn_0018D6A0(0, 0x0035DFE0, 0);
+    handle = fcn_0018D3D0(root,
+                          0,
+                          0x008E3C40,
+                          0,
+                          0,
+                          0x0003080E);
+
+    if (handle != 0) {
+        fcn_001A2560(handle);
+    }
+    return handle;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A2EE0, size 0x1C */
+void FUN_001A2EE0(void)
+{
+    fcn_0018CDA8(0x008E3C40);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A2F00, size 0xA0
+ * PURPOSE: allocate the stream root and initialize subchannels; on setup
+ *          failure closes the root and returns 0. */
+s32 FUN_001A2F00(void)
+{
+    s32 root;
+    s32 handle;
+    s32 setup;
+
+    root = fcn_0018D6A0(0, 0x0035DFE0, 0);
+    handle = fcn_0018D3D0(root,
+                          12,
+                          0x008E3C40,
+                          0x008E3CA0,
+                          0x005A39D0,
+                          0x0003080E);
+
+    if (handle == 0) {
+        return 0;
+    }
+
+    fcn_001A2560(handle);
+    setup = fcn_0018CF88(handle,
+                         0x001F9A50,
+                         6,
+                         0x001F9AE0,
+                         9);
+
+    if (setup == 0) {
+        fcn_0018CDA8(handle);
+        return 0;
+    }
+    return handle;
 }
 
 /* STATUS: RECONSTRUCTED
