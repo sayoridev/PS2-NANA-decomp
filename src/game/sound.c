@@ -13,12 +13,10 @@
 #include "../common/ps2.h"
 
 /* ---- RPC / timing / stream primitives ---- */
-extern s64  Job__Poll(void);                    /* @0x00177EF0: 0 = idle */
 extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
 extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, flag=0, frame++ */
 extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
 extern void Command__Requeue(s32 cmd, s32 a, s32 b); /* @0x00177C20: write next free queue slot */
-extern void Schedule__Kick(int);                /* @0x00177ED0 (arg 6)      */
 extern void Sound__DeferBgmA(s32, s32);         /* @0x00177C20 = Command__Requeue(1,a,b) */
 extern void Sound__DeferBgmB(s32, s32);         /* @0x00177BC0 */
 extern void Sound__WaitCh0(int);                /* @0x00177710 */
@@ -71,10 +69,15 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  Job__Create(s32 desc, int type, s32 handler, int); /* @0x00188910 */
 extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
+extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
+extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
+extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
+extern s32  fcn_00192D50(void);                 /* @0x00192D50 — name pending */
+extern s32  fcn_0019F788(void);                 /* @0x0019F788 — name pending */
+extern void fcn_001A39E8(void);                 /* @0x001A39E8 — name pending */
 extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
 extern u32  g_JobState;                         /* @0x007D20D8 */
 extern u32  g_JobFrames;                        /* @0x007D20DC */
-extern void fcn_00177EB0(void);                 /* @0x00177EB0 — name pending */
 
 typedef struct Schedule__Job Schedule__Job;
 typedef struct Schedule__JobVtable Schedule__JobVtable;
@@ -92,6 +95,90 @@ struct Schedule__JobVtable {
     void (*method_38)(Schedule__Job *, s32, s32, s32); /* +0x38 */
     s32  (*method_3C)(Schedule__Job *, s32);    /* +0x3C */
 };
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177EC0
+ * PURPOSE: read the deferred-job completion flag. */
+s32 Job__ForceFlag(void)
+{
+    return (*(volatile s32 *)0x008E860C);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177ED0
+ * PURPOSE: set the scheduler countdown and clear the completion flag. */
+void Schedule__Kick(int countdown)
+{
+    (*(volatile s32 *)0x008D3900) = countdown;
+    (*(volatile s32 *)0x008E860C) = 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177EF0
+ * PURPOSE: read the scheduler countdown; 0 means idle. */
+s32 Job__Poll(void)
+{
+    return (*(volatile s32 *)0x008D3900);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177FD0
+ * PURPOSE: initialize scheduler state, allocator anchors and linked-list head,
+ *          then initialize the surrounding scheduler/RWA subsystems. */
+void Schedule__Init(void)
+{
+    s32 init_args[4];
+    s32 aligned_ctx;
+    s32 extended_ctx;
+    s32 result;
+    volatile s32 *list_head;
+    volatile s32 *node;
+
+    Memory__Memset((void *)0x008D3900, 0, 0x4D14);
+
+    aligned_ctx = (s32)((0x007D3900u + 15u) & ~15u); /* 0x007D3910 */
+    extended_ctx = aligned_ctx + 0x100000;
+
+    (*(volatile s32 *)0x005A38B0) = extended_ctx;
+    (*(volatile s32 *)0x005A38A8) = aligned_ctx;
+    (*(volatile s32 *)0x005A38AC) = aligned_ctx;
+
+    (*(volatile s32 *)(u32)(aligned_ctx + 0x04)) = 0;
+    (*(volatile s32 *)(u32)(aligned_ctx + 0x08)) = 0;
+    (*(volatile s32 *)(u32)(aligned_ctx + 0x0C)) = 0;
+    (*(volatile s32 *)(u32)aligned_ctx) = 0;
+
+    init_args[0] = 0x00177550;
+    init_args[1] = 0x00177400;
+    init_args[2] = 0x001774D0;
+    init_args[3] = 0x00177480;
+
+    fcn_00192AA0((s32)init_args,
+                 0,
+                 0x00177400,
+                 0x00177550,
+                 init_args[0],
+                 init_args[1],
+                 init_args[2],
+                 init_args[3]);
+
+    (*(volatile s32 *)0x005A3494) = fcn_00192D50();
+
+    result = fcn_0019F788();
+    if (result != 0) {
+        fcn_001A39E8();
+    }
+
+    fcn_00177320();
+    fcn_0017CCF0();
+
+    list_head = (volatile s32 *)0x005A38AC;
+    node = (volatile s32 *)(u32)*list_head;
+    while (node != 0 && ((volatile s32 *)(u32)node)[1] != 0) {
+        node = (volatile s32 *)(u32)((volatile s32 *)(u32)node)[1];
+    }
+    (void)node;
+}
 
 /* ================= command implementations ================= */
 
@@ -255,6 +342,14 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
     return 1;
 }
 
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177EB0
+ * PURPOSE: raise the deferred-job completion flag read by Job__ForceFlag. */
+void Schedule__OnJobDone(void)
+{
+    (*(volatile s32 *)0x008E860C) = 1;
+}
+
 /* STATUS: RECONSTRUCTED (manual MIPS decode; Ghidra decompile comparison pending)
  * ADDRESS: 0x00177140
  * PURPOSE: advance the deferred-callback job state machine once per frame.
@@ -305,7 +400,7 @@ void Schedule__WalkSlots(void)
         *(s32 *)0x007D1FD0 = 0;
         g_JobState = 0;
         Schedule__Kick(6);
-        fcn_00177EB0();
+        Schedule__OnJobDone();
         break;
 
     case 4:

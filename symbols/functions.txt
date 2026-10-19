@@ -201,7 +201,7 @@
 # Game__Init subsystem calls — NAMED (2026-10-15)
 0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
 0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
-0x00177fd0 0 RECONSTRUCTED Schedule__Init        # scheduler ctx memset 0x4D14
+0x00177fd0 0x100 RECONSTRUCTED Schedule__Init # src/game/sound.c — scheduler/RWA init
 0x00176c80 0 RECONSTRUCTED Boot__SystemCheck    # (&flag): ret>=0 && flag -> trap(0)+halt
 0x0013b340 0 RECONSTRUCTED Draw__BootInit
 0x0013c5d0 0 RECONSTRUCTED Mode__Init           # XREF to Mode__Update
@@ -264,10 +264,10 @@
 0x00140180 0 hypothesis  IopCmd__InitB
 
 # Scheduler job machine + task VM (2026-10-15)
-0x00177ef0 0 RECONSTRUCTED Job__Poll            # () -> done?
+0x00177ef0 0x10 RECONSTRUCTED Job__Poll # src/game/sound.c — countdown != 0 means busy
 0x00188910 0 hypothesis  Job__Create           # (desc, type=0x11, handler, 0) -> job obj
-0x00177ed0 0 hypothesis  Schedule__Kick        # (6)
-0x00177eb0 0 hypothesis  Schedule__OnJobDone
+0x00177ed0 0x20 RECONSTRUCTED Schedule__Kick # src/game/sound.c — set countdown, clear flag
+0x00177eb0 0x10 RECONSTRUCTED Schedule__OnJobDone # src/game/sound.c — job completion flag
 0x007d1fc0 0 hypothesis g_CurrentJob           # vtable @ obj+0x50: +0x2c/+0x30/+0x38/+0x3c vmethods
 0x007d20d8 0 hypothesis g_JobState             # 0..5; 0x7d20dc frame counter (thresh 30)
 # Task VM (Task__Execute @0x77C80): 16 cmds (1..10, 0xC..0x13); slot stride 0x134;
@@ -308,7 +308,7 @@
 0x001776b0 0 hypothesis  Sound__WaitCh1
 0x00177c20 0 hypothesis  Task__Defer             # re-queue when job busy
 0x00177960 0 hypothesis  Task__QueuePending      # append to pending list
-0x00177ec0 0 hypothesis  Job__ForceFlag          # override
+0x00177ec0 0x10 RECONSTRUCTED Job__ForceFlag # src/game/sound.c — completion flag
 0x00176df0 0 RECONSTRUCTED Job__Handler11        # vmethod op 5: fire deferred callback g_JobCb(g_JobCbArg)
 0x001f5e58 0 hypothesis g_BgmDescriptorTable     # 0xC-byte entries {file?, size?, flags?}
 # Sound state globals

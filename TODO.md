@@ -11,9 +11,12 @@
 
 ## Completed
 
+- [x] `Schedule__Init` reconstructed in `src/game/sound.c`
+- [x] Scheduler primitives reconstructed: `Job__ForceFlag`, `Schedule__Kick`, `Job__Poll`
+- [x] `Schedule__OnJobDone` reconstructed in `src/game/sound.c`
 - [x] `Schedule__WalkSlots` reconstructed in `src/game/sound.c`
 - [x] Scheduler symbols renamed per Ghidra: `Schedule__Update`, `Schedule__FrameTick`,
-  `Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`
+`Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`
 - [x] Duplicate `src/game/schedule_update.c` removed
 - [x] `Schedule__Update` reconstructed in `src/game/schedule_update.c`
 - [x] crt0 BSS range corrected to `0x001A7900..0x005A3680`
@@ -81,9 +84,9 @@ code → "Invalid instruction" spam). Ghidra confirmation needed for the count.
 ## Next recommended actions
 
 - [ ] Verify `Schedule__WalkSlots` against Ghidra disassembly; confirm size 0x1E0,
-  vtable call order and side-effect sequence.
+vtable call order and side-effect sequence.
 - [ ] Verify `Schedule__Update` against Ghidra/rizin disassembly and mark it
-  VERIFIED if CFG, call sequence and memory accesses match.
+VERIFIED if CFG, call sequence and memory accesses match.
 - [x] ~~Boot chain mapping~~ DONE (2026-10-15): 100% verified incl.
 Boot__SystemCheck = runtime-deployed IOP checker module (864 B ELF).
 
