@@ -11,6 +11,7 @@
 
 ## Completed
 
+- [x] `Job__Create` reconstructed in `src/game/sound.c`
 - [x] `Schedule__Init` reconstructed in `src/game/sound.c`
 - [x] Scheduler primitives reconstructed: `Job__ForceFlag`, `Schedule__Kick`, `Job__Poll`
 - [x] `Schedule__OnJobDone` reconstructed in `src/game/sound.c`

@@ -67,8 +67,11 @@ extern s32  (*g_JobCb)(s32, s32);   /* @0x007D1FC4                            */
 extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 
 /* ---- job executor (type 0x11) ---- */
-extern s32  Job__Create(s32 desc, int type, s32 handler, int); /* @0x00188910 */
 extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
+extern s32  fcn_00188A98(s32);                  /* @0x00188A98 — resolve job class from descriptor */
+extern s32  fcn_00189830(void);                 /* @0x00189830 — deferred-job manager accessor */
+extern s32  WaitSema(s32);                      /* @0x0010E960 */
+extern s32  SignalSema(s32);                    /* @0x0010E940 */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
@@ -340,6 +343,98 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
         Task__QueuePending(p1, p2, p3, p4, p5, cb, cbArg);
     }
     return 1;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00188910, size 0x188
+ * PURPOSE: find the last reusable deferred-job slot for the requested job
+ *          class and initialize it. Returns the job handle, or 0 on failure.
+ *
+ * Opaque layout used below:
+ *   job class: active_count @ +0x04, get_slot @ +0x14, init @ +0x28
+ *   job:       field_30 @ +0x30, field_34 @ +0x34, status @ +0x38,
+ *              field_40 @ +0x40, handler @ +0x48, arg @ +0x4C
+ */
+s32 Job__Create(s32 desc, int type, s32 handler, int arg)
+{
+    s32 class_handle = fcn_00188A98(desc);
+    s32 job = 0;
+    s32 sema_id;
+    s32 signal_result;
+    s32 init_state;
+    s32 init_result;
+    s32 i;
+
+    if (class_handle == 0) {
+        return 0;
+    }
+
+    sema_id = (*(volatile s32 *)0x005A3908);
+    WaitSema(sema_id);
+
+    for (i = 0;
+         i < (*(volatile s32 *)(u32)(class_handle + 0x04));
+         i++) {
+        s32 (*get_slot)(s32, s32);
+        s32 candidate;
+
+        get_slot = *(s32 (**)(s32, s32))(u32)(class_handle + 0x14);
+        candidate = get_slot(class_handle, i);
+        if ((*(volatile s32 *)(u32)(candidate + 0x38)) == 5) {
+            job = candidate;
+        }
+    }
+
+    signal_result = SignalSema(sema_id);
+
+    if (job == 0) {
+        if ((type & 0x10) != 0) {
+            s32 manager = fcn_00189830();
+            s32 create_cb = (*(volatile s32 *)0x008E2D2C);
+
+            if (create_cb == 0) {
+                return 0;
+            }
+
+            (*(volatile s32 *)(u32)(manager + 0x10)) = 8;
+            ((void (*)(void))(u32)create_cb)();
+        }
+        return 0;
+    }
+
+    if (signal_result != 0) {
+        init_state = 2;
+    } else {
+        init_state = (*(volatile s32 *)(u32)(job + 0x30));
+    }
+
+    if (init_state != 0) {
+        (*(volatile s32 *)(u32)(job + 0x48)) = handler;
+        (*(volatile s32 *)(u32)(job + 0x40)) = 2;
+        (*(volatile s32 *)(u32)(job + 0x4C)) = arg;
+    }
+
+    if ((*(volatile s32 *)(u32)(class_handle + 0x10)) != 0) {
+        (*(volatile s32 *)(u32)(job + 0x48)) = handler;
+        (*(volatile s32 *)(u32)(job + 0x40)) = 2;
+        (*(volatile s32 *)(u32)(job + 0x4C)) = arg;
+        type |= 0x10;
+    }
+
+    init_result = ((s32 (*)(s32, s32, s32, s32))
+                   (*(volatile s32 *)(u32)(class_handle + 0x28)))(
+        class_handle, job, desc, type);
+
+    if (init_result != 1) {
+        (*(volatile s32 *)(u32)(job + 0x38)) = 1;
+        job = 0;
+    }
+
+    if (job != 0) {
+        (*(volatile s32 *)(u32)(job + 0x34)) = 2;
+    }
+
+    return job;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)
