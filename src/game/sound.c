@@ -69,6 +69,8 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
+extern s32  fcn_00129B30(s32, s32);             /* @0x00129B30 — copy helper */
+extern s32  fcn_00129CE8(s32, s32);             /* @0x00129CE8 — clear helper */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
@@ -340,6 +342,139 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
         Task__QueuePending(p1, p2, p3, p4, p5, cb, cbArg);
     }
     return 1;
+}
+
+/* Intrusive 16-byte-aligned allocator used by the scheduler task queue.
+ * Node layout:
+ *   +0x00 value/tag
+ *   +0x04 prev
+ *   +0x08 next
+ *   +0x0C payload pointer; zero marks a free node
+ */
+#define ALLOC__HEAD (*(volatile s32 *)0x005A38AC)
+#define ALLOC__NODE(n) ((volatile s32 *)(u32)(n))
+#define ALLOC__ALIGN16(x) (((x) + 15) & ~15)
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177550, size 0xF8 */
+s32 FUN_00177550(s32 size, s32 value)
+{
+    s32 node = ALLOC__HEAD;
+    s32 payload;
+    s32 split;
+
+    while (node != 0) {
+        if (ALLOC__NODE(node)[3] == 0) {
+            payload = ALLOC__ALIGN16(node + 0x10);
+            split = ALLOC__ALIGN16(payload + size);
+
+            if (ALLOC__NODE(node)[2] >= split + 0x20) {
+                s32 old_next = ALLOC__NODE(node)[2];
+
+                ALLOC__NODE(node)[2] = split;
+
+                ALLOC__NODE(split)[0] = 0;
+                ALLOC__NODE(split)[1] = node;
+                ALLOC__NODE(split)[2] = old_next;
+                ALLOC__NODE(split)[3] = 0;
+
+                ALLOC__NODE(node)[2] = split;
+                ALLOC__NODE(node)[3] = payload;
+                ALLOC__NODE(node)[0] = value;
+                return payload;
+            }
+
+            if (ALLOC__NODE(node)[2] >= split) {
+                ALLOC__NODE(node)[2] = payload;
+                ALLOC__NODE(node)[3] = payload;
+                ALLOC__NODE(node)[0] = value;
+                return payload;
+            }
+        }
+        node = ALLOC__NODE(node)[2];
+    }
+
+    node = 0x005A38AC;
+    payload = ALLOC__ALIGN16(node + 0x10);
+    split = ALLOC__ALIGN16(payload + size);
+
+    ALLOC__NODE(node)[2] = payload;
+    ALLOC__NODE(node)[3] = payload;
+    ALLOC__NODE(node)[0] = value;
+
+    ALLOC__NODE(split)[0] = 0;
+    ALLOC__NODE(split)[1] = node;
+    ALLOC__NODE(split)[2] = 0;
+    ALLOC__NODE(split)[3] = 0;
+
+    ALLOC__HEAD = split;
+    return payload;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177400, size 0x74 */
+void FUN_00177400(s32 payload)
+{
+    s32 node = ALLOC__HEAD;
+
+    while (node != 0) {
+        s32 next;
+
+        if (ALLOC__NODE(node)[3] == payload) {
+            ALLOC__NODE(node)[3] = 0;
+            ALLOC__HEAD = node;
+            node = ALLOC__NODE(node)[1];
+            continue;
+        }
+
+        next = ALLOC__NODE(node)[2];
+        if (next != 0 &&
+            ALLOC__NODE(next)[3] == 0 &&
+            ALLOC__NODE(node)[3] == 0) {
+            s32 next_next = ALLOC__NODE(next)[2];
+
+            if (next_next != 0) {
+                ALLOC__NODE(node)[2] = next_next;
+                ALLOC__NODE(next_next)[1] = node;
+            } else {
+                ALLOC__HEAD = node;
+            }
+        }
+
+        node = ALLOC__NODE(node)[1];
+    }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177480, size 0x4C */
+s32 FUN_00177480(s32 size, s32 value)
+{
+    s32 payload = FUN_00177550(size, value);
+
+    fcn_00129CE8(payload, 0);
+    return payload;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x001774D0, size 0x7C */
+s32 FUN_001774D0(s32 payload, s32 size, s32 value)
+{
+    s32 new_payload;
+
+    if (size == 0) {
+        if (payload == 0) {
+            return 0;
+        }
+        FUN_00177400(payload);
+        return 0;
+    }
+
+    new_payload = FUN_00177550(size, value);
+    if (payload != 0) {
+        fcn_00129B30(new_payload, payload);
+        FUN_00177400(payload);
+    }
+    return new_payload;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)

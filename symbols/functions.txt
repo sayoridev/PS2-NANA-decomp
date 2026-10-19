@@ -265,6 +265,7 @@
 
 # Scheduler job machine + task VM (2026-10-15)
 0x00177ef0 0x10 RECONSTRUCTED Job__Poll # src/game/sound.c — countdown != 0 means busy
+0x0012d018 0x1bc RECONSTRUCTED fcn_0012D018 # src/game/sound.c — strncpy(dst,src,n)
 0x00188910 0x188 RECONSTRUCTED Job__Create # src/game/sound.c — find/reuse deferred-job slot
 0x00188a98 0x138 RECONSTRUCTED fcn_00188A98 # src/game/sound.c — resolve job class from descriptor
 0x00189830 0x08 RECONSTRUCTED fcn_00189830 # src/game/sound.c — deferred-job manager accessor
@@ -311,7 +312,20 @@
 0x00177c20 0 hypothesis  Task__Defer             # re-queue when job busy
 0x00177960 0 hypothesis  Task__QueuePending      # append to pending list
 0x00177ec0 0x10 RECONSTRUCTED Job__ForceFlag # src/game/sound.c — completion flag
-0x00176df0 0 RECONSTRUCTED Job__Handler11        # vmethod op 5: fire deferred callback g_JobCb(g_JobCbArg)
+0x00176df0 0x58 RECONSTRUCTED Job__Handler11 # src/game/sound.c — op5 deferred callback
+0x0012ca60 0x118 RECONSTRUCTED fcn_0012CA60 # src/game/sound.c — strcpy(dst,src)
+0x00177830 0x60 RECONSTRUCTED FUN_00177830 # src/game/sound.c — queue task cmd 14, two args
+0x00177890 0x70 RECONSTRUCTED FUN_00177890 # src/game/sound.c — queue task cmd 13, copy name
+0x00177900 0x58 RECONSTRUCTED FUN_00177900 # src/game/sound.c — queue task cmd 12
+0x00177400 0x74 RECONSTRUCTED FUN_00177400 # src/game/sound.c — allocator free/coalesce
+0x00177480 0x4c RECONSTRUCTED FUN_00177480 # src/game/sound.c — allocator zeroed alloc
+0x001774d0 0x7c RECONSTRUCTED FUN_001774D0 # src/game/sound.c — allocator realloc/copy/free
+0x00177550 0xf8 RECONSTRUCTED FUN_00177550 # src/game/sound.c — intrusive 16-byte allocator
+0x00177650 0x60 RECONSTRUCTED FUN_00177650 # src/game/sound.c — queue task cmd 19
+0x001776b0 0x60 RECONSTRUCTED FUN_001776B0 # src/game/sound.c — queue task cmd 18
+0x00177710 0x60 RECONSTRUCTED FUN_00177710 # src/game/sound.c — queue task cmd 17
+0x00177770 0x60 RECONSTRUCTED FUN_00177770 # src/game/sound.c — queue task cmd 16
+0x001777d0 0x60 RECONSTRUCTED FUN_001777D0 # src/game/sound.c — queue task cmd 15
 0x001f5e58 0 hypothesis g_BgmDescriptorTable     # 0xC-byte entries {file?, size?, flags?}
 # Sound state globals
 0x008d8628 0 hypothesis g_BgmStateBlock          # +0: idx +4: state(1/0xE) +8: arg +C: desc +10: counter
