@@ -67,7 +67,6 @@ extern s32  (*g_JobCb)(s32, s32);   /* @0x007D1FC4                            */
 extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 
 /* ---- job executor (type 0x11) ---- */
-extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
@@ -341,6 +340,27 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
         Task__QueuePending(p1, p2, p3, p4, p5, cb, cbArg);
     }
     return 1;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00176DF0, size 0x58
+ * PURPOSE: deferred-callback job handler for vmethod operation 5. */
+void Job__Handler11(s32 job, s32 arg, s32 unused, s32 op)
+{
+    void (*callback)(s32, s32);
+
+    (void)job;
+    (void)unused;
+
+    if (op != 5) {
+        return;
+    }
+
+    callback = (void (*)(s32, s32))(u32)(*(volatile s32 *)0x007D1FC4);
+    callback(arg, *(volatile s32 *)0x007D1FC8);
+
+    (*(volatile s32 *)0x007D20D8) = 3;
+    Schedule__Kick(6);
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)

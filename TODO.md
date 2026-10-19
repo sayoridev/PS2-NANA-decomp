@@ -11,6 +11,7 @@
 
 ## Completed
 
+- [x] `Job__Handler11` reconstructed in `src/game/sound.c`
 - [x] `fcn_0012D018` reconstructed in `src/game/sound.c`
 - [x] `fcn_00188A98` reconstructed in `src/game/sound.c`
 - [x] `fcn_00189830` reconstructed in `src/game/sound.c`
