@@ -1,3 +1,4 @@
+functions.txt
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
@@ -201,6 +202,7 @@
 # Game__Init subsystem calls — NAMED (2026-10-15)
 0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
 0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
+0x0017ccf0 0x1d8 RECONSTRUCTED fcn_0017CCF0 # src/game/sound.c — scheduler subsystem context init
 0x00177fd0 0x100 RECONSTRUCTED Schedule__Init # src/game/sound.c — scheduler/RWA init
 0x00176c80 0 RECONSTRUCTED Boot__SystemCheck    # (&flag): ret>=0 && flag -> trap(0)+halt
 0x0013b340 0 RECONSTRUCTED Draw__BootInit

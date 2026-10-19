@@ -69,8 +69,12 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
+extern void fcn_001A4C98(s32, s32, s32, s32);   /* @0x001A4C98 — subsystem init */
+extern s32  fcn_0018A9E0(void);                 /* @0x0018A9E0 — subsystem handle */
+extern void fcn_001A4EB8(s32);                  /* @0x001A4EB8 — subsystem init */
+extern s32  fcn_001A0D30(s32, s32, s32);        /* @0x001A0D30 — object factory */
+extern s32  fcn_001A6610(s32, s32, s32, s32);   /* @0x001A6610 — record factory */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
-extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
 extern s32  fcn_00192D50(void);                 /* @0x00192D50 — name pending */
 extern s32  fcn_0019F788(void);                 /* @0x0019F788 — name pending */
@@ -119,6 +123,85 @@ void Schedule__Kick(int countdown)
 s32 Job__Poll(void)
 {
     return (*(volatile s32 *)0x008D3900);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x0017CCF0, size 0x1D8
+ * PURPOSE: initialize the 1620-byte scheduler subsystem context at 0x008D8620
+ *          and its twelve 4-byte-spaced records. */
+void fcn_0017CCF0(void)
+{
+    volatile s32 *ctx = (volatile s32 *)0x008D8620u;
+    s32 handle;
+    s32 object;
+    s32 i;
+    s32 step;
+
+    fcn_00129CE8(0x008D8620, 0, 1620);
+
+    fcn_001A4C98(0, 6, 0, 0);
+    handle = fcn_0018A9E0();
+    (*(volatile s32 *)0x008D8624) = handle;
+    fcn_001A4EB8(handle);
+
+    object = fcn_001A0D30(4, 0, 0);
+    (*(volatile s32 *)0x008D8620) = object;
+    (*(volatile s32 *)(u32)(handle + 0x1418)) = object;
+
+    for (i = 0; i < 12; i++) {
+        volatile s32 *entry = ctx + i;
+        s32 j;
+
+        for (j = 0; j < 16; j++) {
+            entry[0x2C + j] = 0;
+        }
+
+        entry[0x61] = fcn_001A6610(entry[1], 0, 0, 0);
+        entry[0x73] = -1;
+        entry[0x85] = -1;
+    }
+
+    step = 0;
+    for (;;) {
+        volatile s32 *block = ctx + step;
+        s32 j;
+
+        for (j = 0; j < 8; j++) {
+            block[0x9D + j] = 0;
+            block[0x101 + j] = -1;
+        }
+
+        step += 8;
+        if (step >= 92) {
+            break;
+        }
+    }
+
+    {
+        volatile s32 *tail = ctx + step;
+        s32 j;
+
+        for (j = 0; j < 2; j++) {
+            tail[0x9D + j] = 0;
+            tail[0x101 + j] = -1;
+        }
+    }
+
+    ctx[2] = -1;    /* +0x008 */
+    ctx[11] = -1;   /* +0x02C */
+    ctx[12] = -1;   /* +0x030 */
+    ctx[14] = -1;   /* +0x038 */
+    ctx[15] = -1;   /* +0x03C */
+    ctx[16] = -1;   /* +0x040 */
+    ctx[17] = -1;   /* +0x044 */
+    ctx[20] = -1;   /* +0x050 */
+    ctx[21] = -1;   /* +0x054 */
+    ctx[23] = -1;   /* +0x05C */
+    ctx[24] = -1;   /* +0x060 */
+    ctx[25] = -1;   /* +0x064 */
+    ctx[26] = -1;   /* +0x068 */
+    ctx[34] = -1;   /* +0x088 */
+    ctx[35] = -1;   /* +0x08C */
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)

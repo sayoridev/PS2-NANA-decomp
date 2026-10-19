@@ -7,6 +7,7 @@ the human-readable mirror.
 
 ## Completed
 
+- [x] `fcn_0017CCF0` reconstructed (scheduler subsystem context init)
 - [x] Dump inspection and personal-dump policy (never commit the dump)
 - [x] ELF analysis: entry, sections, `.reginfo`, compiler comment
 - [x] First-pass function inventory with rizin (`aaa` + `afl`)
