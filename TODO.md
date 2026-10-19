@@ -7,6 +7,9 @@ the human-readable mirror.
 
 ## Completed
 
+- [x] Progress chart restyled as PNG and wired to regenerate on push
+- [x] Subsystem worker init reconstructed: `fcn_001A4EB8`, `FUN_001A4F08`, `FUN_001A4F38`
+- [x] Conditional subsystem init/fallback reconstructed: `fcn_0019F788`, `fcn_001A39E8`
 - [x] `fcn_00192D50` reconstructed (fallback job class registration)
 - [x] Subsystem handle accessors reconstructed: `fcn_0018A9E0`, `FUN_0018A9F0`, `FUN_0018A9F8`
 - [x] `fcn_0017CCF0` reconstructed (scheduler subsystem context init)

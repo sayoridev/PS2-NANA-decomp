@@ -23,9 +23,9 @@ executable:
 functions:
   total: 2348             # rizin 'aaa' estimate; confirm in Ghidra
   identified: 190         # pending Ghidra confirmation
-  decompiled: 75          # clean reconstructed functions; raw references not summed
+  decompiled: 80          # clean reconstructed functions; raw references not summed
   matched: 0
-  remaining: 2273         # 2348 - 75 clean reconstructions; estimate
+  remaining: 2268         # 2348 - 80 clean reconstructions; estimate
 
 modules: []
 

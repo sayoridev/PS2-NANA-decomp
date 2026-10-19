@@ -69,17 +69,27 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 /* ---- job executor (type 0x11) ---- */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
+extern s32  fcn_00190CD0(s32);                  /* @0x00190CD0 — object probe */
+extern void fcn_00190C40(s32, s32, s32);        /* @0x00190C40 — object init */
+extern s32  fcn_00191300(s32, s32, s32, s32, s32); /* @0x00191300 — ABI-sensitive registration, fifth arg in t0 */
+extern s32  fcn_001A4DA0(void);                 /* @0x001A4DA0 — subsystem probe */
+extern s32  fcn_001A6730(void);                 /* @0x001A6730 — subsystem probe */
+extern s32  fcn_001A73F0(void);                 /* @0x001A73F0 — subsystem probe */
+extern s32  fcn_001A2F00(void);                 /* @0x001A2F00 — subsystem probe */
+extern void fcn_001A74A8(void);                 /* @0x001A74A8 — subsystem teardown */
+extern void fcn_001A66F0(void);                 /* @0x001A66F0 — subsystem teardown */
+extern void fcn_001A4D60(void);                 /* @0x001A4D60 — subsystem teardown */
 extern s32  fcn_00190AF8(s32, s32);             /* @0x00190AF8 — job class registration */
 extern s32  fcn_0018DB90(s32, s32);             /* @0x0018DB90 — job class registration */
 extern s32  fcn_00199DD8(s32, s32);             /* @0x00199DD8 — job class registration */
 extern void fcn_001A4C98(s32, s32, s32, s32);   /* @0x001A4C98 — subsystem init */
-extern void fcn_001A4EB8(s32);                  /* @0x001A4EB8 — subsystem init */
+extern s32  GetThreadId(void);                  /* @0x0010E810 */
+extern void SleepThread(void);                  /* @0x0010E840 */
+extern void fcn_001A2080(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x001A2080 — custom ABI */
 extern s32  fcn_001A0D30(s32, s32, s32);        /* @0x001A0D30 — object factory */
 extern s32  fcn_001A6610(s32, s32, s32, s32);   /* @0x001A6610 — record factory */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
-extern s32  fcn_0019F788(void);                 /* @0x0019F788 — name pending */
-extern void fcn_001A39E8(void);                 /* @0x001A39E8 — name pending */
 extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
 extern u32  g_JobState;                         /* @0x007D20D8 */
 extern u32  g_JobFrames;                        /* @0x007D20DC */
@@ -149,6 +159,42 @@ void FUN_0018A9F8(s32 handle, s32 value)
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x0019F788, size 0x70
+ * PURPOSE: initialize/register the object at 0x008DC98. The final
+ *          registration call uses a custom fifth argument in $t0, so the
+ *          C call is ABI-sensitive and remains structural. */
+s32 fcn_0019F788(void)
+{
+    if (fcn_00190CD0(0x008DC98) != 0) {
+        fcn_00190C40(0x008DC98, 0x0035DD90, 0);
+        return fcn_00191300(0x008DC98,
+                            0x00206B50,
+                            6,
+                            0x00207A50,
+                            9);
+    }
+    return 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A39E8, size 0x6C
+ * PURPOSE: conditional fallback/teardown sequence for scheduler subsystems. */
+void fcn_001A39E8(void)
+{
+    if (fcn_001A4DA0() != 0) {
+        if (fcn_001A6730() != 0) {
+            if (fcn_001A73F0() != 0) {
+                if (fcn_001A2F00() == 0) {
+                    fcn_001A74A8();
+                    fcn_001A66F0();
+                }
+            }
+        }
+    }
+    fcn_001A4D60();
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
  * ADDRESS: 0x00192D50, size 0x7C
  * PURPOSE: register the three fallback job classes used by the scheduler. */
 s32 fcn_00192D50(void)
@@ -163,6 +209,51 @@ s32 fcn_00192D50(void)
         return 0;
     }
     return 1;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A4EB8, size 0x50
+ * PURPOSE: register the current subsystem handle, start its worker with a
+ *          thread-aware custom-ABI call, then sleep the calling thread. */
+void fcn_001A4EB8(s32 handle)
+{
+    s32 thread_id;
+
+    (*(volatile s32 *)0x005A3580) = handle;
+    thread_id = GetThreadId();
+
+    /* fcn_001A2080 uses a custom eight-register ABI. */
+    fcn_001A2080(0, 0, 0, 48, 0, thread_id, (*(volatile s32 *)0x005A3580), 0);
+
+    SleepThread();
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A4F08, size 0x2C */
+void FUN_001A4F08(s32 base, s32 src)
+{
+    volatile s32 *out = (volatile s32 *)(u32)(base + 0x40);
+    const volatile u16 *in16 = (const volatile u16 *)(u32)src;
+
+    out[0x196] = (*(volatile s32 *)(u32)src);
+    ((volatile u16 *)out)[0x32E] = in16[2];
+    ((volatile u16 *)out)[0x32F] = in16[3];
+    out[0x19A] = (*(volatile s32 *)(u32)(src + 8));
+    out[0x19B] = (*(volatile s32 *)(u32)(src + 12));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A4F38, size 0x2C */
+void FUN_001A4F38(s32 base, s32 dst)
+{
+    volatile s32 *in = (volatile s32 *)(u32)(base + 0x40);
+    volatile u16 *out16 = (volatile u16 *)(u32)dst;
+
+    (*(volatile s32 *)(u32)dst) = in[0x196];
+    out16[2] = ((const volatile u16 *)in)[0x32E];
+    out16[3] = ((const volatile u16 *)in)[0x32F];
+    (*(volatile s32 *)(u32)(dst + 8)) = in[0x19A];
+    (*(volatile s32 *)(u32)(dst + 12)) = in[0x19B];
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
