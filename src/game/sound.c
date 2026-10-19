@@ -342,6 +342,57 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
     return 1;
 }
 
+/* Queue a 308-byte task slot. The producer cursor is 0x008E8604; slots start
+ * at 0x008D3900 with stride 0x134. cmd is stored at slot+4, arg at slot+0x110. */
+static void Task__QueueSlot(s32 arg, s32 cmd)
+{
+    s32 slot = (*(volatile s32 *)0x008E8604);
+    s32 next = slot + 1;
+
+    if (next < 64) {
+        (*(volatile s32 *)0x008E8604) = next;
+        (*(volatile s32 *)(u32)(0x008D3900 + next * 0x134 + 0x04)) = cmd;
+        (*(volatile s32 *)(u32)(0x008D3900 + next * 0x134 + 0x110)) = arg;
+    } else {
+        (*(volatile s32 *)0x008D8604) = 0;
+    }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177650, size 0x60 */
+void FUN_00177650(s32 arg)
+{
+    Task__QueueSlot(arg, 19);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x001776B0, size 0x60 */
+void FUN_001776B0(s32 arg)
+{
+    Task__QueueSlot(arg, 18);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177710, size 0x60 */
+void FUN_00177710(s32 arg)
+{
+    Task__QueueSlot(arg, 17);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00177770, size 0x60 */
+void FUN_00177770(s32 arg)
+{
+    Task__QueueSlot(arg, 16);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x001777D0, size 0x60 */
+void FUN_001777D0(s32 arg)
+{
+    Task__QueueSlot(arg, 15);
+}
+
 /* STATUS: RECONSTRUCTED (manual MIPS decode)
  * ADDRESS: 0x00176DF0, size 0x58
  * PURPOSE: deferred-callback job handler for vmethod operation 5. */
