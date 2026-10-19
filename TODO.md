@@ -7,6 +7,7 @@ the human-readable mirror.
 
 ## Completed
 
+- [x] Stream accessor/worker-init cluster reconstructed: `FUN_001A31A0`, `FUN_001A31D0`, `FUN_001A31D8`, `FUN_001A32A0`, `FUN_001A32B8`, `FUN_001A3340`
 - [x] `Stream__CloseWait` reconstructed; `Sound__WaitCh0..3` aliases added
 - [x] Stream stage/notify layer reconstructed: `Stream__StageConfig`, `Stream__StageCmd`, `Stream__StageResume`, `Stream__Notify`, `Stream__StageParam`, `Stream__Resume`, `Stream__Control`, `Sound__DeferBgmB`, `Command__Requeue`, `Sound__DeferBgmA`
 - [x] Progress chart restyled as PNG and wired to regenerate on push

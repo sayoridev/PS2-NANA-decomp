@@ -88,6 +88,7 @@ extern void fcn_001A4C98(s32, s32, s32, s32);   /* @0x001A4C98 — subsystem ini
 extern s32  GetThreadId(void);                  /* @0x0010E810 */
 extern void SleepThread(void);                  /* @0x0010E840 */
 extern void fcn_001A2080(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x001A2080 — custom ABI */
+extern void fcn_0010F218(s32, s32);            /* @0x0010F218 — sync primitive init */
 extern s32  fcn_001A0D30(s32, s32, s32);        /* @0x001A0D30 — object factory */
 extern s32  fcn_001A6610(s32, s32, s32, s32);   /* @0x001A6610 — record factory */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
@@ -1384,6 +1385,103 @@ void Stream__CloseWait(s32 handle, int arg1, int arg2)
         (*(volatile s32 *)(u32)(cmd_node + 4)) = cmd_head;
         fcn_0018DEB0(handle, arg1, arg2, cmd_head);
     }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A31A0, size 0x34 */
+s32 FUN_001A31A0(s32 handle)
+{
+    volatile s32 *mirror =
+        (volatile s32 *)(u32)((handle + 0x1080) | 0x20000000u);
+
+    if (((*(volatile s32 *)(u32)((u32)mirror + 0x280)) & 0x04) != 0) {
+        return 2;
+    }
+    return (*(volatile s32 *)(u32)(handle + 0x0F40));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A31D0, size 0x08 */
+s32 FUN_001A31D0(s32 handle)
+{
+    return (*(volatile s32 *)(u32)(handle + 0x0F44));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A31D8, size 0x08 */
+s32 FUN_001A31D8(s32 handle)
+{
+    return (*(volatile s32 *)(u32)(handle + 0x0F48));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A32A0, size 0x18 */
+float FUN_001A32A0(s32 handle)
+{
+    return (*(volatile float *)(u32)(handle + 0x0F50)) * 0.000030517578125f;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A32B8, size 0x88
+ * PURPOSE: initialize a stream worker slot and enter worker sleep. */
+s32 FUN_001A32B8(s32 handle)
+{
+    volatile s32 *slot = (volatile s32 *)0x008E3CC0u;
+    volatile s32 *mirror = (volatile s32 *)((u32)slot | 0x20000000u);
+    s32 thread_id;
+    s32 sema;
+
+    (*(volatile s32 *)0x008E3CC0) =
+        (*(volatile s32 *)(u32)(handle + 0x1044));
+    slot[1] = 1;
+
+    fcn_0010F218((s32)slot, (s32)slot + 0xBF);
+    thread_id = GetThreadId();
+
+    sema = (*(volatile s32 *)0x005A82E8);
+    fcn_001A2080(sema,
+                 (s32)slot,
+                 0,
+                 192,
+                 60,
+                 thread_id,
+                 0,
+                 0);
+
+    SleepThread();
+    return (*(volatile s32 *)(u32)((u32)mirror + 0x08));
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
+ * ADDRESS: 0x001A3340, size 0xA4
+ * PURPOSE: initialize a paired stream worker slot and copy its list link. */
+void FUN_001A3340(s32 handle, s32 source)
+{
+    volatile s32 *slot = (volatile s32 *)0x008E3CC0u;
+    volatile s32 *mirror = (volatile s32 *)((u32)slot | 0x20000000u);
+    s32 thread_id;
+    s32 sema;
+
+    slot[0] = (*(volatile s32 *)(u32)(handle + 0x1044));
+    slot[1] = 3;
+    slot[2] = (*(volatile s32 *)(u32)(source + 0x08));
+
+    fcn_0010F218((s32)slot, (s32)slot + 0xBF);
+    thread_id = GetThreadId();
+
+    sema = (*(volatile s32 *)0x005A82E8);
+    fcn_001A2080(sema,
+                 (s32)slot,
+                 0,
+                 192,
+                 60,
+                 thread_id,
+                 0,
+                 0);
+
+    SleepThread();
+    (*(volatile s32 *)(u32)(source + 0x0C)) =
+        (*(volatile s32 *)(u32)((u32)mirror + 0x0C));
 }
 
 /* STATUS: RECONSTRUCTED

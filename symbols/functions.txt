@@ -202,6 +202,7 @@
 0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
 0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
 0x0017ccf0 0x1d8 RECONSTRUCTED fcn_0017CCF0 # src/game/sound.c — scheduler subsystem context init
+0x0018f600 0xf4 RECONSTRUCTED Stream__CloseWait # src/game/sound.c — close stream channel
 0x0019f788 0x70 RECONSTRUCTED fcn_0019F788 # src/game/sound.c — conditional subsystem init
 0x001a39e8 0x6c RECONSTRUCTED fcn_001A39E8 # src/game/sound.c — conditional subsystem fallback/teardown
 0x00192d50 0x7c RECONSTRUCTED fcn_00192D50 # src/game/sound.c — register fallback job classes
@@ -335,7 +336,11 @@
 0x00177550 0xf8 RECONSTRUCTED FUN_00177550 # src/game/sound.c — intrusive 16-byte allocator
 0x00177650 0x60 RECONSTRUCTED FUN_00177650 # src/game/sound.c — queue task cmd 19
 0x001776b0 0x60 RECONSTRUCTED FUN_001776B0 # src/game/sound.c — queue task cmd 18
+0x001776b0 0x60 RECONSTRUCTED Sound__WaitCh1 # src/game/sound.c — alias FUN_001776B0
+0x001776b0 0x60 RECONSTRUCTED Sound__WaitCh3 # src/game/sound.c — ch3 alias FUN_001776B0
 0x00177710 0x60 RECONSTRUCTED FUN_00177710 # src/game/sound.c — queue task cmd 17
+0x00177710 0x60 RECONSTRUCTED Sound__WaitCh0 # src/game/sound.c — alias FUN_00177710
+0x00177710 0x60 RECONSTRUCTED Sound__WaitCh2 # src/game/sound.c — ch2 alias FUN_00177710
 0x00177770 0x60 RECONSTRUCTED FUN_00177770 # src/game/sound.c — queue task cmd 16
 0x001777d0 0x60 RECONSTRUCTED FUN_001777D0 # src/game/sound.c — queue task cmd 15
 0x001f5e58 0 hypothesis g_BgmDescriptorTable     # 0xC-byte entries {file?, size?, flags?}
@@ -391,6 +396,12 @@
 0x001a7ba0 0x30 RECONSTRUCTED Stream__StageParam # src/game/sound.c — stage stream param float
 0x001a3060 0x20 RECONSTRUCTED Stream__Resume # src/game/sound.c — wrapper stage resume
 0x001a3180 0x20 RECONSTRUCTED Stream__Control # src/game/sound.c — wrapper stream notify
+0x001a31a0 0x34 RECONSTRUCTED FUN_001A31A0 # src/game/sound.c — stream status accessor
+0x001a31d0 0x08 RECONSTRUCTED FUN_001A31D0 # src/game/sound.c — stream field getter +0xF44
+0x001a31d8 0x08 RECONSTRUCTED FUN_001A31D8 # src/game/sound.c — stream field getter +0xF48
+0x001a32a0 0x18 RECONSTRUCTED FUN_001A32A0 # src/game/sound.c — stream scaled float getter
+0x001a32b8 0x88 RECONSTRUCTED FUN_001A32B8 # src/game/sound.c — stream worker init
+0x001a3340 0xa4 RECONSTRUCTED FUN_001A3340 # src/game/sound.c — paired stream worker init
 0x001a7b58 0x18 RECONSTRUCTED Stream__StageCmd # src/game/sound.c — stage stream command env
 0x001a7b88 0x18 RECONSTRUCTED Stream__Notify # src/game/sound.c — mark stream slot notify
 0x0012ca60 0 RECONSTRUCTED String__Copy         # (dst, src)
