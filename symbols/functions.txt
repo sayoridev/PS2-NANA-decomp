@@ -266,6 +266,8 @@
 # Scheduler job machine + task VM (2026-10-15)
 0x00177ef0 0x10 RECONSTRUCTED Job__Poll # src/game/sound.c — countdown != 0 means busy
 0x00188910 0x188 RECONSTRUCTED Job__Create # src/game/sound.c — find/reuse deferred-job slot
+0x00188a98 0x138 RECONSTRUCTED fcn_00188A98 # src/game/sound.c — resolve job class from descriptor
+0x00189830 0x08 RECONSTRUCTED fcn_00189830 # src/game/sound.c — deferred-job manager accessor
 0x00177ed0 0x20 RECONSTRUCTED Schedule__Kick # src/game/sound.c — set countdown, clear flag
 0x00177eb0 0x10 RECONSTRUCTED Schedule__OnJobDone # src/game/sound.c — job completion flag
 0x007d1fc0 0 hypothesis g_CurrentJob           # vtable @ obj+0x50: +0x2c/+0x30/+0x38/+0x3c vmethods

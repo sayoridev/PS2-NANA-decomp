@@ -11,6 +11,8 @@
 
 ## Completed
 
+- [x] `fcn_00188A98` reconstructed in `src/game/sound.c`
+- [x] `fcn_00189830` reconstructed in `src/game/sound.c`
 - [x] `Job__Create` reconstructed in `src/game/sound.c`
 - [x] `Schedule__Init` reconstructed in `src/game/sound.c`
 - [x] Scheduler primitives reconstructed: `Job__ForceFlag`, `Schedule__Kick`, `Job__Poll`

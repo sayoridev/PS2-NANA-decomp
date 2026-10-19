@@ -68,10 +68,9 @@ extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 
 /* ---- job executor (type 0x11) ---- */
 extern void Job__Handler11(s32, s32, s32, s32); /* @0x00176DF0: op5 fires cb */
-extern s32  fcn_00188A98(s32);                  /* @0x00188A98 — resolve job class from descriptor */
-extern s32  fcn_00189830(void);                 /* @0x00189830 — deferred-job manager accessor */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
+extern void fcn_0012D018(s32, s32, s32);       /* @0x0012D018 — prefix copy helper */
 extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_0017CCF0(void);                 /* @0x0017CCF0 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
@@ -343,6 +342,75 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
         Task__QueuePending(p1, p2, p3, p4, p5, cb, cbArg);
     }
     return 1;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00188A98, size 0x138
+ * PURPOSE: resolve a job descriptor prefix ("name:...") to a registered job
+ *          class. Returns the fallback class when no prefix match exists.
+ *
+ * Opaque structures:
+ *   registration manager @0x008D91B8: strlen @+0xF4, compare @+0xF0
+ *   job-class list head   @0x008DD298
+ *   class node: next @+0x00, name @+0x0C
+ */
+s32 fcn_00188A98(s32 desc)
+{
+    char prefix[256];
+    s32 manager = 0x008DD298;
+    s32 length;
+    s32 node;
+    s32 i;
+
+    if ((*(volatile s32 *)(u32)(manager + 0x08)) == 0) {
+        s32 register_cb = (*(volatile s32 *)(u32)(manager + 0x14));
+
+        if (register_cb != 0) {
+            ((void (*)(s32))(u32)register_cb)(6);
+        }
+        return 0;
+    }
+
+    length = ((s32 (*)(void))
+              (*(volatile s32 *)0x008D91B8 + 0xF4))();
+    if (length == 0) {
+        return (*(volatile s32 *)0x005A3494);
+    }
+
+    for (i = 0; i < length; i++) {
+        if ((*(volatile char *)(u32)(desc + i)) == ':') {
+            s32 prefix_len = i + 1;
+            s32 cmp_result;
+
+            fcn_0012D018((s32)prefix, desc, prefix_len);
+            prefix[prefix_len] = '\0';
+
+            node = (*(volatile s32 *)0x008DD298);
+            while (node != 0) {
+                s32 (*compare)(s32, s32);
+
+                compare = *(s32 (**)(s32, s32))
+                    (u32)((*(volatile s32 *)0x008D91B8) + 0xF0);
+                cmp_result = compare((s32)prefix,
+                                     (*(volatile s32 *)(u32)(node + 0x0C)));
+                if (cmp_result == 0) {
+                    return node;
+                }
+                node = (*(volatile s32 *)(u32)node);
+            }
+            return 0;
+        }
+    }
+
+    return (*(volatile s32 *)0x005A3494);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode)
+ * ADDRESS: 0x00189830, size 0x08
+ * PURPOSE: return the deferred-job manager singleton. */
+s32 fcn_00189830(void)
+{
+    return 0x008DD298;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode)
