@@ -1,4 +1,3 @@
-functions.txt
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
@@ -325,6 +324,8 @@ functions.txt
 0x00177960 0 hypothesis  Task__QueuePending      # append to pending list
 0x00177ec0 0x10 RECONSTRUCTED Job__ForceFlag # src/game/sound.c — completion flag
 0x00176df0 0x58 RECONSTRUCTED Job__Handler11 # src/game/sound.c — op5 deferred callback
+0x00112170 0x30 RECONSTRUCTED fcn_00112170 # src/game/sound.c — RPC pool expansion helper
+0x001121a0 0x4c RECONSTRUCTED fcn_001121A0 # src/game/sound.c — RPC indexed slot allocator
 0x00112868 0x200 RECONSTRUCTED Rpc__Call # src/game/sound.c — allocate/send RPC request
 0x00112a68 0x3c RECONSTRUCTED Rpc__IsPending # src/game/sound.c — pending predicate
 0x00112aa8 0x90 RECONSTRUCTED FUN_00112AA8 # src/game/sound.c — global RPC list append

@@ -63,7 +63,8 @@ extern void fcn_0010E930(s32);                  /* @0x0010E930 — DeleteSema */
 extern void fcn_0010E960(s32);                  /* @0x0010E960 — WaitSema */
 extern void fcn_001189E0(void);                 /* @0x001189E0 — RPC sync enter */
 extern void fcn_00118A30(void);                 /* @0x00118A30 — RPC sync exit */
-extern s32  fcn_001121A0(s32);                  /* @0x001121A0 — RPC request alloc */
+extern s32  fcn_00112170(s32);                  /* @0x00112170 — RPC pool expansion helper */
+extern s32  fcn_001121A0(s32, s32);             /* @0x001121A0 — RPC indexed slot allocator */
 extern s32  fcn_00112170(s32);                  /* @0x00112170 — RPC request dequeue */
 extern s32  fcn_0010ECE0(s32, s32);             /* @0x0010ECE0 — sceSifSetDma */
 extern void fcn_00112150(s32);                  /* @0x00112150 — RPC request free */
@@ -831,6 +832,39 @@ s32 FUN_00112CA8(s32 req)
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112170, size 0x30
+ * PURPOSE: expand the RPC request pool and return the first slot.
+ *
+ * The original contains a defensive trap path when pool+0x18 is zero;
+ * no portable C trap is emitted here.
+ */
+s32 fcn_00112170(s32 pool)
+{
+    volatile s32 *ctx = (volatile s32 *)(u32)pool;
+    s32 guard = ctx[6];
+    s32 slot_base = ctx[5];
+    s32 index = 0;
+
+    (void)guard;
+    ctx[9] = index + 1;
+    return slot_base + (index << 6);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x001121A0, size 0x4C
+ * PURPOSE: return the RPC slot for an indexed request, expanding the pool
+ *          when the index is outside the current capacity. */
+s32 fcn_001121A0(s32 pool, s32 index)
+{
+    volatile s32 *ctx = (volatile s32 *)(u32)pool;
+
+    if (index < ctx[8]) {
+        return ctx[7] + (index << 6);
+    }
+    return fcn_00112170(pool);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
  * ADDRESS: 0x00112D90, size 0x1C8
  * PURPOSE: complete an RPC request: invoke its callback, align payload
  *          buffers, queue a follow-up request and send it through either the
@@ -863,7 +897,8 @@ s32 FUN_00112D90(s32 request)
 
     fcn_001189E0();
     if ((req->f[13] & 0x04) != 0) {
-        next = (Rpc__Request *)(u32)fcn_001121A0(0x005A6580);
+        next = (Rpc__Request *)(u32)fcn_001121A0(0x005A6580,
+                                                      req->f[8]);
     } else {
         next = (Rpc__Request *)(u32)fcn_00112170(0x005A6580);
     }
