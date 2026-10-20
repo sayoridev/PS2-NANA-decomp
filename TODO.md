@@ -12,9 +12,9 @@ phase: 3
 phase_name: Decompilation foundation
 estimated_total_functions: 2348
 identified: 190
-clean_reconstructed: 119
+clean_reconstructed: 121
 binary_matched: 0
-remaining_estimate: 2229
+remaining_estimate: 2227
 ```
 
 The function count is still an estimate until the Ghidra boundary export
@@ -45,7 +45,8 @@ custom-register ABI, allocator and memory-loop idioms
 
 - [x] crt0 BSS range fixed to `0x001A7900..0x005A3680`
 - [x] `Game__Main` reconstructed @ `0x0013B930`
-- [x] `Game__Init` reconstructed @ `0x00146350`
+- [x] `Game__Init` reconstructed @ `0x00141D90`
+(correction: `0x00146350` was a stale label — needs reclassification)
 - [x] `Mode__GetState` reconstructed
 - [x] `Mode__GetStatus` reconstructed
 - [x] `State__Enable` reconstructed
@@ -125,6 +126,10 @@ custom-register ABI, allocator and memory-loop idioms
 - [x] RPC allocator/dequeue helpers reconstructed:
 `fcn_001121A0`, `fcn_00112170`
 - [x] Dispatcher slot-index call fixed to pass `req->f[8]` explicitly
+- [x] RPC retry wrapper reconstructed @ `0x00113110`
+(`FUN_00113110` — bounded retry around `Rpc__Call`, custom ABI 10 args)
+- [x] RPC slot-table lookup reconstructed @ `0x00113200`
+(`FUN_00113200` — index-to-slot under global semaphore)
 
 ### Custom ABI / format migration
 
@@ -145,7 +150,7 @@ custom-register ABI, allocator and memory-loop idioms
 - [x] Scheduler dependency block reconstructed
 - [x] ABI-specific stubs/compiler-extension layer added
 - [ ] Verify custom ABI layer with the real ps2dev toolchain
-- [ ] Reconstruct RPC worker main loop
+- [ ] Reconstruct RPC request content dispatcher @ `0x00113270` (PARTIAL)
 - [ ] Classify/reconstruct remaining `Schedule__Init` subsystem helpers
 
 ## Next — technical priorities
@@ -159,12 +164,18 @@ custom-register ABI, allocator and memory-loop idioms
 - [ ] After verification, update codegen notes with the exact compiler
 behavior and remove “target verification pending” warnings.
 
-### 2. RPC worker main loop
+### 2. RPC request content dispatcher
 
-- [ ] Reconstruct the large RPC worker function @ `0x00113110`.
+- [ ] Complete `FUN_00113270` (currently PARTIAL: head/tail decoded).
+
+Head/tail facts already recovered: per-request 1088-byte records at
+`0x005A7280`, uncached alias via `0x20000000`, 25-case jump table indexed
+by `cmd - 2`, 128-bit LQ/SQ copy loops, negative-slot release scan, and a
+`SignalSema` exit path.
+
 - [ ] Map its interaction with:
 
-- `Rpc__Call`
+- `Rpc__Call` / `FUN_00113110`
 - RPC queue helpers
 - RPC semaphore helpers
 - stream worker callbacks
@@ -227,7 +238,7 @@ file set, so this remains blocked until a fuller local dump is inspected.
 
 Phase 3 can be considered complete when:
 
-- [ ] RPC worker main loop is reconstructed.
+- [ ] RPC request content dispatcher @ `0x00113270` is reconstructed.
 - [ ] Remaining scheduler subsystem init helpers are classified or
 reconstructed.
 - [ ] Custom ABI layer is verified with ps2dev.
@@ -238,4 +249,5 @@ reconstructed.
 ## Suggested next commit
 
 - `abi: verify custom t-register call layer` after ps2dev smoke test, or
-- `decomp: reconstruct rpc worker main` if ABI verification is deferred.
+- `decomp: reconstruct rpc request dispatcher` (@ `0x00113270`) if ABI
+verification is deferred.
