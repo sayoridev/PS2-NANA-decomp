@@ -25,13 +25,13 @@ SYMBOLS = os.path.join(REPO, "symbols", "functions.txt")
 # module key -> (title, base_vaddr or None for ELF-embedded vaddrs)
 MODULES = {
     "functions_main":   ("SLPM_659.14 (main)", None),
-    "functions_clothe2R": ("OVL clothe2R", 0x00B7F800),
-    "functions_endingR":  ("OVL endingR",  0x00B7F800),
-    "functions_jobfnd2R": ("OVL jobfnd2R", 0x00B7F800),
-    "functions_myroomR":  ("OVL myroomR",  0x00B7F800),
-    "functions_shop2R":   ("OVL shop2R",   0x00B7F800),
-    "functions_statusR":  ("OVL statusR",  0x00B7F800),
-    "functions_workingR": ("OVL workingR", 0x00B7F800),
+    "functions_CLOTHE2R": ("OVL clothe2R", 0x00B7F800),
+    "functions_ENDINGR":  ("OVL endingR",  0x00B7F800),
+    "functions_JOBFND2R": ("OVL jobfnd2R", 0x00B7F800),
+    "functions_MYROOMR":  ("OVL myroomR",  0x00B7F800),
+    "functions_SHOP2R":   ("OVL shop2R",   0x00B7F800),
+    "functions_STATUSR":  ("OVL statusR",  0x00B7F800),
+    "functions_WORKINGR": ("OVL workingR", 0x00B7F800),
 }
 
 STATUS_COLOR = {
@@ -198,8 +198,15 @@ def main():
     for key in MODULES:
         path = os.path.join(fdir, key + ".json")
         if not os.path.exists(path):
-            print("skip (missing):", path)
-            continue
+            alt = None
+            for cand in os.listdir(fdir):
+                if cand.lower() == (key + ".json").lower():
+                    alt = os.path.join(fdir, cand)
+                    break
+            if alt is None:
+                print("skip (missing):", path)
+                continue
+            path = alt
         rows = load_module(path, MODULES[key][1])
         for r in rows:
             st = statuses.get(r["vaddr"], ("unidentified", r["name"], ""))
