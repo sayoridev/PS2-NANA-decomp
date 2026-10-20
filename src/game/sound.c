@@ -798,6 +798,58 @@ s32 Rpc__Call(Rpc__CallSlot *out,
         return 0;
     }
 }
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00113110, size 0xec
+ * PURPOSE: RPC call with bounded retry. Repeats Rpc__Call while it fails
+ *          and the caller permits retrying; backs off with fixed ~1 ms
+ *          waits between attempts.
+ *
+ * Custom ABI entry: args 3..8 arrive in a2/a3/t0/t1/t2/t3 exactly like
+ * Rpc__Call; arg 9 (Rpc__Call stack payload) and arg 10 (retry flag) are
+ * caller stack args fetched at 0xc0/0xc8($sp).
+ *
+ * Returns 0 when the call eventually succeeds, 1 if the last attempt still
+ * failed. Note: returns the sign bit of the last Rpc__Call result, not the
+ * result itself.
+ *
+ * OPEN: the wait call fcn_0010f998 receives wait_scale*1000 via mult into
+ * HI/LO (delay slot) with no explicit mflo; presumed DelayThread-style
+ * usec sleep. Confirm against 0x0010f998 body before VERIFIED.
+ *
+ * OPEN: the wait-scale doubling fires only when the scale is >= 127, which
+ * the starting value 1 never reaches — the backoff is effectively flat.
+ * Kept verbatim to preserve behavior.
+ */
+s32 FUN_00113110(Rpc__CallSlot *out,
+                 s32 fn,
+                 s32 flags,
+                 s32 p3,
+                 s32 t0_arg,
+                 s32 t1_arg,
+                 s32 t2_arg,
+                 s32 t3_arg,
+                 s32 stack_arg,
+                 s32 retry)
+{
+    s32 tries = 0;
+    s32 wait_scale = 1;
+    s32 failed;
+
+    do {
+        failed = Rpc__Call(out, fn, flags, p3, t0_arg, t1_arg, t2_arg,
+                           t3_arg, stack_arg) < 0;
+        if (!failed || retry) {
+            break;
+        }
+        fcn_0010f998(wait_scale * 1000);
+        if (wait_scale >= 127) {
+            wait_scale <<= 1;
+        }
+        tries++;
+    } while (tries < 101);
+
+    return failed;
+}
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
  * ADDRESS: 0x00112A68, size 0x3C */
