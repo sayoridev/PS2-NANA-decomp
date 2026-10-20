@@ -1,41 +1,51 @@
 # TODO — PS2-NANA-decomp
 
-*Last updated: 2026-10-19 (Phase 3 in progress)*
+*Last updated: 2026-10-20 (Phase 3 in progress)*
 
-Milestones: [progress.yaml](progress.yaml) is the source of truth; this file is
-the human-readable mirror.
+`progress.yaml` is the machine-readable source of truth. This file is the
+human-readable working plan.
+
+## Current snapshot
+
+```yaml
+phase: 3
+phase_name: Decompilation foundation
+estimated_total_functions: 2348
+identified: 190
+clean_reconstructed: 119
+binary_matched: 0
+remaining_estimate: 2229
+```
+
+The function count is still an estimate until the Ghidra boundary export
+replaces the rizin-based inventory.
 
 ## Completed
 
-- [x] Custom ABI support added: `src/common/ee_custom_abi.h`, `src/game/scheduler_abi.S`, symbols TSV v2
-- [x] Scheduler dependency block reconstructed: `fcn_00177320`, `FUN_001773A0`, `FUN_001773D0`, `Task__QueuePending`
-- [x] RPC allocator/dequeue helpers reconstructed: `fcn_001121A0`, `fcn_00112170`; dispatcher slot-index call fixed
-- [x] `FUN_00112D90` reconstructed (RPC completion dispatcher)
-- [x] RPC helper cluster reconstructed: `FUN_00112D38`, `FUN_00112F58`, `FUN_00112F98`, `FUN_00113008`, `FUN_00113088`
-- [x] RPC request cluster reconstructed: `Rpc__Call`, `Rpc__IsPending`, `FUN_00112AA8`, `FUN_00112B40`, `FUN_00112C10`, `FUN_00112CA8`
-- [x] Stream root open/close cluster reconstructed: `Stream__Open`, `FUN_001A2E70`, `FUN_001A2EE0`, `FUN_001A2F00`
-- [x] Stream accessor/worker-init cluster reconstructed: `FUN_001A31A0`, `FUN_001A31D0`, `FUN_001A31D8`, `FUN_001A32A0`, `FUN_001A32B8`, `FUN_001A3340`
-- [x] `Stream__CloseWait` reconstructed; `Sound__WaitCh0..3` aliases added
-- [x] Stream stage/notify layer reconstructed: `Stream__StageConfig`, `Stream__StageCmd`, `Stream__StageResume`, `Stream__Notify`, `Stream__StageParam`, `Stream__Resume`, `Stream__Control`, `Sound__DeferBgmB`, `Command__Requeue`, `Sound__DeferBgmA`
-- [x] Progress chart restyled as PNG and wired to regenerate on push
-- [x] Subsystem worker init reconstructed: `fcn_001A4EB8`, `FUN_001A4F08`, `FUN_001A4F38`
-- [x] Conditional subsystem init/fallback reconstructed: `fcn_0019F788`, `fcn_001A39E8`
-- [x] `fcn_00192D50` reconstructed (fallback job class registration)
-- [x] Subsystem handle accessors reconstructed: `fcn_0018A9E0`, `FUN_0018A9F0`, `FUN_0018A9F8`
-- [x] `fcn_0017CCF0` reconstructed (scheduler subsystem context init)
-- [x] Dump inspection and personal-dump policy (never commit the dump)
-- [x] ELF analysis: entry, sections, `.reginfo`, compiler comment
-- [x] First-pass function inventory with rizin (`aaa` + `afl`)
-- [x] `.nkp` / `.rws` signatures identified
+### Documentation / repository hygiene
+
+- [x] Dump inspection and personal-dump policy established
+- [x] ELF analysis: entry point, sections, `.reginfo`, compiler comment
 - [x] MWo3 overlay container documented
-- [x] Documented memory layout and Game Code layout
-- [x] Identified crt0 chain: `ResetEE → bootstrap → _start → main`
-- [x] Identified `main` @ `0x0013B8B0`
-- [x] Identified main-loop address region
+- [x] `.nkp` / `.rws` signatures identified
+- [x] Memory layout and Game Code layout documented
+- [x] crt0 chain identified: `ResetEE → bootstrap → _start → main`
+- [x] `main` identified @ `0x0013B8B0`
+- [x] Codegen catalog extended with verified branch-likely, delay-slot,
+custom-register ABI, allocator and memory-loop idioms
+- [x] Initial syscall wrapper map added in `src/common/ps2_syscalls.h`
+- [x] Raw-file cleanup completed; all five tracked `_raw.c` files removed
+- [x] Progress chart generator implemented and documented
+- [x] Progress chart restyled as PNG and wired to regenerate on push
+- [x] README refreshed; progress snapshot now image-only
+- [x] `symbols/functions.txt` converted to TSV v2
+- [x] `symbols/README.md` updated for TSV format
+
+### Core game / startup
+
+- [x] crt0 BSS range fixed to `0x001A7900..0x005A3680`
 - [x] `Game__Main` reconstructed @ `0x0013B930`
 - [x] `Game__Init` reconstructed @ `0x00146350`
-- [x] First overlay (JOBFND2R) parsed and documented
-- [x] Boot-time handler installer identified @ `0x00101148`
 - [x] `Mode__GetState` reconstructed
 - [x] `Mode__GetStatus` reconstructed
 - [x] `State__Enable` reconstructed
@@ -44,64 +54,188 @@ the human-readable mirror.
 - [x] `Scene__Update` reconstructed @ `0x00146040`
 - [x] `AssetOverlay__Registry` reconstructed @ `0x001446E0`
 - [x] Pad input family reconstructed (11 functions)
+- [x] First overlay (JOBFND2R) parsed and documented
+- [x] Boot-time handler installer identified @ `0x00101148`
+
+### Sound / scheduler core
+
 - [x] `Sound__ProcessCommand` reconstructed
-- [x] `Schedule__OnJobDone` reconstructed @ `0x00177EB0`
-- [x] Scheduler primitives reconstructed: `Job__ForceFlag`, `Schedule__Kick`, `Job__Poll`
-- [x] `Schedule__Init` reconstructed @ `0x00177FD0`
-- [x] `Schedule__WalkSlots` reconstructed @ `0x00177140`
-- [x] Scheduler symbols renamed per Ghidra (`Schedule__Update`, `Schedule__FrameTick`, `Schedule__TickA`, `Schedule__TickB`, `Schedule__WalkSlots`)
+- [x] Scheduler symbols renamed per Ghidra:
+`Schedule__Update`, `Schedule__FrameTick`, `Schedule__TickA`,
+`Schedule__TickB`, `Schedule__WalkSlots`
 - [x] Duplicate `src/game/schedule_update.c` removed
-- [x] `Job__Create` reconstructed @ `0x00188910`
-- [x] `fcn_00189830` reconstructed (deferred-job manager accessor)
-- [x] `fcn_00188A98` reconstructed (job class resolver)
+- [x] `Schedule__Update` reconstructed @ `0x00177F30`
+- [x] `Schedule__FrameTick` reconstructed @ `0x00177F00`
+- [x] `Schedule__WalkSlots` reconstructed @ `0x00177140`
+- [x] `Schedule__Init` reconstructed @ `0x00177FD0`
+- [x] `Schedule__OnJobDone` reconstructed @ `0x00177EB0`
+- [x] Scheduler primitives reconstructed:
+`Job__ForceFlag`, `Schedule__Kick`, `Job__Poll`
 - [x] `Job__Handler11` reconstructed @ `0x00176DF0`
-- [x] Task queue wrappers reconstructed: `FUN_00177650`, `FUN_001776B0`, `FUN_00177710`, `FUN_00177770`, `FUN_001777D0`, `FUN_00177830`, `FUN_00177890`, `FUN_00177900`
-- [x] Scheduler intrusive allocator reconstructed: `FUN_00177550`, `FUN_00177400`, `FUN_00177480`, `FUN_001774D0`
-- [x] Memory helpers reconstructed: `fcn_00129B30` (`memmove`), `fcn_00129CE8` (`memset`)
-- [x] `fcn_0012D018` reconstructed (`strncpy` semantics)
-- [x] `fcn_0012CA60` reconstructed (`strcpy` semantics)
-- [x] Raw-file cleanup completed; all five tracked `_raw.c` references removed after clean replacements were verified
-- [x] Progress chart generator implemented and documented (`tools/progress_chart.py`)
-- [x] Codegen catalog extended with verified branch-likely, custom-register ABI, delay-slot and memory-loop idioms
-- [x] Initial syscall wrapper map added in `src/common/ps2_syscalls.h`
+- [x] `Job__Create` reconstructed @ `0x00188910`
+- [x] `fcn_00188A98` reconstructed — job class resolver
+- [x] `fcn_00189830` reconstructed — deferred-job manager accessor
+- [x] `fcn_00192D50` reconstructed — fallback job class registration
+- [x] Scheduler dependency block reconstructed:
+`fcn_00177320`, `FUN_001773A0`, `FUN_001773D0`, `Task__QueuePending`
+
+### Scheduler allocator / memory helpers
+
+- [x] Scheduler intrusive allocator reconstructed:
+`FUN_00177550`, `FUN_00177400`, `FUN_00177480`, `FUN_001774D0`
+- [x] Memory helpers reconstructed:
+`fcn_00129B30` (`memmove`), `fcn_00129CE8` (`memset`),
+`fcn_0012D018` (`strncpy`), `fcn_0012CA60` (`strcpy`)
+
+### Task queue
+
+- [x] Task queue wrappers reconstructed:
+`FUN_00177650`, `FUN_001776B0`, `FUN_00177710`, `FUN_00177770`,
+`FUN_001777D0`, `FUN_00177830`, `FUN_00177890`, `FUN_00177900`
+- [x] `Command__Requeue` reconstructed
+- [x] `Sound__DeferBgmA` reconstructed
+- [x] `Sound__DeferBgmB` reconstructed
+
+### Stream layer
+
+- [x] Stream stage/notify layer reconstructed:
+`Stream__StageConfig`, `Stream__StageCmd`, `Stream__StageResume`,
+`Stream__Notify`, `Stream__StageParam`, `Stream__Resume`,
+`Stream__Control`
+- [x] `Stream__CloseWait` reconstructed
+- [x] `Sound__WaitCh0..3` aliases added
+- [x] Stream accessor/worker-init cluster reconstructed:
+`FUN_001A31A0`, `FUN_001A31D0`, `FUN_001A31D8`, `FUN_001A32A0`,
+`FUN_001A32B8`, `FUN_001A3340`
+- [x] Stream root open/close cluster reconstructed:
+`Stream__Open`, `FUN_001A2E70`, `FUN_001A2EE0`, `FUN_001A2F00`
+- [x] Subsystem worker init reconstructed:
+`fcn_001A4EB8`, `FUN_001A4F08`, `FUN_001A4F38`
+
+### RPC layer
+
+- [x] RPC request cluster reconstructed:
+`Rpc__Call`, `Rpc__IsPending`, `FUN_00112AA8`, `FUN_00112B40`,
+`FUN_00112C10`, `FUN_00112CA8`
+- [x] RPC helper cluster reconstructed:
+`FUN_00112D38`, `FUN_00112F58`, `FUN_00112F98`, `FUN_00113008`,
+`FUN_00113088`
+- [x] RPC completion dispatcher reconstructed:
+`FUN_00112D90`
+- [x] RPC allocator/dequeue helpers reconstructed:
+`fcn_001121A0`, `fcn_00112170`
+- [x] Dispatcher slot-index call fixed to pass `req->f[8]` explicitly
+
+### Custom ABI / format migration
+
+- [x] Custom ABI support added:
+`src/common/ee_custom_abi.h`
+- [x] Custom-entry stub added:
+`src/game/scheduler_abi.S`
+- [x] `Task__QueuePending` split into assembly entry stub + C helper
+- [x] `symbols/functions.txt` migrated from loose text to TSV v2
 
 ## In progress
 
 - [ ] **Phase 3 — Decompilation foundation**
-- [x] crt0 / startup chain reconstructed
-- [x] BSS range fixed to `0x001A7900..0x005A3680`
 - [x] Main loop reconstructed
 - [x] Sound/scheduler command VM largely reconstructed
-- [x] Complete remaining scheduler dependencies (`fcn_00177320`, `Task__QueuePending`, immediate subsystem init helpers)
-- [x] ABI-specific stubs/compiler-extension layer added for custom `$t0-$t3` calls (target verification pending)
+- [x] RPC request/helper/dispatcher layer reconstructed
+- [x] Stream stage/root/close layer reconstructed
+- [x] Scheduler dependency block reconstructed
+- [x] ABI-specific stubs/compiler-extension layer added
+- [ ] Verify custom ABI layer with the real ps2dev toolchain
+- [ ] Reconstruct RPC worker main loop
+- [ ] Classify/reconstruct remaining `Schedule__Init` subsystem helpers
+
+## Next — technical priorities
+
+### 1. Verify custom ABI before building more on it
+
+- [ ] Compile a minimal ps2dev test that includes `src/common/ee_custom_abi.h`.
+- [ ] Verify `EE_CALL5`, `EE_CALL6` and `EE_CALL8` register constraints.
+- [ ] Verify `src/game/scheduler_abi.S` stack layout for `Task__QueuePending`.
+- [ ] If the inline-asm path fails, replace it with checked assembly stubs.
+- [ ] After verification, update codegen notes with the exact compiler
+behavior and remove “target verification pending” warnings.
+
+### 2. RPC worker main loop
+
+- [ ] Reconstruct the large RPC worker function @ `0x00113110`.
+- [ ] Map its interaction with:
+
+- `Rpc__Call`
+- RPC queue helpers
+- RPC semaphore helpers
+- stream worker callbacks
+
+### 3. Remaining scheduler / subsystem init helpers
+
+- [ ] Classify and reconstruct `fcn_00192AA0`.
+- [ ] Classify and reconstruct `fcn_001A4C98`.
+- [ ] Classify and reconstruct `fcn_001A0D30`.
+- [ ] Classify and reconstruct `fcn_001A6610`.
+- [ ] Continue replacing `extern` declarations in `sound.c` with verified
+function bodies one family at a time.
+
+### 4. Tooling and code hygiene
+
+- [ ] Add `tools/symbols_lint.py` to validate `symbols/functions.txt`:
+
+- five TSV columns,
+- valid hex addresses,
+- known status values,
+- duplicate address/name detection.
+
+- [ ] Fix the pre-existing implicit declaration warning for `Bgm__StopAll`.
+- [ ] Audit remaining direct calls with more than four arguments for custom
+ABI usage.
+- [ ] Add an ABI convention note to `AGENTS.md` once ps2dev verification is
+complete.
 
 ## Pending — blocked by Ghidra/export confirmation
 
-- [ ] Confirm function count and boundaries in Ghidra; replace rizin estimate `2348` with an exported count.
-- [ ] Export/update `symbols/functions.txt` from Ghidra with reliable function sizes.
-- [ ] Verify `Schedule__Update`, `Schedule__WalkSlots`, `Schedule__Init`, `Job__Create` and allocator helpers against full Ghidra decompile; promote to `VERIFIED` only after CFG/call/side-effect checks pass.
-- [ ] Add `functions.csv`, `globals.txt` and `globals.csv` after the Ghidra boundary pass is exported.
+- [ ] Confirm function count and boundaries in Ghidra; replace rizin estimate
+`2348` with an exported count.
+- [ ] Export reliable function sizes into `symbols/functions.txt`.
+- [ ] Verify reconstructed functions against full Ghidra decompiles and
+promote to `VERIFIED` only after CFG/call/side-effect checks pass.
+- [ ] Add `functions.csv`.
+- [ ] Add `globals.txt` and `globals.csv`.
+
+## Pending — blocked by target/runtime verification
+
+- [ ] Build a minimal EE syntax/build test with ps2dev.
+- [ ] Add linker layout matching the original memory map.
+- [ ] Add function-level comparison against original assembly.
+- [ ] Run PCSX2 behavioral checks once a buildable subset exists.
 
 ## Pending — blocked by dump content
 
-- [ ] Locate and document `.nkp` dispatch tables. The current uploaded analysis dump contains no `.nkp` file, only a minimal subset including `BGM_002.RWS`; complete this after a fuller local dump is available.
+- [ ] Locate and document `.nkp` dispatch tables.
+The currently available analysis dump does not include a complete `.nkp`
+file set, so this remains blocked until a fuller local dump is inspected.
 
-## Pending — next analysis targets
+## Non-goals for the current phase
 
-- [ ] Reconstruct ABI-specific scheduler initializer `fcn_00177320` after choosing a safe custom-call strategy.
-- [ ] Reconstruct `Task__QueuePending` after solving its seven-argument `$a0-$a3/$t0-$t2` convention.
-- [ ] Classify `fcn_00192AA0`, `fcn_00192D50`, `fcn_0019F788`, `fcn_001A39E8`, `fcn_00177320`, `fcn_0017CCF0` called by `Schedule__Init`.
-- [ ] Classify `fcn_00177EB0` rename confidence against Ghidra project state (currently `Schedule__OnJobDone` hypothesis supported by flag writer/reader pair).
-- [ ] Continue replacing remaining `extern` declarations in `sound.c` with verified function bodies one module at a time.
+- [ ] No byte-identical GCC matching yet.
+- [ ] No committed ISO/ELF/assets.
+- [ ] No proprietary SDK material.
+- [ ] No speculative names for helpers whose Ghidra/user labels are absent.
 
-## Next recommended actions
+## Phase 3 exit criteria
 
-1. Provide or run Ghidra/rizin disassembly for `fcn_00177320` and `Task__QueuePending` so the custom ABI strategy can be finalized safely.
-2. Import/inspect a fuller local dump containing `.nkp` assets before attempting NKP dispatch-table analysis.
-3. Keep scheduler reconstructions at `RECONSTRUCTED` until the Ghidra decompile comparison is performed.
+Phase 3 can be considered complete when:
 
-## Suggested commit sequence
+- [ ] RPC worker main loop is reconstructed.
+- [ ] Remaining scheduler subsystem init helpers are classified or
+reconstructed.
+- [ ] Custom ABI layer is verified with ps2dev.
+- [ ] `symbols/functions.txt` has reliable boundaries from Ghidra.
+- [ ] No raw Ghidra references remain.
+- [ ] Reconstruction state is consistently tracked in `progress.yaml`.
 
-- `decomp: reconstruct scheduler memory helpers` (previous delivered batch)
-- `todo: complete raw cleanup and scheduler documentation baseline`
-- Then resume normal decomp on ABI-specific scheduler initializers.
+## Suggested next commit
+
+- `abi: verify custom t-register call layer` after ps2dev smoke test, or
+- `decomp: reconstruct rpc worker main` if ABI verification is deferred.
