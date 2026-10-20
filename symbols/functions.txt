@@ -344,6 +344,10 @@
 0x00177900 0x58 RECONSTRUCTED FUN_00177900 # src/game/sound.c — queue task cmd 12
 0x00129b30 0x1b8 RECONSTRUCTED fcn_00129B30 # src/game/sound.c — memmove(dst,src,n)
 0x00129ce8 0xc0 RECONSTRUCTED fcn_00129CE8 # src/game/sound.c — memset(dst,value,n)
+0x00177320 0x80 RECONSTRUCTED fcn_00177320 # src/game/sound.c — scheduler queue init
+0x001773a0 0x30 RECONSTRUCTED FUN_001773A0 # src/game/sound.c — scheduler subsystem init A
+0x001773d0 0x30 RECONSTRUCTED FUN_001773D0 # src/game/sound.c — scheduler subsystem init B
+0x00177960 0x120 RECONSTRUCTED Task__QueuePending # src/game/sound.c — full deferred request enqueue
 0x00177400 0x74 RECONSTRUCTED FUN_00177400 # src/game/sound.c — allocator free/coalesce
 0x00177480 0x4c RECONSTRUCTED FUN_00177480 # src/game/sound.c — allocator zeroed alloc
 0x001774d0 0x7c RECONSTRUCTED FUN_001774D0 # src/game/sound.c — allocator realloc/copy/free

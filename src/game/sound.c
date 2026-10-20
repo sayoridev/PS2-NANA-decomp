@@ -79,8 +79,17 @@ void Sound__WaitCh0(int);
 void Sound__WaitCh1(int);
 void Sound__WaitCh2(s32);
 void Sound__WaitCh3(s32);
+void fcn_00177320(void);
 void Stream__CloseWait(s32, int, int);
 extern void fcn_0018DEB0(s32, s32, s32, s32);
+extern s32  fcn_0018A260(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x0018A260 — custom ABI allocator */
+extern void fcn_00189140(s32);                  /* @0x00189140 — init primitive */
+extern void fcn_00189278(s32);                  /* @0x00189278 — init hook */
+extern void fcn_001893C8(s32);                  /* @0x001893C8 — init hook */
+extern void fcn_001A5338(s32);                  /* @0x001A5338 — subsystem init */
+extern void fcn_001A5258(s32);                  /* @0x001A5258 — subsystem init */
+extern void fcn_001A5208(s32);                  /* @0x001A5208 — subsystem init */
+extern void fcn_001A52A8(s32);                  /* @0x001A52A8 — subsystem init */
 extern void fcn_0018FE98(s32, s32);
 extern s32  fcn_00190CD0(s32);                  /* @0x00190CD0 — object probe */
 extern void fcn_00190C40(s32, s32, s32);        /* @0x00190C40 — object init */
@@ -108,7 +117,6 @@ extern void fcn_0018CDA8(s32);                  /* @0x0018CDA8 — stream root c
 extern s32  fcn_0018CF88(s32, s32, s32, s32, s32); /* @0x0018CF88 — subchannel setup */
 extern s32  fcn_001A0D30(s32, s32, s32);        /* @0x001A0D30 — object factory */
 extern s32  fcn_001A6610(s32, s32, s32, s32);   /* @0x001A6610 — record factory */
-extern void fcn_00177320(void);                 /* @0x00177320 — name pending */
 extern void fcn_00192AA0(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x00192AA0 */
 extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
 extern u32  g_JobState;                         /* @0x007D20D8 */
@@ -545,11 +553,89 @@ void SeBank__StopAll(void)
     g_Sound.seVolume = 0;
 }
 
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00177320, size 0x80
+ * PURPOSE: initialize the scheduler queue context and register its RPC
+ *          worker object.
+ *
+ * fcn_0018A260 uses a custom eight-register ABI; argument order below mirrors
+ * the recovered register sequence rather than a portable stack convention.
+ */
+void fcn_00177320(void)
+{
+    s32 worker;
+
+    fcn_00129CE8(0x007D1FC0, 0, 0x120);
+    fcn_00189140(-1);
+
+    worker = fcn_0018A260(3,
+                          3,
+                          0x007D2100,
+                          0x00000800,
+                          0x00351C00,
+                          0x00351C08,
+                          0,
+                          2);
+
+    fcn_00189278(worker);
+    fcn_001893C8(worker);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x001773A0, size 0x30 */
+void FUN_001773A0(void)
+{
+    fcn_001A5338(0);
+    fcn_001A5258(0);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x001773D0, size 0x30 */
+void FUN_001773D0(void)
+{
+    fcn_001A5208(0);
+    fcn_001A52A8(0);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00177960, size 0x120
+ * PURPOSE: enqueue a full 308-byte deferred-job request.
+ *
+ * Original ABI receives p5/callback/callback-arg in $t0-$t2. Keep this
+ * signature aligned with custom call sites until the ABI layer is finalized.
+ */
+void Task__QueuePending(s32 p1,
+                        s32 p2,
+                        s32 p3,
+                        s32 p4,
+                        s32 p5,
+                        s32 callback,
+                        s32 callback_arg)
+{
+    s32 cursor = (*(volatile s32 *)0x008E8604);
+    s32 next = cursor + 1;
+
+    if (next < 64) {
+        s32 slot = 0x008D3900 + next * 0x134;
+
+        (*(volatile s32 *)0x008E8604) = next;
+        (*(volatile s32 *)(u32)(slot + 0x04)) = 10;
+        fcn_0012CA60(slot + 0x08, p1);
+        (*(volatile s32 *)(u32)(slot + 0x118)) = p2;
+        (*(volatile s32 *)(u32)(slot + 0x11C)) = p3;
+        (*(volatile s32 *)(u32)(slot + 0x120)) = p4;
+        (*(volatile s32 *)(u32)(slot + 0x124)) = p5;
+        (*(volatile s32 *)(u32)(slot + 0x128)) = callback;
+        (*(volatile s32 *)(u32)(slot + 0x12C)) = callback_arg;
+    } else {
+        (*(volatile s32 *)0x008D8604) = 0;
+    }
+}
+
 /* cmd 10 — deferred callback job */
 undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
 {
     extern void JobDesc__Set(s32, s32, s32);        /* @0x00141FA0 */
-    extern void Task__QueuePending(s32,s32,s32,s32,s32,s32,s32); /* @0x00177960 */
     extern s32  g_CurrentJob;                       /* @0x007D1FC0 */
     extern u32  g_JobState;                         /* @0x007D20D8 */
     extern u32  g_JobFrames;                        /* @0x007D20DC */
