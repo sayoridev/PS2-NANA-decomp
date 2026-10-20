@@ -18,7 +18,6 @@ extern void Sound__UpdateEnd(void);             /* @0x00192C08: Rwa__EndUpdate, 
 extern void Job__PollAll(void);                 /* @0x00189468: walk job registry, fire vmethod+0x3C */
 extern void Stream__SendConfig(s32 h, void *cfg0x24); /* @0x001A3080 */
 extern void Stream__SendCmd(s32 h, void *env);  /* @0x001A2AE8 */
-extern s64  Rpc__Call(s32 port, s32 fn, s32, s32, s32, s32, s32, s32); /* @0x00112868 */
 extern void Memory__Memset(void *, s32, s32);   /* @0x00129CE8 */
 extern void Memory__Copy(void *, void *, s32);  /* @0x00129B30 */
 
@@ -56,6 +55,13 @@ extern s32  (*g_JobCb)(s32, s32);   /* @0x007D1FC4                            */
 extern s32  g_JobCbArg;             /* @0x007D1FC8                            */
 
 /* ---- job executor (type 0x11) ---- */
+extern s32  fcn_001120A8(s32);                  /* @0x001120A8 — RPC request allocator */
+extern s32  fcn_00111E30(s32, s32);             /* @0x00111E30 — buffer align helper */
+extern s32  fcn_00111C68(s32, s32, s32, s32, s32, s32); /* @0x00111C68 — RPC send */
+extern s32  fcn_0010E920(s32);                  /* @0x0010E920 — CreateSema */
+extern void fcn_0010E930(s32);                  /* @0x0010E930 — DeleteSema */
+extern void fcn_0010E960(s32);                  /* @0x0010E960 — WaitSema */
+extern void fcn_00112150(s32);                  /* @0x00112150 — RPC request free */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
 void Sound__DeferBgmB(s32, s32);
@@ -562,6 +568,261 @@ undefined4 Job__Start(s32 p1, s32 p2, s32 p3, s32 p4, s32 p5, s32 cb, s32 cbArg)
         Task__QueuePending(p1, p2, p3, p4, p5, cb, cbArg);
     }
     return 1;
+}
+
+/* Opaque RPC request/call layouts. Only observed offsets are named. */
+typedef struct {
+    volatile s32 f[20];
+} Rpc__Request;
+
+typedef struct {
+    volatile s32 f[12];
+} Rpc__CallSlot;
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112868, size 0x200
+ * PURPOSE: allocate and send one RPC request; optionally block on a private
+ *          semaphore for synchronous calls.
+ *
+ * Custom entry mapping recovered from registers:
+ *   a0 = call slot, a1 = function/port, a2 = flags,
+ *   a3/t0/t1/t2/t3 = payload registers, stack arg = call payload.
+ */
+s32 Rpc__Call(Rpc__CallSlot *out,
+              s32 fn,
+              s32 flags,
+              s32 p3,
+              s32 t0_arg,
+              s32 t1_arg,
+              s32 t2_arg,
+              s32 t3_arg,
+              s32 stack_arg)
+{
+    Rpc__Request *req = (Rpc__Request *)(u32)fcn_001120A8(0x005A6580);
+
+    if (req == 0) {
+        return -1;
+    }
+
+    out->f[8] = stack_arg;
+    out->f[1] = req->f[6];
+    out->f[0] = (s32)req;
+    out->f[7] = t3_arg;
+    out->f[6] = (s32)0x005AB270u;
+
+    req->f[8] = fn;
+    req->f[9] = t0_arg;
+    req->f[10] = t1_arg;
+    req->f[11] = t2_arg;
+    req->f[5] = (s32)req;
+    req->f[7] = (s32)out;
+
+    if ((flags & 0x02) == 0) {
+        req->f[13] = out->f[9];
+    }
+
+    if (p3 == t1_arg) {
+        s32 aligned = fcn_00111E30(p3, t2_arg);
+        s32 selected = (aligned == 0) ? t0_arg : t2_arg;
+        (void)selected;
+    } else {
+        if (t0_arg > 0) {
+            fcn_00111E30(p3, t0_arg);
+        }
+        if (t2_arg > 0) {
+            fcn_00111E30(t1_arg, t2_arg);
+        }
+    }
+
+    if ((flags & 0x01) == 0) {
+        s32 send_result;
+
+        if (t3_arg == 0) {
+            req->f[12] = 1;
+        } else {
+            req->f[12] = 0;
+        }
+
+        out->f[2] = -1;
+        send_result = fcn_00111C68(0x8000000Au,
+                                   (s32)req,
+                                   64,
+                                   p3,
+                                   req->f[5],
+                                   t0_arg);
+        if (send_result != 0) {
+            return -1;
+        }
+        fcn_00112150((s32)req);
+        return 0;
+    }
+
+    {
+        s32 sema;
+        s32 send_result;
+        s32 sema_args[6];
+
+        sema_args[1] = 1;
+        sema_args[2] = 0;
+        sema_args[5] = -1448;
+        sema = fcn_0010E920((s32)sema_args);
+
+        if (sema < 0) {
+            out->f[2] = sema;
+            fcn_00112150((s32)req);
+            return 0;
+        }
+
+        req->f[2] = sema;
+        req->f[12] = -3;
+        send_result = fcn_00111C68(0x8000000Au,
+                                   (s32)req,
+                                   64,
+                                   p3,
+                                   req->f[5],
+                                   t0_arg);
+
+        if (send_result != 0) {
+            fcn_0010E930(sema);
+            fcn_00112150((s32)req);
+            return -2;
+        }
+
+        fcn_0010E960(sema);
+        fcn_00112150((s32)req);
+        return 0;
+    }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112A68, size 0x3C */
+s32 Rpc__IsPending(Rpc__CallSlot *call)
+{
+    Rpc__Request *req = (Rpc__Request *)(u32)call->f[0];
+
+    if (req == 0) {
+        return 0;
+    }
+    if (req->f[6] != call->f[1]) {
+        return 0;
+    }
+    if ((req->f[4] & 0x01) != 0) {
+        return 1;
+    }
+    return 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112AA8, size 0x90 */
+void FUN_00112AA8(s32 node, s32 value)
+{
+    volatile s32 *entry = (volatile s32 *)(u32)node;
+    s32 head = (*(volatile s32 *)0x005A65A8);
+
+    entry[0] = value;
+    entry[1] = 0;
+    entry[2] = 0;
+    entry[3] = 0;
+    entry[4] = 0;
+    entry[5] = 0;
+
+    if (head == 0) {
+        (*(volatile s32 *)0x005A65A8) = node;
+        return;
+    }
+
+    while ((*(volatile s32 *)(u32)(head + 0x14)) != 0) {
+        head = (*(volatile s32 *)(u32)(head + 0x14));
+    }
+    (*(volatile s32 *)(u32)(head + 0x14)) = node;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112B40, size 0xCC
+ * PURPOSE: fill an RPC request and append it to owner->8 via +0x38 links. */
+void FUN_00112B40(s32 node,
+                  s32 value,
+                  s32 a2,
+                  s32 a3,
+                  s32 t0_arg,
+                  s32 t1_arg,
+                  s32 owner)
+{
+    volatile s32 *entry = (volatile s32 *)(u32)node;
+    s32 head = (*(volatile s32 *)(u32)(owner + 0x08));
+
+    entry[15] = 0;
+    entry[14] = 0;
+    entry[0] = value;
+    entry[1] = a2;
+    entry[2] = a3;
+    entry[4] = t0_arg;
+    entry[5] = t1_arg;
+    entry[16] = owner;
+
+    if (head == 0) {
+        (*(volatile s32 *)(u32)(owner + 0x08)) = node;
+        return;
+    }
+
+    while ((*(volatile s32 *)(u32)(head + 0x38)) != 0) {
+        head = (*(volatile s32 *)(u32)(head + 0x38));
+    }
+    (*(volatile s32 *)(u32)(head + 0x38)) = node;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112C10, size 0x90
+ * PURPOSE: unlink request from owner queue; returns head when removed from
+ *          front, otherwise the previous node (0 when not found). */
+s32 FUN_00112C10(s32 req, s32 owner)
+{
+    volatile s32 *owner_ctx = (volatile s32 *)(u32)owner;
+    s32 node = owner_ctx[2];
+
+    if (node == req) {
+        owner_ctx[2] = (*(volatile s32 *)(u32)(req + 0x38));
+        return node;
+    }
+
+    while (node != 0) {
+        s32 next = (*(volatile s32 *)(u32)(node + 0x38));
+
+        if (next == req) {
+            (*(volatile s32 *)(u32)(node + 0x38)) =
+                (*(volatile s32 *)(u32)(req + 0x38));
+            return node;
+        }
+        node = next;
+    }
+    return 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112CA8, size 0x8C
+ * PURPOSE: unlink request from global RPC queue; returns head when removed
+ *          from front, otherwise the previous node (0 when not found). */
+s32 FUN_00112CA8(s32 req)
+{
+    volatile s32 *head_slot = (volatile s32 *)0x005A65A8u;
+    s32 node = *head_slot;
+
+    if (node == req) {
+        *head_slot = (*(volatile s32 *)(u32)(req + 0x14));
+        return node;
+    }
+
+    while (node != 0) {
+        s32 next = (*(volatile s32 *)(u32)(node + 0x14));
+
+        if (next == req) {
+            (*(volatile s32 *)(u32)(node + 0x14)) =
+                (*(volatile s32 *)(u32)(req + 0x14));
+            return node;
+        }
+        node = next;
+    }
+    return 0;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-19)
