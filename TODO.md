@@ -12,9 +12,9 @@ phase: 3
 phase_name: Decompilation foundation
 estimated_total_functions: 2348
 identified: 190
-clean_reconstructed: 121
+clean_reconstructed: 122
 binary_matched: 0
-remaining_estimate: 2227
+remaining_estimate: 2226
 ```
 
 The function count is still an estimate until the Ghidra boundary export
@@ -130,6 +130,10 @@ custom-register ABI, allocator and memory-loop idioms
 (`FUN_00113110` — bounded retry around `Rpc__Call`, custom ABI 10 args)
 - [x] RPC slot-table lookup reconstructed @ `0x00113200`
 (`FUN_00113200` — index-to-slot under global semaphore)
+- [x] Media path builder reconstructed @ `0x00141FA0`
+(`FUN_00141FA0` — host0/cdrom0/hfs/dvd prefixes, `;1` suffix,
+separator normalization; NOTE: stale `Config__Parse` comment in
+`symbols/functions.txt` flagged for reclassification)
 
 ### Custom ABI / format migration
 

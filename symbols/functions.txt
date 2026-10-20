@@ -1,3 +1,4 @@
+functions.txt
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format v2: address<TAB>size<TAB>status<TAB>name<TAB>comment
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
@@ -345,6 +346,9 @@
 0x00113088	0x84	RECONSTRUCTED	FUN_00113088	src/game/sound.c — RPC free slot alloc
 0x00113110	0xec	RECONSTRUCTED	FUN_00113110	src/game/sound.c — RPC call with bounded retry around Rpc__Call (custom ABI, 10 args)
 0x00113200	0x6c	RECONSTRUCTED	FUN_00113200	src/game/sound.c — RPC slot-table lookup under global semaphore
+0x0012c788	0	hypothesis	fcn_0012c788	hypothesis: strchr (alignment prologue + scan loop)
+0x0012e7c8	0	hypothesis	fcn_0012e7c8	hypothesis: strlen
+0x00141fa0	0x36c	RECONSTRUCTED	FUN_00141FA0	src/game/path_build.c — media path builder (host0/cdrom0/hfs/dvd), separator normalize
 0x00113270	0x3b0	PARTIAL	FUN_00113270	src/game/sound.c — RPC request content dispatcher (25-case jump table, LQ/SQ 128-bit copies); head+tail decoded
 0x0010e940	0	hypothesis	fcn_0010e940	hypothesis: SignalSema
 0x0010e960	0	hypothesis	fcn_0010e960	hypothesis: WaitSema
