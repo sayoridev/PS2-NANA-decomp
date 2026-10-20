@@ -1,45 +1,49 @@
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
-# Format: address size status name
+# Format v2: address<TAB>size<TAB>status<TAB>name<TAB>comment
+# Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
+# Sizes are 0 until measured/exported from Ghidra.
+
+# PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
 # Sizes are 0 until measured in Ghidra. Evidence: notes/analysis/startup.md,
 # notes/analysis/mainloop.md
 
 # Bootstrap & system interface
-0x00100080 0 RECONSTRUCTED Startup__Entry      # src/system/startup.c
-0x001000f0 0 RECONSTRUCTED Fpu__ClearAll       # src/system/startup.c
-0x00118478 0 hypothesis  System__InstallHandlers
-0x00118398 0 hypothesis  System__AddHandler    # kernel syscall 0x56 wrapper
-0x00111688 0 hypothesis  System__CalcTableEnd
-0x00119098 0 hypothesis  System__Fatal
-0x00118c98 0 hypothesis  System__BootInit1     # 8 subsystem inits; tails to arena init
-0x0011a9d8 0 hypothesis  Memory__ArenaPush     # 0x10-byte slot arena @0x5AB8C8
-0x0011aa58 0 hypothesis  Memory__ArenaIndex    # handles masked & 0x7FFFFFFF
-0x00129ce8 0 hypothesis  Memory__Memset        # (dst, 0, n) — memset-like
-0x00129b30 0 hypothesis  Memory__Memset2       # variant, args (dst, src?, n)
-0x0010eba0 0 hypothesis  System__Syscall64     # syscall 0x64 wrapper; stub table 0x10EBA0+
-0x00127de0 0 hypothesis  System__Exit          # exit-callback lists (ctx+0x148), back to crt0 @0x100218
+0x00100080	0	RECONSTRUCTED	Startup__Entry	src/system/startup.c
+0x001000f0	0	RECONSTRUCTED	Fpu__ClearAll	src/system/startup.c
+0x00118478	0	hypothesis	System__InstallHandlers
+0x00118398	0	hypothesis	System__AddHandler	kernel syscall 0x56 wrapper
+0x00111688	0	hypothesis	System__CalcTableEnd
+0x00119098	0	hypothesis	System__Fatal
+0x00118c98	0	hypothesis	System__BootInit1	8 subsystem inits; tails to arena init
+0x0011a9d8	0	hypothesis	Memory__ArenaPush	0x10-byte slot arena @0x5AB8C8
+0x0011aa58	0	hypothesis	Memory__ArenaIndex	handles masked & 0x7FFFFFFF
+0x00129ce8	0	hypothesis	Memory__Memset	(dst, 0, n) — memset-like
+0x00129b30	0	hypothesis	Memory__Memset2	variant, args (dst, src?, n)
+0x0010eba0	0	hypothesis	System__Syscall64	syscall 0x64 wrapper; stub table 0x10EBA0+
+0x00127de0	0	hypothesis	System__Exit	exit-callback lists (ctx+0x148), back to crt0 @0x100218
 
 # Game core
-0x00141ee0 0 RECONSTRUCTED Game__Main            # src/game/main.c — init then infinite loop
-0x00141f04 0 RECONSTRUCTED Game__MainLoop        # src/game/main.c — 14 verified calls per iteration
+0x00141ee0	0	RECONSTRUCTED	Game__Main	src/game/main.c — init then infinite loop
+0x00141f04	0	RECONSTRUCTED	Game__MainLoop	src/game/main.c — 14 verified calls per iteration
 
 # Main-loop body (classification in notes/analysis/mainloop.md)
-0x0014e8e0 0 RECONSTRUCTED Time__Tick          # src/system/time.c — frame counter @0x71FDE8
-0x0012b968 0 RECONSTRUCTED Random__Next        # src/system/random.c — Knuth LCG, 44 xrefs
-0x00123c18 0 hypothesis  Random__MulStep       # 64x64 signed multiply, low64 result; 9 callers
-0x00142390 0 hypothesis  System__FrameService  # per-frame hook + counters @0x5A3A70-78; calls 0x1314E0
-0x0013bde0 0 hypothesis  Mode__Update          # state machine on struct @0x5B2F00; switch on +0x130
-0x00142510 0 hypothesis  State__UpdatePair      # fcn.0013B960(0,&0x5B3E60) + (1,&0x5B3E50)
-0x001424c0 0 RECONSTRUCTED Mode__GetStatus       # src/game/mode.c — lhu 0x5B3E62
-0x001424b0 0 RECONSTRUCTED Mode__GetState        # src/game/mode.c — lhu 0x5B3E6A, 32 xrefs
-0x0013b310 0 hypothesis  Draw__SetContext2      # ctx accessors 0x1347F0/0x134790, param 2
-0x001425d0 0 RECONSTRUCTED System__InitFrameHook # src/system/framehook.c — installs default hook 0x1A8FE0
-0x00177f30 0xa0 RECONSTRUCTED Schedule__Update # src/game/sound.c — countdown + command dispatch
-0x00142570 0 PARTIAL       System__RunFrameHook  # src/system/framehook.c — gate/flag/callback
-0x00177f00 0x30 RECONSTRUCTED Schedule__FrameTick # src/game/sound.c — counter @0x8DF810++
-0x00146040 0 hypothesis  Scene__Update          # state machine @0x5BB880, jump table @0x1B9E20
-0x00142700 0 PARTIAL       System__DispatchPending # consumes id slot 0x5A2A24; args 0x301E90/0x301EA0
-0x00134d50 0 hypothesis  Display__EndFrame     # struct @0x5B1AD0; fn-ptr @+0; end-of-frame routine
+0x0014e8e0	0	RECONSTRUCTED	Time__Tick	src/system/time.c — frame counter @0x71FDE8
+0x0012b968	0	RECONSTRUCTED	Random__Next	src/system/random.c — Knuth LCG, 44 xrefs
+0x00123c18	0	hypothesis	Random__MulStep	64x64 signed multiply, low64 result; 9 callers
+0x00142390	0	hypothesis	System__FrameService	per-frame hook + counters @0x5A3A70-78; calls 0x1314E0
+0x0013bde0	0	hypothesis	Mode__Update	state machine on struct @0x5B2F00; switch on +0x130
+0x00142510	0	hypothesis	State__UpdatePair	fcn.0013B960(0,&0x5B3E60) + (1,&0x5B3E50)
+0x001424c0	0	RECONSTRUCTED	Mode__GetStatus	src/game/mode.c — lhu 0x5B3E62
+0x001424b0	0	RECONSTRUCTED	Mode__GetState	src/game/mode.c — lhu 0x5B3E6A, 32 xrefs
+0x0013b310	0	hypothesis	Draw__SetContext2	ctx accessors 0x1347F0/0x134790, param 2
+0x001425d0	0	RECONSTRUCTED	System__InitFrameHook	src/system/framehook.c — installs default hook 0x1A8FE0
+0x00177f30	0xa0	RECONSTRUCTED	Schedule__Update	src/game/sound.c — countdown + command dispatch
+0x00142570	0	PARTIAL	System__RunFrameHook	src/system/framehook.c — gate/flag/callback
+0x00177f00	0x30	RECONSTRUCTED	Schedule__FrameTick	src/game/sound.c — counter @0x8DF810++
+0x00146040	0	hypothesis	Scene__Update	state machine @0x5BB880, jump table @0x1B9E20
+0x00142700	0	PARTIAL	System__DispatchPending	consumes id slot 0x5A2A24; args 0x301E90/0x301EA0
+0x00134d50	0	hypothesis	Display__EndFrame	struct @0x5B1AD0; fn-ptr @+0; end-of-frame routine
 
 # Syscall surface
 #   0x3C = heap/stack setup (crt0; returns sp in v0)
@@ -49,30 +53,30 @@
 #   0x64 .. 0x76 = stub table @0x10EBA0-0x10ECDC (central kernel API)
 
 # Data symbols
-0x001C7FD0 0 hypothesis g_SystemContext        # central system struct pointer
-0x0071FDD0 0 hypothesis Time__g_Context        # tick struct; counter +0x18 = 0x71FDE8, cap 0x0CDFD7F0
-0x005A3A70 0 hypothesis g_PerfCounterA         # gp-0x7B00, +1 per frame
-0x005A3A74 0 hypothesis g_PerfCounterB         # gp-0x7AFC, +1 per frame
-0x005A3A78 0 hypothesis g_FrameCallback        # gp-0x7AF8, per-frame callback
-0x005A3A64 0 hypothesis g_FrameHook            # {gate,flag,callback} see framehook.c; default handler 0x1A8FE0
-0x005B3E50 0 hypothesis g_ModeStateB           # 8 x u16, updated via fcn.0013B960(1,...)
-0x005B3E60 0 hypothesis g_ModeStateA           # 8 x u16, getters + copyout in mode.c
-0x005A2A24 0 hypothesis g_PendingCommandId     # gp-0x7F4C, consumed by System__DispatchPending
-0x00B78000 0 hypothesis Stream__g_Context       # 0x760 B; slots 0xA0-0xB4 = -1, flag 0xB78054
-0x0071F8F7 0 hypothesis g_StreamReady           # set to 1 after stream init
-0x0034CCD0 0 hypothesis g_MsgJumpTable          # 13-entry dispatch table (Msg__Dispatch)
-0x0030_0000 0 hypothesis scratch region          # 0x30xxxx-0x31xxxx message/config/string pool
-0x005A3204 0 hypothesis g_DispatchParam        # read by System__DispatchPending
-0x005B1AD0 0 hypothesis g_DisplayContext       # Display__EndFrame struct
-0x005B2F00 0 hypothesis g_GameState            # Mode__Update state machine struct
-0x008D3900 0 hypothesis Schedule__g_Context     # 59 task slots x 0x134, timer @base
-0x008DF810 0 hypothesis Schedule__g_FrameCount  # +1 per frame
-0x005BB880 0 hypothesis g_SceneContext          # Scene__Update state machine
-0x001C4990 0 hypothesis g_SystemInitDone      # EnsureInit guard flag
-0x001C6124 0 hypothesis g_SubsystemReady      # set by System__SubsystemInit
-0x001C5078 0 hypothesis g_SystemHandlerTable   # header {13,18,8}; {id,handler} pairs
-0x005A3A80 0 hypothesis g_BootParamPtr         # u32 read at crt0
-0x005AB8C8 0 hypothesis g_ArenaSlots           # 0x200-byte arena, 0x10-byte slots
+0x001C7FD0	0	hypothesis	g_SystemContext	central system struct pointer
+0x0071FDD0	0	hypothesis	Time__g_Context	tick struct; counter +0x18 = 0x71FDE8, cap 0x0CDFD7F0
+0x005A3A70	0	hypothesis	g_PerfCounterA	gp-0x7B00, +1 per frame
+0x005A3A74	0	hypothesis	g_PerfCounterB	gp-0x7AFC, +1 per frame
+0x005A3A78	0	hypothesis	g_FrameCallback	gp-0x7AF8, per-frame callback
+0x005A3A64	0	hypothesis	g_FrameHook	{gate,flag,callback} see framehook.c; default handler 0x1A8FE0
+0x005B3E50	0	hypothesis	g_ModeStateB	8 x u16, updated via fcn.0013B960(1,...)
+0x005B3E60	0	hypothesis	g_ModeStateA	8 x u16, getters + copyout in mode.c
+0x005A2A24	0	hypothesis	g_PendingCommandId	gp-0x7F4C, consumed by System__DispatchPending
+0x00B78000	0	hypothesis	Stream__g_Context	0x760 B; slots 0xA0-0xB4 = -1, flag 0xB78054
+0x0071F8F7	0	hypothesis	g_StreamReady	set to 1 after stream init
+0x0034CCD0	0	hypothesis	g_MsgJumpTable	13-entry dispatch table (Msg__Dispatch)
+# UNPARSED: 0x0030_0000 0 hypothesis scratch region          # 0x30xxxx-0x31xxxx message/config/string pool
+0x005A3204	0	hypothesis	g_DispatchParam	read by System__DispatchPending
+0x005B1AD0	0	hypothesis	g_DisplayContext	Display__EndFrame struct
+0x005B2F00	0	hypothesis	g_GameState	Mode__Update state machine struct
+0x008D3900	0	hypothesis	Schedule__g_Context	59 task slots x 0x134, timer @base
+0x008DF810	0	hypothesis	Schedule__g_FrameCount	+1 per frame
+0x005BB880	0	hypothesis	g_SceneContext	Scene__Update state machine
+0x001C4990	0	hypothesis	g_SystemInitDone	EnsureInit guard flag
+0x001C6124	0	hypothesis	g_SubsystemReady	set by System__SubsystemInit
+0x001C5078	0	hypothesis	g_SystemHandlerTable	header {13,18,8}; {id,handler} pairs
+0x005A3A80	0	hypothesis	g_BootParamPtr	u32 read at crt0
+0x005AB8C8	0	hypothesis	g_ArenaSlots	0x200-byte arena, 0x10-byte slots
 
 # Pending classification (helpers seen during loop analysis)
 #   0x0013B960  State__Update       — (index, struct) updater used by State__UpdatePair
@@ -152,23 +156,23 @@
 #   ORDER FIX in loop: System__RunFrameHook (0x142570) runs BEFORE Schedule__FrameTick (0x177F00)
 
 # Pad driver family (discovered via Mode__Update decompile, 2026-10-15)
-0x0011b500 0 RECONSTRUCTED Pad__ReadStatus      # (slot, sub) -> status byte; 'c'(99)=no pad; calls 0x11B2D8
-0x0011b668 0 RECONSTRUCTED Pad__TestButton     # (slot,0) -> record[+0x71] data-ready flag (0 if pad absent)
-0x0011be78 0 hypothesis  Pad__TestButton2
-0x0011be18 0 hypothesis  Pad__TestButton3     # gates 0x48 -> 0x4C
-0x0011ba60 0 hypothesis  Pad__TestCombo       # (slot, 0, 1, 3)
-0x0011b928 0 hypothesis  Pad__TestAnalog      # (slot, 0, n, mask64)
-0x0011bbe0 0 hypothesis  Pad__Query           # (slot, 0, buf6)
-0x0011b488 0 hypothesis  Pad__Check           # (slot, 0, buf)
-0x0011bb18 0 RECONSTRUCTED Pad__SetOutputs     # RUMBLE: 6B actuator payload to transfer ctx, cmd=1 len=6
+0x0011b500	0	RECONSTRUCTED	Pad__ReadStatus	(slot, sub) -> status byte; 'c'(99)=no pad; calls 0x11B2D8
+0x0011b668	0	RECONSTRUCTED	Pad__TestButton	(slot,0) -> record[+0x71] data-ready flag (0 if pad absent)
+0x0011be78	0	hypothesis	Pad__TestButton2
+0x0011be18	0	hypothesis	Pad__TestButton3	gates 0x48 -> 0x4C
+0x0011ba60	0	hypothesis	Pad__TestCombo	(slot, 0, 1, 3)
+0x0011b928	0	hypothesis	Pad__TestAnalog	(slot, 0, n, mask64)
+0x0011bbe0	0	hypothesis	Pad__Query	(slot, 0, buf6)
+0x0011b488	0	hypothesis	Pad__Check	(slot, 0, buf)
+0x0011bb18	0	RECONSTRUCTED	Pad__SetOutputs	RUMBLE: 6B actuator payload to transfer ctx, cmd=1 len=6
 # gp globals (from Mode__Update decompile)
-0x005A34A8 0 hypothesis g_PadRepeatDelay      # gp+0xFFFF8438
-0x005A34AC 0 hypothesis g_PadRepeatInterval   # gp+0xFFFF843C
+0x005A34A8	0	hypothesis	g_PadRepeatDelay	gp+0xFFFF8438
+0x005A34AC	0	hypothesis	g_PadRepeatInterval	gp+0xFFFF843C
 # Mode__Update: state block field map confirmed — see notes/analysis/mode_update_doc.md
 
 # Pad internals (from Pad__ReadStatus decompile, 2026-10-15)
-0x0011b2d8 0 RECONSTRUCTED Pad__GetStateRaw    # (slot, sub, &out128): double-buffered pad record, 2x128B per (slot,sub)
-0x005ABB60 0 hypothesis g_PadContextArray      # slot*0x70 + sub*0x1C; +0x10 = present flag
+0x0011b2d8	0	RECONSTRUCTED	Pad__GetStateRaw	(slot, sub, &out128): double-buffered pad record, 2x128B per (slot,sub)
+0x005ABB60	0	hypothesis	g_PadContextArray	slot*0x70 + sub*0x1C; +0x10 = present flag
 # Pad status enum (Konami internal): 'c'(99)=absent, 5=(6&&2 remap), 6=intermediate,
 #   7=button-held (Mode__Update: cmdCounter++ on 7), 2=sub-state/existence byte
 
@@ -176,85 +180,85 @@
 #   ctx = 0x5ABB50 + slot*0x70 + sub*0x1C   (REAL base 0x5ABB50)
 #   buf = ctx + (readIdx(+0x58) < writeIdx(+0xD8)) ? 0x80 : 0
 #   record = 128 bytes copied to caller; indices per-buffer (0x58 / 0xD8)
-0x0010f3d8 0 hypothesis  Cache__InvalidateRange  # (start, end) — DMA pad data cache refresh
+0x0010f3d8	0	hypothesis	Cache__InvalidateRange	(start, end) — DMA pad data cache refresh
 # BEV primitives CONFIRMED in pad read path (2026-10-15):
 #   0x001189E0 = System__WaitBEVClear, 0x00118A30 = System__IsBEVSet
 
 # Confirmed via Pad__SetOutputs/TestButton decompiles (2026-10-15)
-0x0011af20 0 hypothesis  Pad__TransferTrigger  # (slot, sub) — sends output cmd to IOP, 1=ok
-0x005ABB54 0 hypothesis g_PadTransferCtxPtrs    # transfer context ptr per (slot,sub), +4=cmd +8=len +0xC=payload6
+0x0011af20	0	hypothesis	Pad__TransferTrigger	(slot, sub) — sends output cmd to IOP, 1=ok
+0x005ABB54	0	hypothesis	g_PadTransferCtxPtrs	transfer context ptr per (slot,sub), +4=cmd +8=len +0xC=payload6
 # Pad record layout (128B): +0x70 = actuator-ready flag, +0x71 = data-ready flag
 
 # Display/DMA family (confirmed via Scene__Update, 2026-10-15)
-0x001347f0 0 RECONSTRUCTED Display__BeginContext  # (ctx id 8)
-0x00134790 0 RECONSTRUCTED Display__EndContext    # pair
-0x00139470 0 hypothesis  Draw__SetItemCount     # (id, count-1)
-0x00138700 0 hypothesis  Draw__SubmitPacket     # (ctx, id, packet@0x5BB8A8)
+0x001347f0	0	RECONSTRUCTED	Display__BeginContext	(ctx id 8)
+0x00134790	0	RECONSTRUCTED	Display__EndContext	pair
+0x00139470	0	hypothesis	Draw__SetItemCount	(id, count-1)
+0x00138700	0	hypothesis	Draw__SubmitPacket	(ctx, id, packet@0x5BB8A8)
 # Scene data symbols
-0x005BB880 0 hypothesis g_SceneContext
-0x001C9E20 0 hypothesis g_FadeCounts
-0x001C9E40 0 hypothesis g_FadeTable
-0x001CA164 0 hypothesis g_SceneTiming
-0x005BB830 0 hypothesis g_SceneItemModes
-0x005BB8A8 0 hypothesis g_DmaPacketBuf
+0x005BB880	0	hypothesis	g_SceneContext
+0x001C9E20	0	hypothesis	g_FadeCounts
+0x001C9E40	0	hypothesis	g_FadeTable
+0x001CA164	0	hypothesis	g_SceneTiming
+0x005BB830	0	hypothesis	g_SceneItemModes
+0x005BB8A8	0	hypothesis	g_DmaPacketBuf
 
 # Game__Init subsystem calls — NAMED (2026-10-15)
-0x00141b50 0 RECONSTRUCTED System__EarlyInit     # config parse + RNG seed
-0x00134dd0 0 RECONSTRUCTED Memory__InitRegions   # heap 0x1EC0000-0x1F60000 + scratch 0xA0000
-0x0017ccf0 0x1d8 RECONSTRUCTED fcn_0017CCF0 # src/game/sound.c — scheduler subsystem context init
-0x0018f600 0xf4 RECONSTRUCTED Stream__CloseWait # src/game/sound.c — close stream channel
-0x0019f788 0x70 RECONSTRUCTED fcn_0019F788 # src/game/sound.c — conditional subsystem init
-0x001a39e8 0x6c RECONSTRUCTED fcn_001A39E8 # src/game/sound.c — conditional subsystem fallback/teardown
-0x00192d50 0x7c RECONSTRUCTED fcn_00192D50 # src/game/sound.c — register fallback job classes
-0x00177fd0 0x100 RECONSTRUCTED Schedule__Init # src/game/sound.c — scheduler/RWA init
-0x00176c80 0 RECONSTRUCTED Boot__SystemCheck    # (&flag): ret>=0 && flag -> trap(0)+halt
-0x0013b340 0 RECONSTRUCTED Draw__BootInit
-0x0013c5d0 0 RECONSTRUCTED Mode__Init           # XREF to Mode__Update
-0x00134b60 0 RECONSTRUCTED Display__SetMode     # (512,512,448,256,224) NTSC
-0x00134b20 0 RECONSTRUCTED Display__SetAspect   # (1.0, 1.12)
-0x00134ae0 0 RECONSTRUCTED Display__SetDepthRange # (1.1, 10000.0)
-0x00147110 0 RECONSTRUCTED Scene__Init          # memset g_SceneContext + LoadRequest(0)
-0x001507b0 0 hypothesis  Msg__Init              # dispatch family init
-0x001B96B0 0 RECONSTRUCTED Stream__Init         # stream ctx @0xB78000
-0x00139d60 0 hypothesis  (init TBD)
-0x00132170 0 hypothesis  (init TBD)
-0x00101150 0 hypothesis  (display sibling, 14 xrefs)
+0x00141b50	0	RECONSTRUCTED	System__EarlyInit	config parse + RNG seed
+0x00134dd0	0	RECONSTRUCTED	Memory__InitRegions	heap 0x1EC0000-0x1F60000 + scratch 0xA0000
+0x0017ccf0	0x1d8	RECONSTRUCTED	fcn_0017CCF0	src/game/sound.c — scheduler subsystem context init
+0x0018f600	0xf4	RECONSTRUCTED	Stream__CloseWait	src/game/sound.c — close stream channel
+0x0019f788	0x70	RECONSTRUCTED	fcn_0019F788	src/game/sound.c — conditional subsystem init
+0x001a39e8	0x6c	RECONSTRUCTED	fcn_001A39E8	src/game/sound.c — conditional subsystem fallback/teardown
+0x00192d50	0x7c	RECONSTRUCTED	fcn_00192D50	src/game/sound.c — register fallback job classes
+0x00177fd0	0x100	RECONSTRUCTED	Schedule__Init	src/game/sound.c — scheduler/RWA init
+0x00176c80	0	RECONSTRUCTED	Boot__SystemCheck	(&flag): ret>=0 && flag -> trap(0)+halt
+0x0013b340	0	RECONSTRUCTED	Draw__BootInit
+0x0013c5d0	0	RECONSTRUCTED	Mode__Init	XREF to Mode__Update
+0x00134b60	0	RECONSTRUCTED	Display__SetMode	(512,512,448,256,224) NTSC
+0x00134b20	0	RECONSTRUCTED	Display__SetAspect	(1.0, 1.12)
+0x00134ae0	0	RECONSTRUCTED	Display__SetDepthRange	(1.1, 10000.0)
+0x00147110	0	RECONSTRUCTED	Scene__Init	memset g_SceneContext + LoadRequest(0)
+0x001507b0	0	hypothesis	Msg__Init	dispatch family init
+0x001B96B0	0	RECONSTRUCTED	Stream__Init	stream ctx @0xB78000
+# UNPARSED: 0x00139d60 0 hypothesis  (init TBD)
+# UNPARSED: 0x00132170 0 hypothesis  (init TBD)
+# UNPARSED: 0x00101150 0 hypothesis  (display sibling, 14 xrefs)
 
 # Confirmed via Schedule__Update + AssetOverlay__Registry decompiles (2026-10-15)
-0x00101fa0 0 RECONSTRUCTED System__RegisterFrameCallback  # (handler) — cached at gp-0x7AF8 by FrameService
-0x001423e0 0 RECONSTRUCTED Registry__OnFrame   # per-frame callback; CHAINS to g_PrevFrameCallback; SYNC+EI at end
-0x00139a90 0 RECONSTRUCTED Asset__LoadEmbedded   # (name, nkp_ptr) — flag==0 path
-0x00139ba0 0 RECONSTRUCTED Asset__LoadFromDisc   # (path, 0) — flag==1 path, "dvd:" prefix
-0x0012c2d0 0 RECONSTRUCTED String__Format        # sprintf (varargs dropped by decompiler)
-0x00192bc8 0 RECONSTRUCTED Sound__UpdateBegin   # g_SoundUpdating=1; Rwa__BeginUpdate(0x18F878)
-0x0017ccb0 0 hypothesis  Sound__TickB           # tail update
-0x00177140 0x1e0 RECONSTRUCTED Schedule__WalkSlots # src/game/sound.c — deferred-job state machine
-0x00177c80 0 hypothesis  Task__Execute
-0x008d8608 0 hypothesis g_ScheduleCurrentSlot
+0x00101fa0	0	RECONSTRUCTED	System__RegisterFrameCallback	(handler) — cached at gp-0x7AF8 by FrameService
+0x001423e0	0	RECONSTRUCTED	Registry__OnFrame	per-frame callback; CHAINS to g_PrevFrameCallback; SYNC+EI at end
+0x00139a90	0	RECONSTRUCTED	Asset__LoadEmbedded	(name, nkp_ptr) — flag==0 path
+0x00139ba0	0	RECONSTRUCTED	Asset__LoadFromDisc	(path, 0) — flag==1 path, "dvd:" prefix
+0x0012c2d0	0	RECONSTRUCTED	String__Format	sprintf (varargs dropped by decompiler)
+0x00192bc8	0	RECONSTRUCTED	Sound__UpdateBegin	g_SoundUpdating=1; Rwa__BeginUpdate(0x18F878)
+0x0017ccb0	0	hypothesis	Sound__TickB	tail update
+0x00177140	0x1e0	RECONSTRUCTED	Schedule__WalkSlots	src/game/sound.c — deferred-job state machine
+0x00177c80	0	hypothesis	Task__Execute
+0x008d8608	0	hypothesis	g_ScheduleCurrentSlot
 # Format A registry semantics CONFIRMED: flag=0 embedded NKP, flag=1 disc NKP (lazy name load)
 
 # Frame service architecture COMPLETE (2026-10-15)
-0x00131580 0 RECONSTRUCTED System__SaveContext      # (ctx144)
-0x001314e0 0 RECONSTRUCTED System__RestoreContext   # (ctx144)
-0x005A3778 0 hypothesis  g_PrevFrameCallback        # fn ptr chain (set by RegisterFrameCallback return)
+0x00131580	0	RECONSTRUCTED	System__SaveContext	(ctx144)
+0x001314e0	0	RECONSTRUCTED	System__RestoreContext	(ctx144)
+0x005A3778	0	hypothesis	g_PrevFrameCallback	fn ptr chain (set by RegisterFrameCallback return)
 # Model: DI -> SaveContext -> handler chain -> counters -> RestoreContext -> SYNC -> EI
 
 # Pad family COMPLETE (2026-10-15) — I/O architecture verified
-0x0011bcb8 0 RECONSTRUCTED Pad__GetButtonsRaw      # (slot) -> raw 18-bit active-low word
-0x0011bd68 0 RECONSTRUCTED Pad__GetButtonsMasked   # (slot, sub, mask)
-0x0011b5b0 0 hypothesis  Pad__RpcWake             # (slot, sub, 2) after RPC result 1
-0x00112868 0 RECONSTRUCTED Rpc__Call               # (port, fn, ..., sndBuf, sndSize, rcvBuf, rcvSize, 0)
-0x0010f218 0 RECONSTRUCTED Cache__FlushRange       # writeback (EE->IOP direction)
-0x00111608 0 hypothesis  Thread__Delay            # (ticks)
-0x00129b30 0 RECONSTRUCTED Memory__Copy          # memcpy
+0x0011bcb8	0	RECONSTRUCTED	Pad__GetButtonsRaw	(slot) -> raw 18-bit active-low word
+0x0011bd68	0	RECONSTRUCTED	Pad__GetButtonsMasked	(slot, sub, mask)
+0x0011b5b0	0	hypothesis	Pad__RpcWake	(slot, sub, 2) after RPC result 1
+0x00112868	0	RECONSTRUCTED	Rpc__Call	(port, fn, ..., sndBuf, sndSize, rcvBuf, rcvSize, 0)
+0x0010f218	0	RECONSTRUCTED	Cache__FlushRange	writeback (EE->IOP direction)
+0x00111608	0	hypothesis	Thread__Delay	(ticks)
+0x00129b30	0	RECONSTRUCTED	Memory__Copy	memcpy
 # Button geometry: 18-bit active-low word; 0x3FFFF=none; 0xFFF=standard 12
 # Data: 0x005ABB00 g_PadRpcPort | 0x005ABD40 g_RpcCmdBuf(0x80) | 0x001C6064 retry flag
 
 # Memory allocator family (from Boot__SystemCheck, 2026-10-15)
-0x00116c58 0 RECONSTRUCTED Iop__Alloc          # RPC to IOP allocator server 0x5A7E00; returns IOP RAM addr
-0x00116dc0 0 RECONSTRUCTED Iop__Free           # RPC release of IOP buffer
-0x001178d8 0 RECONSTRUCTED Rpc__Call2          # (iopBuf, 0, 0, &outFlag) — SifRpc wrapper
-0x001F5AF0 0 hypothesis  g_BootCheckBlob       # 0x360 B DMA'd to IOP for verification
+0x00116c58	0	RECONSTRUCTED	Iop__Alloc	RPC to IOP allocator server 0x5A7E00; returns IOP RAM addr
+0x00116dc0	0	RECONSTRUCTED	Iop__Free	RPC release of IOP buffer
+0x001178d8	0	RECONSTRUCTED	Rpc__Call2	(iopBuf, 0, 0, &outFlag) — SifRpc wrapper
+0x001F5AF0	0	hypothesis	g_BootCheckBlob	0x360 B DMA'd to IOP for verification
 # NOTE: anti-piracy/integrity mechanism — documented for preservation only.
 # Any bypass discussion is out of scope per CONTRIBUTING.md.
 
@@ -264,220 +268,220 @@
 # Flow: Iop__Alloc(0x360) -> DMA blob EE->IOP -> Rpc__Call2(module,0,0,&flag)
 #       -> flag &= ~3 -> Iop__Free. The verification RUNS ON THE IOP agent.
 # Documented for preservation; bypass out of scope per CONTRIBUTING.md.
-0x001F5AF0 0 RECONSTRUCTED g_BootCheckIopModule   # 0x360-byte embedded IOP checker ELF
-0x0013e2c0 0 hypothesis  IopCmd__InitA           # 2 xrefs to Iop__Alloc (pad cmd bufs)
-0x00140180 0 hypothesis  IopCmd__InitB
+0x001F5AF0	0	RECONSTRUCTED	g_BootCheckIopModule	0x360-byte embedded IOP checker ELF
+0x0013e2c0	0	hypothesis	IopCmd__InitA	2 xrefs to Iop__Alloc (pad cmd bufs)
+0x00140180	0	hypothesis	IopCmd__InitB
 
 # Scheduler job machine + task VM (2026-10-15)
-0x00177ef0 0x10 RECONSTRUCTED Job__Poll # src/game/sound.c — countdown != 0 means busy
-0x0012d018 0x1bc RECONSTRUCTED fcn_0012D018 # src/game/sound.c — strncpy(dst,src,n)
-0x001a4eb8 0x50 RECONSTRUCTED fcn_001A4EB8 # src/game/sound.c — subsystem worker init/sleep
-0x001a4f08 0x2c RECONSTRUCTED FUN_001A4F08 # src/game/sound.c — subsystem record setter
-0x001a4f38 0x2c RECONSTRUCTED FUN_001A4F38 # src/game/sound.c — subsystem record getter
-0x0018a9e0 0x08 RECONSTRUCTED fcn_0018A9E0 # src/game/sound.c — subsystem handle singleton
-0x0018a9f0 0x08 RECONSTRUCTED FUN_0018A9F0 # src/game/sound.c — handle field getter +0x64
-0x0018a9f8 0x08 RECONSTRUCTED FUN_0018A9F8 # src/game/sound.c — handle field setter +0x68
-0x00188910 0x188 RECONSTRUCTED Job__Create # src/game/sound.c — find/reuse deferred-job slot
-0x00188a98 0x138 RECONSTRUCTED fcn_00188A98 # src/game/sound.c — resolve job class from descriptor
-0x00189830 0x08 RECONSTRUCTED fcn_00189830 # src/game/sound.c — deferred-job manager accessor
-0x00177ed0 0x20 RECONSTRUCTED Schedule__Kick # src/game/sound.c — set countdown, clear flag
-0x00177eb0 0x10 RECONSTRUCTED Schedule__OnJobDone # src/game/sound.c — job completion flag
-0x007d1fc0 0 hypothesis g_CurrentJob           # vtable @ obj+0x50: +0x2c/+0x30/+0x38/+0x3c vmethods
-0x007d20d8 0 hypothesis g_JobState             # 0..5; 0x7d20dc frame counter (thresh 30)
+0x00177ef0	0x10	RECONSTRUCTED	Job__Poll	src/game/sound.c — countdown != 0 means busy
+0x0012d018	0x1bc	RECONSTRUCTED	fcn_0012D018	src/game/sound.c — strncpy(dst,src,n)
+0x001a4eb8	0x50	RECONSTRUCTED	fcn_001A4EB8	src/game/sound.c — subsystem worker init/sleep
+0x001a4f08	0x2c	RECONSTRUCTED	FUN_001A4F08	src/game/sound.c — subsystem record setter
+0x001a4f38	0x2c	RECONSTRUCTED	FUN_001A4F38	src/game/sound.c — subsystem record getter
+0x0018a9e0	0x08	RECONSTRUCTED	fcn_0018A9E0	src/game/sound.c — subsystem handle singleton
+0x0018a9f0	0x08	RECONSTRUCTED	FUN_0018A9F0	src/game/sound.c — handle field getter +0x64
+0x0018a9f8	0x08	RECONSTRUCTED	FUN_0018A9F8	src/game/sound.c — handle field setter +0x68
+0x00188910	0x188	RECONSTRUCTED	Job__Create	src/game/sound.c — find/reuse deferred-job slot
+0x00188a98	0x138	RECONSTRUCTED	fcn_00188A98	src/game/sound.c — resolve job class from descriptor
+0x00189830	0x08	RECONSTRUCTED	fcn_00189830	src/game/sound.c — deferred-job manager accessor
+0x00177ed0	0x20	RECONSTRUCTED	Schedule__Kick	src/game/sound.c — set countdown, clear flag
+0x00177eb0	0x10	RECONSTRUCTED	Schedule__OnJobDone	src/game/sound.c — job completion flag
+0x007d1fc0	0	hypothesis	g_CurrentJob	vtable @ obj+0x50: +0x2c/+0x30/+0x38/+0x3c vmethods
+0x007d20d8	0	hypothesis	g_JobState	0..5; 0x7d20dc frame counter (thresh 30)
 # Task VM (Task__Execute @0x77C80): 16 cmds (1..10, 0xC..0x13); slot stride 0x134;
 #   cmd@+0x00, args @+0x104/+0x108, +0x10C/+0x110, +0x114..+0x128 (cmd10 7 args),
 #   slot advance with WRAP AT 64 slots (CORRECTION: was 59)
-0x0017b6c0 0 RECONSTRUCTED Bgm__Play            # (bgmIndex, arg): desc table 0x1F5E58 x 0xC, vol=1.0f
-0x0017b4e0 0 RECONSTRUCTED Bgm__PlayModeB      # like cmd01, states 0x11/6 (immediate? loop?)
-0x0017b280 0 RECONSTRUCTED Bgm__StopAll         # stops stream ch0/ch1, resets BGM state
-0x0017aa70 0 RECONSTRUCTED Voice__Play           # (voiceId): bank table 0x1F6070 (25 banks = V000-V024.RWS), mode 1
-0x0017a890 0 RECONSTRUCTED Voice__PlayLoop       # same, mode 4 (loop?)
-0x0017a800 0 RECONSTRUCTED Voice__Stop            # cmd 06: stop voice ch2, reset voice state
-0x00179dc0 0 RECONSTRUCTED VoiceBank2__Play     # (id, arg): gp table 0x5A3388 (system SE bank?), 1 range
-0x00179bf0 0 RECONSTRUCTED Bank2__PlayLoop       # cmd 08: loop mode (4) play on SE channel
-0x00179ab0 0 RECONSTRUCTED Bank2__StopAll        # cmd 09: stop SE ch3, reset bank2 state
-0x00176fc0 0 RECONSTRUCTED Job__Start           # 7 args: creates async job type 0x11 (handler 0x176DF0); queues if busy
-0x001788e0 0 RECONSTRUCTED Stream__OpenChannel   # cmd 0C: channels[i] = Stream__Open(rwaHandle)
-0x00178800 0 RECONSTRUCTED Stream__Configure     # cmd 0D: send 0x24B config packet to channel
-0x00178710 0 RECONSTRUCTED Stream__SetParam      # cmd 0E: send param cmd (type 3, sub 2)
-0x00178680 0 hypothesis TaskCmd__0F
-0x001785f0 0 hypothesis TaskCmd__10h
-0x00178560 0 hypothesis TaskCmd__11h
-0x001784c0 0 hypothesis TaskCmd__12h
-0x00178340 0 hypothesis TaskCmd__13h
+0x0017b6c0	0	RECONSTRUCTED	Bgm__Play	(bgmIndex, arg): desc table 0x1F5E58 x 0xC, vol=1.0f
+0x0017b4e0	0	RECONSTRUCTED	Bgm__PlayModeB	like cmd01, states 0x11/6 (immediate? loop?)
+0x0017b280	0	RECONSTRUCTED	Bgm__StopAll	stops stream ch0/ch1, resets BGM state
+0x0017aa70	0	RECONSTRUCTED	Voice__Play	(voiceId): bank table 0x1F6070 (25 banks = V000-V024.RWS), mode 1
+0x0017a890	0	RECONSTRUCTED	Voice__PlayLoop	same, mode 4 (loop?)
+0x0017a800	0	RECONSTRUCTED	Voice__Stop	cmd 06: stop voice ch2, reset voice state
+0x00179dc0	0	RECONSTRUCTED	VoiceBank2__Play	(id, arg): gp table 0x5A3388 (system SE bank?), 1 range
+0x00179bf0	0	RECONSTRUCTED	Bank2__PlayLoop	cmd 08: loop mode (4) play on SE channel
+0x00179ab0	0	RECONSTRUCTED	Bank2__StopAll	cmd 09: stop SE ch3, reset bank2 state
+0x00176fc0	0	RECONSTRUCTED	Job__Start	7 args: creates async job type 0x11 (handler 0x176DF0); queues if busy
+0x001788e0	0	RECONSTRUCTED	Stream__OpenChannel	cmd 0C: channels[i] = Stream__Open(rwaHandle)
+0x00178800	0	RECONSTRUCTED	Stream__Configure	cmd 0D: send 0x24B config packet to channel
+0x00178710	0	RECONSTRUCTED	Stream__SetParam	cmd 0E: send param cmd (type 3, sub 2)
+0x00178680	0	hypothesis	TaskCmd__0F
+0x001785f0	0	hypothesis	TaskCmd__10h
+0x00178560	0	hypothesis	TaskCmd__11h
+0x001784c0	0	hypothesis	TaskCmd__12h
+0x00178340	0	hypothesis	TaskCmd__13h
 # Init TBDs RESOLVED (2026-10-15)
-0x00139d60 0 RECONSTRUCTED Asset__InitSlots    # memset g_AssetSlots 0x5B1C90 x 0x1040 (16 x 0x104) + counter=0
-0x005b1c90 0 hypothesis g_DrawContext          # 0x1040-byte struct
-0x00132170 0 RECONSTRUCTED Display__SetClearColor # (r,g,b) -> RGBA x2 @0x5B1340/0x5B11D0
-0x00101150 0 RECONSTRUCTED Gs__WaitIdle        # (wait): drains VIF1/GIF DMA, VIF FIFO, VU1, GIF
+0x00139d60	0	RECONSTRUCTED	Asset__InitSlots	memset g_AssetSlots 0x5B1C90 x 0x1040 (16 x 0x104) + counter=0
+0x005b1c90	0	hypothesis	g_DrawContext	0x1040-byte struct
+0x00132170	0	RECONSTRUCTED	Display__SetClearColor	(r,g,b) -> RGBA x2 @0x5B1340/0x5B11D0
+0x00101150	0	RECONSTRUCTED	Gs__WaitIdle	(wait): drains VIF1/GIF DMA, VIF FIFO, VU1, GIF
                                                # timeout 0x1000000 -> reg dump via 0x111608, -1
                                                # (query mode): bitmask 1=VIF1DMA 2=GIFDMA 4=VIF1FIFO 8=VU 0x10=GIF
 # GS register names (from extension symbols): REG_DMAC_1_VIF1_CHCR, REG_DMAC_2_GIF_CHCR,
 #   REG_VIF1_STAT, REG_GIF_STAT, VU status via _cfc2
 
 # Audio/sound system (from TaskCmd decompiles, 2026-10-15)
-0x001a3180 0 RECONSTRUCTED Stream__Stop           # (handle, 1) — stop request
-0x0018f600 0 RECONSTRUCTED Stream__Close          # (handle, 0, 0) — wait end + close
-0x00177710 0 hypothesis  Sound__WaitCh0          # defer while ch0 busy
-0x001776b0 0 hypothesis  Sound__WaitCh1
-0x00177c20 0x58 RECONSTRUCTED Command__Requeue # src/game/sound.c — requeue command cmd 1
-0x00177960 0 hypothesis  Task__QueuePending      # append to pending list
-0x00177ec0 0x10 RECONSTRUCTED Job__ForceFlag # src/game/sound.c — completion flag
-0x00176df0 0x58 RECONSTRUCTED Job__Handler11 # src/game/sound.c — op5 deferred callback
-0x00112170 0x30 RECONSTRUCTED fcn_00112170 # src/game/sound.c — RPC pool expansion helper
-0x001121a0 0x4c RECONSTRUCTED fcn_001121A0 # src/game/sound.c — RPC indexed slot allocator
-0x00112868 0x200 RECONSTRUCTED Rpc__Call # src/game/sound.c — allocate/send RPC request
-0x00112a68 0x3c RECONSTRUCTED Rpc__IsPending # src/game/sound.c — pending predicate
-0x00112aa8 0x90 RECONSTRUCTED FUN_00112AA8 # src/game/sound.c — global RPC list append
-0x00112b40 0xcc RECONSTRUCTED FUN_00112B40 # src/game/sound.c — RPC request enqueue
-0x00112c10 0x90 RECONSTRUCTED FUN_00112C10 # src/game/sound.c — RPC owner queue unlink
-0x00112ca8 0x8c RECONSTRUCTED FUN_00112CA8 # src/game/sound.c — RPC global queue unlink
-0x00112d38 0x58 RECONSTRUCTED FUN_00112D38 # src/game/sound.c — RPC pending fetch/reset
-0x00112d90 0x1c8 RECONSTRUCTED FUN_00112D90 # src/game/sound.c — RPC completion dispatcher
-0x00112f58 0x40 RECONSTRUCTED FUN_00112F58 # src/game/sound.c — RPC wait loop
-0x00112f98 0x6c RECONSTRUCTED FUN_00112F98 # src/game/sound.c — RPC semaphore init
-0x00113008 0x80 RECONSTRUCTED FUN_00113008 # src/game/sound.c — RPC active slot count
-0x00113088 0x84 RECONSTRUCTED FUN_00113088 # src/game/sound.c — RPC free slot alloc
-0x0012ca60 0x118 RECONSTRUCTED fcn_0012CA60 # src/game/sound.c — strcpy(dst,src)
-0x00177830 0x60 RECONSTRUCTED FUN_00177830 # src/game/sound.c — queue task cmd 14, two args
-0x00177890 0x70 RECONSTRUCTED FUN_00177890 # src/game/sound.c — queue task cmd 13, copy name
-0x00177900 0x58 RECONSTRUCTED FUN_00177900 # src/game/sound.c — queue task cmd 12
-0x00129b30 0x1b8 RECONSTRUCTED fcn_00129B30 # src/game/sound.c — memmove(dst,src,n)
-0x00129ce8 0xc0 RECONSTRUCTED fcn_00129CE8 # src/game/sound.c — memset(dst,value,n)
-0x00177320 0x80 RECONSTRUCTED fcn_00177320 # src/game/sound.c — scheduler queue init
-0x001773a0 0x30 RECONSTRUCTED FUN_001773A0 # src/game/sound.c — scheduler subsystem init A
-0x001773d0 0x30 RECONSTRUCTED FUN_001773D0 # src/game/sound.c — scheduler subsystem init B
-0x00177960 0x120 RECONSTRUCTED Task__QueuePending # src/game/sound.c — full deferred request enqueue
-0x00177400 0x74 RECONSTRUCTED FUN_00177400 # src/game/sound.c — allocator free/coalesce
-0x00177480 0x4c RECONSTRUCTED FUN_00177480 # src/game/sound.c — allocator zeroed alloc
-0x001774d0 0x7c RECONSTRUCTED FUN_001774D0 # src/game/sound.c — allocator realloc/copy/free
-0x00177550 0xf8 RECONSTRUCTED FUN_00177550 # src/game/sound.c — intrusive 16-byte allocator
-0x00177650 0x60 RECONSTRUCTED FUN_00177650 # src/game/sound.c — queue task cmd 19
-0x001776b0 0x60 RECONSTRUCTED FUN_001776B0 # src/game/sound.c — queue task cmd 18
-0x001776b0 0x60 RECONSTRUCTED Sound__WaitCh1 # src/game/sound.c — alias FUN_001776B0
-0x001776b0 0x60 RECONSTRUCTED Sound__WaitCh3 # src/game/sound.c — ch3 alias FUN_001776B0
-0x00177710 0x60 RECONSTRUCTED FUN_00177710 # src/game/sound.c — queue task cmd 17
-0x00177710 0x60 RECONSTRUCTED Sound__WaitCh0 # src/game/sound.c — alias FUN_00177710
-0x00177710 0x60 RECONSTRUCTED Sound__WaitCh2 # src/game/sound.c — ch2 alias FUN_00177710
-0x00177770 0x60 RECONSTRUCTED FUN_00177770 # src/game/sound.c — queue task cmd 16
-0x001777d0 0x60 RECONSTRUCTED FUN_001777D0 # src/game/sound.c — queue task cmd 15
-0x001f5e58 0 hypothesis g_BgmDescriptorTable     # 0xC-byte entries {file?, size?, flags?}
+0x001a3180	0	RECONSTRUCTED	Stream__Stop	(handle, 1) — stop request
+0x0018f600	0	RECONSTRUCTED	Stream__Close	(handle, 0, 0) — wait end + close
+0x00177710	0	hypothesis	Sound__WaitCh0	defer while ch0 busy
+0x001776b0	0	hypothesis	Sound__WaitCh1
+0x00177c20	0x58	RECONSTRUCTED	Command__Requeue	src/game/sound.c — requeue command cmd 1
+0x00177960	0	hypothesis	Task__QueuePending	append to pending list
+0x00177ec0	0x10	RECONSTRUCTED	Job__ForceFlag	src/game/sound.c — completion flag
+0x00176df0	0x58	RECONSTRUCTED	Job__Handler11	src/game/sound.c — op5 deferred callback
+0x00112170	0x30	RECONSTRUCTED	fcn_00112170	src/game/sound.c — RPC pool expansion helper
+0x001121a0	0x4c	RECONSTRUCTED	fcn_001121A0	src/game/sound.c — RPC indexed slot allocator
+0x00112868	0x200	RECONSTRUCTED	Rpc__Call	src/game/sound.c — allocate/send RPC request
+0x00112a68	0x3c	RECONSTRUCTED	Rpc__IsPending	src/game/sound.c — pending predicate
+0x00112aa8	0x90	RECONSTRUCTED	FUN_00112AA8	src/game/sound.c — global RPC list append
+0x00112b40	0xcc	RECONSTRUCTED	FUN_00112B40	src/game/sound.c — RPC request enqueue
+0x00112c10	0x90	RECONSTRUCTED	FUN_00112C10	src/game/sound.c — RPC owner queue unlink
+0x00112ca8	0x8c	RECONSTRUCTED	FUN_00112CA8	src/game/sound.c — RPC global queue unlink
+0x00112d38	0x58	RECONSTRUCTED	FUN_00112D38	src/game/sound.c — RPC pending fetch/reset
+0x00112d90	0x1c8	RECONSTRUCTED	FUN_00112D90	src/game/sound.c — RPC completion dispatcher
+0x00112f58	0x40	RECONSTRUCTED	FUN_00112F58	src/game/sound.c — RPC wait loop
+0x00112f98	0x6c	RECONSTRUCTED	FUN_00112F98	src/game/sound.c — RPC semaphore init
+0x00113008	0x80	RECONSTRUCTED	FUN_00113008	src/game/sound.c — RPC active slot count
+0x00113088	0x84	RECONSTRUCTED	FUN_00113088	src/game/sound.c — RPC free slot alloc
+0x0012ca60	0x118	RECONSTRUCTED	fcn_0012CA60	src/game/sound.c — strcpy(dst,src)
+0x00177830	0x60	RECONSTRUCTED	FUN_00177830	src/game/sound.c — queue task cmd 14, two args
+0x00177890	0x70	RECONSTRUCTED	FUN_00177890	src/game/sound.c — queue task cmd 13, copy name
+0x00177900	0x58	RECONSTRUCTED	FUN_00177900	src/game/sound.c — queue task cmd 12
+0x00129b30	0x1b8	RECONSTRUCTED	fcn_00129B30	src/game/sound.c — memmove(dst,src,n)
+0x00129ce8	0xc0	RECONSTRUCTED	fcn_00129CE8	src/game/sound.c — memset(dst,value,n)
+0x00177320	0x80	RECONSTRUCTED	fcn_00177320	src/game/sound.c — scheduler queue init
+0x001773a0	0x30	RECONSTRUCTED	FUN_001773A0	src/game/sound.c — scheduler subsystem init A
+0x001773d0	0x30	RECONSTRUCTED	FUN_001773D0	src/game/sound.c — scheduler subsystem init B
+0x00177960	0x120	RECONSTRUCTED	Task__QueuePending	src/game/sound.c — full deferred request enqueue
+0x00177400	0x74	RECONSTRUCTED	FUN_00177400	src/game/sound.c — allocator free/coalesce
+0x00177480	0x4c	RECONSTRUCTED	FUN_00177480	src/game/sound.c — allocator zeroed alloc
+0x001774d0	0x7c	RECONSTRUCTED	FUN_001774D0	src/game/sound.c — allocator realloc/copy/free
+0x00177550	0xf8	RECONSTRUCTED	FUN_00177550	src/game/sound.c — intrusive 16-byte allocator
+0x00177650	0x60	RECONSTRUCTED	FUN_00177650	src/game/sound.c — queue task cmd 19
+0x001776b0	0x60	RECONSTRUCTED	FUN_001776B0	src/game/sound.c — queue task cmd 18
+0x001776b0	0x60	RECONSTRUCTED	Sound__WaitCh1	src/game/sound.c — alias FUN_001776B0
+0x001776b0	0x60	RECONSTRUCTED	Sound__WaitCh3	src/game/sound.c — ch3 alias FUN_001776B0
+0x00177710	0x60	RECONSTRUCTED	FUN_00177710	src/game/sound.c — queue task cmd 17
+0x00177710	0x60	RECONSTRUCTED	Sound__WaitCh0	src/game/sound.c — alias FUN_00177710
+0x00177710	0x60	RECONSTRUCTED	Sound__WaitCh2	src/game/sound.c — ch2 alias FUN_00177710
+0x00177770	0x60	RECONSTRUCTED	FUN_00177770	src/game/sound.c — queue task cmd 16
+0x001777d0	0x60	RECONSTRUCTED	FUN_001777D0	src/game/sound.c — queue task cmd 15
+0x001f5e58	0	hypothesis	g_BgmDescriptorTable	0xC-byte entries {file?, size?, flags?}
 # Sound state globals
-0x008d8628 0 hypothesis g_BgmStateBlock          # +0: idx +4: state(1/0xE) +8: arg +C: desc +10: counter
+0x008d8628	0	hypothesis	g_BgmStateBlock	+0: idx +4: state(1/0xE) +8: arg +C: desc +10: counter
                                                 # +14: volume f32 +1C..: more; stream handles @0x8D86D0/D4
 # Scheduler = SOUND COMMAND PROCESSOR (Task__Execute) + async job queue (WalkSlots)
 
 # Sound VM refinement (2026-10-15)
-0x00177b60 0 hypothesis  Sound__DeferCh2A       # cmd04 busy defer
-0x00177b00 0 hypothesis  Sound__DeferCh2B       # cmd05 busy defer
-0x00177aa0 0 hypothesis  Sound__DeferBank2
-0x00177bc0 0x60 RECONSTRUCTED Sound__DeferBgmB # src/game/sound.c — defer BGM cmd 2
-0x008d86d8 0 hypothesis g_VoiceStreamHandle     # third stream channel (voice)
-0x001f6070 0 RECONSTRUCTED g_VoiceBankTable     # 25 x {minId,maxId} -> V000-V024.RWS mapping
-0x005a3388 0 hypothesis g_SeBankTable           # gp+0xFFFF8118: system SE range table
+0x00177b60	0	hypothesis	Sound__DeferCh2A	cmd04 busy defer
+0x00177b00	0	hypothesis	Sound__DeferCh2B	cmd05 busy defer
+0x00177aa0	0	hypothesis	Sound__DeferBank2
+0x00177bc0	0x60	RECONSTRUCTED	Sound__DeferBgmB	src/game/sound.c — defer BGM cmd 2
+0x008d86d8	0	hypothesis	g_VoiceStreamHandle	third stream channel (voice)
+0x001f6070	0	RECONSTRUCTED	g_VoiceBankTable	25 x {minId,maxId} -> V000-V024.RWS mapping
+0x005a3388	0	hypothesis	g_SeBankTable	gp+0xFFFF8118: system SE range table
 # Model: Schedule__Update = SOUND COMMAND PROCESSOR; 64 slots x 0x134 = pending
 #   command queue; one command per tick; countdown = sound tick timer.
 
 # Audio address-space tables DECODED (2026-10-15)
-0x001f5e5c 0 RECONSTRUCTED g_BgmTable           # 30 x {name, path, param} -> BGM_001..030.RWS
-0x00351c88 0 hypothesis g_BgmStringPool        # name/path string pairs for BGM table
-0x001f6070 0 RECONSTRUCTED g_VoiceBankTable    # 25 x {min,max}: bank i = ids [i*500, +499]
+0x001f5e5c	0	RECONSTRUCTED	g_BgmTable	30 x {name, path, param} -> BGM_001..030.RWS
+0x00351c88	0	hypothesis	g_BgmStringPool	name/path string pairs for BGM table
+0x001f6070	0	RECONSTRUCTED	g_VoiceBankTable	25 x {min,max}: bank i = ids [i*500, +499]
 # Totals: 12,311 voice lines (24x500 + 311); 30 BGM tracks; bank->file V{bank:03d}.RWS
 
 # Stream primitives (from cmd 0C/0D/0E decompiles, 2026-10-15)
-0x001a2e00 0x34 RECONSTRUCTED Stream__Open # src/game/sound.c — public open wrapper
-0x001a3080 0 RECONSTRUCTED Stream__SendConfig     # (handle, cfg0x24)
-0x001a2ae8 0 RECONSTRUCTED Stream__CmdSend        # (handle, {ptr,count} command envelope)
-0x008d86d0 0 RECONSTRUCTED g_StreamChannels       # [4]: ch0/ch1 BGM, ch2 voice, ch3 SE
-0x008d8624 0 hypothesis  g_RwaRootHandle          # RWA driver root
+0x001a2e00	0x34	RECONSTRUCTED	Stream__Open	src/game/sound.c — public open wrapper
+0x001a3080	0	RECONSTRUCTED	Stream__SendConfig	(handle, cfg0x24)
+0x001a2ae8	0	RECONSTRUCTED	Stream__CmdSend	(handle, {ptr,count} command envelope)
+0x008d86d0	0	RECONSTRUCTED	g_StreamChannels	[4]: ch0/ch1 BGM, ch2 voice, ch3 SE
+0x008d8624	0	hypothesis	g_RwaRootHandle	RWA driver root
 # Sound state: single struct 0x008D8624..0x008D86E0 (BGM block 0x8D8628,
 #   voice block 0x8D8658, bank2 block 0x8D867C, channels @0x8D86D0)
 # Defer helpers: 0x177900, 0x177890, 0x177830 (busy re-queue variants)
 # String pool CONFIRMED: 'BGM_002' -> 'rwab/BGM_002.rws' (lowercase disc paths)
 
 # Sound VM COMPLETE — 16/16 commands named (2026-10-15)
-0x001a3180 0 RECONSTRUCTED Stream__Control         # (handle, op): 1=stop 2=fadeout 3=pause
-0x001a3060 0 RECONSTRUCTED Stream__Resume          # (handle, 1)
-0x00178680 0 RECONSTRUCTED Stream__Pause           # cmd 0F
-0x001785f0 0 RECONSTRUCTED Stream__FadeStop        # cmd 10 (+ 0x16FB0 fade prep)
-0x00178560 0 RECONSTRUCTED Stream__StopCh          # cmd 11
-0x001784c0 0 RECONSTRUCTED Stream__CloseCh         # cmd 12
-0x00178340 0 RECONSTRUCTED Stream__ResumeCh        # cmd 13
-0x0016fb0  0 hypothesis  Sound__FadePrep
+0x001a3180	0	RECONSTRUCTED	Stream__Control	(handle, op): 1=stop 2=fadeout 3=pause
+0x001a3060	0	RECONSTRUCTED	Stream__Resume	(handle, 1)
+0x00178680	0	RECONSTRUCTED	Stream__Pause	cmd 0F
+0x001785f0	0	RECONSTRUCTED	Stream__FadeStop	cmd 10 (+ 0x16FB0 fade prep)
+0x00178560	0	RECONSTRUCTED	Stream__StopCh	cmd 11
+0x001784c0	0	RECONSTRUCTED	Stream__CloseCh	cmd 12
+0x00178340	0	RECONSTRUCTED	Stream__ResumeCh	cmd 13
+0x0016fb0	0	hypothesis	Sound__FadePrep
 # Renames applied in src: Schedule__Update -> Sound__Update, etc. (see sound.c)
 
 # RWA stream protocol (2026-10-15)
-0x0018e350 0 hypothesis  Stream__OpenImpl        # (ctx@0x8E3C40, rwa, p3, p2, p4, p5) -> handle
-0x008e3c40 0 hypothesis g_StreamMgr             # stream manager context
-0x001a7b18 0x40 RECONSTRUCTED Stream__StageConfig # src/game/sound.c — stage stream config payload
-0x001a7b70 0x18 RECONSTRUCTED Stream__StageResume # src/game/sound.c — stage stream resume arg
-0x001a7ba0 0x30 RECONSTRUCTED Stream__StageParam # src/game/sound.c — stage stream param float
-0x001a2e70 0x6c RECONSTRUCTED FUN_001A2E70 # src/game/sound.c — open default stream root
-0x001a2ee0 0x1c RECONSTRUCTED FUN_001A2EE0 # src/game/sound.c — close stream root
-0x001a2f00 0xa0 RECONSTRUCTED FUN_001A2F00 # src/game/sound.c — open stream root with subchannels
-0x001a3060 0x20 RECONSTRUCTED Stream__Resume # src/game/sound.c — wrapper stage resume
-0x001a3180 0x20 RECONSTRUCTED Stream__Control # src/game/sound.c — wrapper stream notify
-0x001a31a0 0x34 RECONSTRUCTED FUN_001A31A0 # src/game/sound.c — stream status accessor
-0x001a31d0 0x08 RECONSTRUCTED FUN_001A31D0 # src/game/sound.c — stream field getter +0xF44
-0x001a31d8 0x08 RECONSTRUCTED FUN_001A31D8 # src/game/sound.c — stream field getter +0xF48
-0x001a32a0 0x18 RECONSTRUCTED FUN_001A32A0 # src/game/sound.c — stream scaled float getter
-0x001a32b8 0x88 RECONSTRUCTED FUN_001A32B8 # src/game/sound.c — stream worker init
-0x001a3340 0xa4 RECONSTRUCTED FUN_001A3340 # src/game/sound.c — paired stream worker init
-0x001a7b58 0x18 RECONSTRUCTED Stream__StageCmd # src/game/sound.c — stage stream command env
-0x001a7b88 0x18 RECONSTRUCTED Stream__Notify # src/game/sound.c — mark stream slot notify
-0x0012ca60 0 RECONSTRUCTED String__Copy         # (dst, src)
-0x00123990 0 hypothesis  Float__Unpack          # float conversions for 22.10 fixed packing
-0x00125a70 0 hypothesis  Float__ToFixed10
-0x0018fe98 0 hypothesis  Stream__ReleaseDma     # (handle, n) x2 on close (flag&1)
-0x0018deb0 0 hypothesis  Stream__CloseFinal
+0x0018e350	0	hypothesis	Stream__OpenImpl	(ctx@0x8E3C40, rwa, p3, p2, p4, p5) -> handle
+0x008e3c40	0	hypothesis	g_StreamMgr	stream manager context
+0x001a7b18	0x40	RECONSTRUCTED	Stream__StageConfig	src/game/sound.c — stage stream config payload
+0x001a7b70	0x18	RECONSTRUCTED	Stream__StageResume	src/game/sound.c — stage stream resume arg
+0x001a7ba0	0x30	RECONSTRUCTED	Stream__StageParam	src/game/sound.c — stage stream param float
+0x001a2e70	0x6c	RECONSTRUCTED	FUN_001A2E70	src/game/sound.c — open default stream root
+0x001a2ee0	0x1c	RECONSTRUCTED	FUN_001A2EE0	src/game/sound.c — close stream root
+0x001a2f00	0xa0	RECONSTRUCTED	FUN_001A2F00	src/game/sound.c — open stream root with subchannels
+0x001a3060	0x20	RECONSTRUCTED	Stream__Resume	src/game/sound.c — wrapper stage resume
+0x001a3180	0x20	RECONSTRUCTED	Stream__Control	src/game/sound.c — wrapper stream notify
+0x001a31a0	0x34	RECONSTRUCTED	FUN_001A31A0	src/game/sound.c — stream status accessor
+0x001a31d0	0x08	RECONSTRUCTED	FUN_001A31D0	src/game/sound.c — stream field getter +0xF44
+0x001a31d8	0x08	RECONSTRUCTED	FUN_001A31D8	src/game/sound.c — stream field getter +0xF48
+0x001a32a0	0x18	RECONSTRUCTED	FUN_001A32A0	src/game/sound.c — stream scaled float getter
+0x001a32b8	0x88	RECONSTRUCTED	FUN_001A32B8	src/game/sound.c — stream worker init
+0x001a3340	0xa4	RECONSTRUCTED	FUN_001A3340	src/game/sound.c — paired stream worker init
+0x001a7b58	0x18	RECONSTRUCTED	Stream__StageCmd	src/game/sound.c — stage stream command env
+0x001a7b88	0x18	RECONSTRUCTED	Stream__Notify	src/game/sound.c — mark stream slot notify
+0x0012ca60	0	RECONSTRUCTED	String__Copy	(dst, src)
+0x00123990	0	hypothesis	Float__Unpack	float conversions for 22.10 fixed packing
+0x00125a70	0	hypothesis	Float__ToFixed10
+0x0018fe98	0	hypothesis	Stream__ReleaseDma	(handle, n) x2 on close (flag&1)
+0x0018deb0	0	hypothesis	Stream__CloseFinal
 # PROTOCOL FACTS: channel struct 0x1040 bytes; cmd staging @ +0x1F8..+0x294;
 #   pending slot @ +0x2C0 (2C8/2CC = ring values); shared ring counter @ +0x1040.
 #   Volumes/pitch: 22.10 fixed point (i<<10 | f*1024).
 
 # Channel manager (from Stream__OpenImpl, 2026-10-15)
-0x0018f598 0 hypothesis  Channel__AllocDefault   # (mgr, flags, buf, size)
-0x0018e660 0 hypothesis  Channel__Init           # (ch, mgr, flags, b0)
-0x0018f6f8 0 hypothesis  Channel__SizeQuery      # (mgr, type&7, &out)
-0x0019c508 0 hypothesis  Id__Register            # (&guidPair, id) — GUID @0x35D198/0x35D1A0
-0x0018f9a8 0 hypothesis  Rwa__GetDefault         # () default rwa handle
-0x0018d768 0 hypothesis  Rwa__Validate           # (id, mgr) — 0 = reject
-0x001927e8 0 hypothesis  Alloc__DmaBuffer        # (size, flags 0x1080B)
-0x00192810 0 hypothesis  Free__DmaBuffer
-0x005a3430 0 hypothesis g_StreamByNameFlag
-0x005a3930 0 hypothesis g_ChannelList           # global channel object list
+0x0018f598	0	hypothesis	Channel__AllocDefault	(mgr, flags, buf, size)
+0x0018e660	0	hypothesis	Channel__Init	(ch, mgr, flags, b0)
+0x0018f6f8	0	hypothesis	Channel__SizeQuery	(mgr, type&7, &out)
+0x0019c508	0	hypothesis	Id__Register	(&guidPair, id) — GUID @0x35D198/0x35D1A0
+0x0018f9a8	0	hypothesis	Rwa__GetDefault	() default rwa handle
+0x0018d768	0	hypothesis	Rwa__Validate	(id, mgr) — 0 = reject
+0x001927e8	0	hypothesis	Alloc__DmaBuffer	(size, flags 0x1080B)
+0x00192810	0	hypothesis	Free__DmaBuffer
+0x005a3430	0	hypothesis	g_StreamByNameFlag
+0x005a3930	0	hypothesis	g_ChannelList	global channel object list
 # Channel object: vtable @ +0x00 (+0x28 open), rwa @ +0x24, list node +0x14/+0x18
 
 # Asset loader pair (2026-10-15) — NKP circle closed
-0x00139ba0 0 RECONSTRUCTED Asset__LoadFromDisc   # open->stage 0x8000B @0xB7F800->size @+0x14 must be
+0x00139ba0	0	RECONSTRUCTED	Asset__LoadFromDisc	open->stage 0x8000B @0xB7F800->size @+0x14 must be
                                                # 0x800-aligned->alloc/copy->close->slot register
-0x00139a90 0 RECONSTRUCTED Asset__LoadEmbedded   # {elfPtr, path} slot register only (no I/O)
-0x005b1c90 0 RECONSTRUCTED g_AssetSlots          # 16 x {ptr, path[256]}, stride 0x104
-0x005a3690 0 RECONSTRUCTED g_AssetSlotCount      # gp+0xFFFF8420, <0x10, zeroed by Asset__InitSlots
-0x00301b20 0 RECONSTRUCTED g_ExtDotNkp           # '.nkp' — appended to registry names for disc loads
-0x0012cb78 0 RECONSTRUCTED String__FindSep       # strrchr/strlen helper
-0x0012c658 0 RECONSTRUCTED String__Concat        # strcat
-0x00176db0 0 hypothesis  File__Open              # (path) -> handle
-0x00188e90 0 hypothesis  File__Read              # (dst, size, mode, handle)
-0x00188e38 0 hypothesis  File__Close
-0x00128f60 0 hypothesis  Memory__AllocLocal      # (size) -> EE buf
+0x00139a90	0	RECONSTRUCTED	Asset__LoadEmbedded	{elfPtr, path} slot register only (no I/O)
+0x005b1c90	0	RECONSTRUCTED	g_AssetSlots	16 x {ptr, path[256]}, stride 0x104
+0x005a3690	0	RECONSTRUCTED	g_AssetSlotCount	gp+0xFFFF8420, <0x10, zeroed by Asset__InitSlots
+0x00301b20	0	RECONSTRUCTED	g_ExtDotNkp	'.nkp' — appended to registry names for disc loads
+0x0012cb78	0	RECONSTRUCTED	String__FindSep	strrchr/strlen helper
+0x0012c658	0	RECONSTRUCTED	String__Concat	strcat
+0x00176db0	0	hypothesis	File__Open	(path) -> handle
+0x00188e90	0	hypothesis	File__Read	(dst, size, mode, handle)
+0x00188e38	0	hypothesis	File__Close
+0x00128f60	0	hypothesis	Memory__AllocLocal	(size) -> EE buf
 # FACT: 0xB7F800 (MWo3 overlay region) doubles as asset staging buffer for disc loads
 
 # Sound update bracket + job registry (2026-10-15)
-0x00192c08 0 RECONSTRUCTED Sound__UpdateEnd     # Rwa__EndUpdate(0x18F910); flag=0; g_SoundFrameCount++
-0x0018f878 0 RECONSTRUCTED Rwa__BeginUpdate     # (rwa, 0)
-0x0018f910 0 RECONSTRUCTED Rwa__EndUpdate       # (rwa, 0)
-0x0019d6b8 0 hypothesis  Sound__UpdateA         # mid-update pass
-0x0019cae0 0 hypothesis  Sound__UpdateB
-0x00189468 0 RECONSTRUCTED Job__PollAll         # walk job registry list @0x8DD298 {next,count,cb@+0x14};
+0x00192c08	0	RECONSTRUCTED	Sound__UpdateEnd	Rwa__EndUpdate(0x18F910); flag=0; g_SoundFrameCount++
+0x0018f878	0	RECONSTRUCTED	Rwa__BeginUpdate	(rwa, 0)
+0x0018f910	0	RECONSTRUCTED	Rwa__EndUpdate	(rwa, 0)
+0x0019d6b8	0	hypothesis	Sound__UpdateA	mid-update pass
+0x0019cae0	0	hypothesis	Sound__UpdateB
+0x00189468	0	RECONSTRUCTED	Job__PollAll	walk job registry list @0x8DD298 {next,count,cb@+0x14};
                                                # completed jobs get vmethod +0x3C
-0x008dd298 0 RECONSTRUCTED g_JobRegistry        # linked list of job registries
-0x00177c20 0 RECONSTRUCTED Command__Requeue     # (cmd,a,b): write slot 0x8D8604 (wrap 64) — producer cursor
-0x008d8604 0 RECONSTRUCTED g_CmdWriteSlot       # producer cursor (exec cursor = 0x8D8608)
-0x005a349c 0 hypothesis  g_SoundUpdating        # gp+0xFFFF822C
-0x005a3498 0 hypothesis  g_SoundFrameCount      # gp+0xFFFF8228
+0x008dd298	0	RECONSTRUCTED	g_JobRegistry	linked list of job registries
+0x00177c20	0	RECONSTRUCTED	Command__Requeue	(cmd,a,b): write slot 0x8D8604 (wrap 64) — producer cursor
+0x008d8604	0	RECONSTRUCTED	g_CmdWriteSlot	producer cursor (exec cursor = 0x8D8608)
+0x005a349c	0	hypothesis	g_SoundUpdating	gp+0xFFFF822C
+0x005a3498	0	hypothesis	g_SoundFrameCount	gp+0xFFFF8228
 
 # Overlay code (SHOP2R.BIN @0xB7F800 — first live decompile, 2026-10-15)
-0x00b7f880 0 hypothesis  Shop__FrameUpdate    # 19 slots, cooldown fade, calls 0x1A8DE0/0x144AF0
-0x001a8de0 0 hypothesis  Render__SetupA      # main-ELF render helper (overlay-called)
-0x00144af0 0 hypothesis  Render__DrawItem    # (item, &fade, &scale)
+0x00b7f880	0	hypothesis	Shop__FrameUpdate	19 slots, cooldown fade, calls 0x1A8DE0/0x144AF0
+0x001a8de0	0	hypothesis	Render__SetupA	main-ELF render helper (overlay-called)
+0x00144af0	0	hypothesis	Render__DrawItem	(item, &fade, &scale)
 # Overlay data (SHOP2 runtime): ptr table 0xB8BBE4 (+0xD4 cooldown), items 0xB8BD70

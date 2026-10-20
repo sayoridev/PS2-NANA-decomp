@@ -1,8 +1,9 @@
 # Symbols
 
-Current symbol files:
+Current symbol file:
 
-- `functions.txt` — one entry per line: `address size status name`
+- `functions.txt` — TSV table with columns:
+`address`, `size`, `status`, `name`, `comment`
 
 Planned exports, once Ghidra boundaries are stable:
 

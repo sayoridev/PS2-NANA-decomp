@@ -1,12 +1,13 @@
 # TODO — PS2-NANA-decomp
 
-*Last updated: 2026-10-20 (Phase 3 in progress)*
+*Last updated: 2026-10-19 (Phase 3 in progress)*
 
 Milestones: [progress.yaml](progress.yaml) is the source of truth; this file is
 the human-readable mirror.
 
 ## Completed
 
+- [x] Custom ABI support added: `src/common/ee_custom_abi.h`, `src/game/scheduler_abi.S`, symbols TSV v2
 - [x] Scheduler dependency block reconstructed: `fcn_00177320`, `FUN_001773A0`, `FUN_001773D0`, `Task__QueuePending`
 - [x] RPC allocator/dequeue helpers reconstructed: `fcn_001121A0`, `fcn_00112170`; dispatcher slot-index call fixed
 - [x] `FUN_00112D90` reconstructed (RPC completion dispatcher)
@@ -72,7 +73,7 @@ the human-readable mirror.
 - [x] Main loop reconstructed
 - [x] Sound/scheduler command VM largely reconstructed
 - [x] Complete remaining scheduler dependencies (`fcn_00177320`, `Task__QueuePending`, immediate subsystem init helpers)
-- [ ] ABI-specific stubs or verified compiler extensions for custom `$t0-$t3` calls
+- [x] ABI-specific stubs/compiler-extension layer added for custom `$t0-$t3` calls (target verification pending)
 
 ## Pending — blocked by Ghidra/export confirmation
 

@@ -11,6 +11,7 @@
  * State struct: 0x008D8624..0x008D86E0. Stream channels: 0x8D86D0[4].
  */
 #include "../common/ps2.h"
+#include "../common/ee_custom_abi.h"
 
 /* ---- RPC / timing / stream primitives ---- */
 extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
@@ -80,6 +81,7 @@ void Sound__WaitCh1(int);
 void Sound__WaitCh2(s32);
 void Sound__WaitCh3(s32);
 void fcn_00177320(void);
+void Task__QueuePendingImpl(s32, s32, s32, s32, s32, s32, s32);
 void Stream__CloseWait(s32, int, int);
 extern void fcn_0018DEB0(s32, s32, s32, s32);
 extern s32  fcn_0018A260(s32, s32, s32, s32, s32, s32, s32, s32); /* @0x0018A260 — custom ABI allocator */
@@ -251,7 +253,15 @@ void fcn_001A4EB8(s32 handle)
     thread_id = GetThreadId();
 
     /* fcn_001A2080 uses a custom eight-register ABI. */
-    fcn_001A2080(0, 0, 0, 48, 0, thread_id, (*(volatile s32 *)0x005A3580), 0);
+    EE_CALL8_VOID(fcn_001A2080,
+                  0,
+                  0,
+                  0,
+                  48,
+                  0,
+                  thread_id,
+                  (*(volatile s32 *)0x005A3580),
+                  0);
 
     SleepThread();
 }
@@ -568,7 +578,8 @@ void fcn_00177320(void)
     fcn_00129CE8(0x007D1FC0, 0, 0x120);
     fcn_00189140(-1);
 
-    worker = fcn_0018A260(3,
+    worker = EE_CALL8(fcn_0018A260,
+                          3,
                           3,
                           0x007D2100,
                           0x00000800,
@@ -604,7 +615,7 @@ void FUN_001773D0(void)
  * Original ABI receives p5/callback/callback-arg in $t0-$t2. Keep this
  * signature aligned with custom call sites until the ABI layer is finalized.
  */
-void Task__QueuePending(s32 p1,
+void Task__QueuePendingImpl(s32 p1,
                         s32 p2,
                         s32 p3,
                         s32 p4,
@@ -736,7 +747,8 @@ s32 Rpc__Call(Rpc__CallSlot *out,
         }
 
         out->f[2] = -1;
-        send_result = fcn_00111C68(0x8000000Au,
+        send_result = EE_CALL6(fcn_00111C68,
+                                   0x8000000Au,
                                    (s32)req,
                                    64,
                                    p3,
@@ -767,7 +779,8 @@ s32 Rpc__Call(Rpc__CallSlot *out,
 
         req->f[2] = sema;
         req->f[12] = -3;
-        send_result = fcn_00111C68(0x8000000Au,
+        send_result = EE_CALL6(fcn_00111C68,
+                                   0x8000000Au,
                                    (s32)req,
                                    64,
                                    p3,
@@ -997,7 +1010,8 @@ s32 FUN_00112D90(s32 request)
     if (req->f[12] != 0) {
         next->f[6] = 0;
         do {
-            result = fcn_00111C68(0x80000008u,
+            result = EE_CALL6(fcn_00111C68,
+                                  0x80000008u,
                                   (s32)next,
                                   64,
                                   result,
@@ -2016,7 +2030,8 @@ s32 FUN_001A32B8(s32 handle)
     thread_id = GetThreadId();
 
     sema = (*(volatile s32 *)0x005A82E8);
-    fcn_001A2080(sema,
+    EE_CALL8_VOID(fcn_001A2080,
+                      sema,
                  (s32)slot,
                  0,
                  192,
@@ -2047,7 +2062,8 @@ void FUN_001A3340(s32 handle, s32 source)
     thread_id = GetThreadId();
 
     sema = (*(volatile s32 *)0x005A82E8);
-    fcn_001A2080(sema,
+    EE_CALL8_VOID(fcn_001A2080,
+                      sema,
                  (s32)slot,
                  0,
                  192,
@@ -2078,7 +2094,8 @@ s32 FUN_001A2E70(void)
     s32 handle;
 
     root = fcn_0018D6A0(0, 0x0035DFE0, 0);
-    handle = fcn_0018D3D0(root,
+    handle = EE_CALL6(fcn_0018D3D0,
+                          root,
                           0,
                           0x008E3C40,
                           0,
@@ -2109,7 +2126,8 @@ s32 FUN_001A2F00(void)
     s32 setup;
 
     root = fcn_0018D6A0(0, 0x0035DFE0, 0);
-    handle = fcn_0018D3D0(root,
+    handle = EE_CALL6(fcn_0018D3D0,
+                          root,
                           12,
                           0x008E3C40,
                           0x008E3CA0,
@@ -2121,7 +2139,8 @@ s32 FUN_001A2F00(void)
     }
 
     fcn_001A2560(handle);
-    setup = fcn_0018CF88(handle,
+    setup = EE_CALL5(fcn_0018CF88,
+                         handle,
                          0x001F9A50,
                          6,
                          0x001F9AE0,
