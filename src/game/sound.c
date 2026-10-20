@@ -63,6 +63,9 @@ extern void fcn_0010E930(s32);                  /* @0x0010E930 — DeleteSema */
 extern void fcn_0010E960(s32);                  /* @0x0010E960 — WaitSema */
 extern void fcn_001189E0(void);                 /* @0x001189E0 — RPC sync enter */
 extern void fcn_00118A30(void);                 /* @0x00118A30 — RPC sync exit */
+extern s32  fcn_001121A0(s32);                  /* @0x001121A0 — RPC request alloc */
+extern s32  fcn_00112170(s32);                  /* @0x00112170 — RPC request dequeue */
+extern s32  fcn_0010ECE0(s32, s32);             /* @0x0010ECE0 — sceSifSetDma */
 extern void fcn_00112150(s32);                  /* @0x00112150 — RPC request free */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
@@ -825,6 +828,81 @@ s32 FUN_00112CA8(s32 req)
         node = next;
     }
     return 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112D90, size 0x1C8
+ * PURPOSE: complete an RPC request: invoke its callback, align payload
+ *          buffers, queue a follow-up request and send it through either the
+ *          SifCallRpc path or the SifSetDma path.
+ */
+s32 FUN_00112D90(s32 request)
+{
+    Rpc__Request *req = (Rpc__Request *)(u32)request;
+    Rpc__Request *next;
+    s32 result;
+    s32 out_size = 0;
+    s32 desc[8];
+    s32 desc_count;
+    s32 i;
+
+    result = ((s32 (*)(s32, s32, s32))
+              (*(volatile s32 *)(u32)(req->f[1])))(
+        req->f[9], req->f[2], req->f[3]);
+
+    if (result == 0) {
+        out_size = req->f[11];
+    }
+
+    if (req->f[3] > 0) {
+        fcn_00111E30(req->f[2], req->f[3]);
+    }
+    if (out_size > 0) {
+        fcn_00111E30(result, out_size);
+    }
+
+    fcn_001189E0();
+    if ((req->f[13] & 0x04) != 0) {
+        next = (Rpc__Request *)(u32)fcn_001121A0(0x005A6580);
+    } else {
+        next = (Rpc__Request *)(u32)fcn_00112170(0x005A6580);
+    }
+    fcn_00118A30();
+
+    next->f[8] = 0x8000000Au;
+    next->f[7] = req->f[7];
+    next->f[12] = req->f[12];
+
+    if (req->f[12] != 0) {
+        next->f[6] = 0;
+        do {
+            result = fcn_00111C68(0x80000008u,
+                                  (s32)next,
+                                  64,
+                                  result,
+                                  out_size,
+                                  req->f[7]);
+        } while (result == 0);
+        return result;
+    }
+
+    desc_count = 0;
+    desc[0] = (s32)next;
+    desc[1] = req->f[8];
+    desc[2] = 64;
+    desc[3] = 0;
+    desc_count = 1;
+
+    do {
+        result = fcn_0010ECE0((s32)desc, desc_count);
+        if (result != 0) {
+            return result;
+        }
+        for (i = 0; i < 0x100000; i++) {
+        }
+    } while (result == 0);
+
+    return result;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)

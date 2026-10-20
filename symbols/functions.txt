@@ -1,3 +1,4 @@
+functions.txt
 # PS2-NANA-decomp — function symbols (EE main ELF, SLPM_659.14)
 # Format: address size status name
 # Status: unknown | hypothesis | RECONSTRUCTED | PARTIAL | VERIFIED | STUB
@@ -330,6 +331,12 @@
 0x00112b40 0xcc RECONSTRUCTED FUN_00112B40 # src/game/sound.c — RPC request enqueue
 0x00112c10 0x90 RECONSTRUCTED FUN_00112C10 # src/game/sound.c — RPC owner queue unlink
 0x00112ca8 0x8c RECONSTRUCTED FUN_00112CA8 # src/game/sound.c — RPC global queue unlink
+0x00112d38 0x58 RECONSTRUCTED FUN_00112D38 # src/game/sound.c — RPC pending fetch/reset
+0x00112d90 0x1c8 RECONSTRUCTED FUN_00112D90 # src/game/sound.c — RPC completion dispatcher
+0x00112f58 0x40 RECONSTRUCTED FUN_00112F58 # src/game/sound.c — RPC wait loop
+0x00112f98 0x6c RECONSTRUCTED FUN_00112F98 # src/game/sound.c — RPC semaphore init
+0x00113008 0x80 RECONSTRUCTED FUN_00113008 # src/game/sound.c — RPC active slot count
+0x00113088 0x84 RECONSTRUCTED FUN_00113088 # src/game/sound.c — RPC free slot alloc
 0x0012ca60 0x118 RECONSTRUCTED fcn_0012CA60 # src/game/sound.c — strcpy(dst,src)
 0x00177830 0x60 RECONSTRUCTED FUN_00177830 # src/game/sound.c — queue task cmd 14, two args
 0x00177890 0x70 RECONSTRUCTED FUN_00177890 # src/game/sound.c — queue task cmd 13, copy name
