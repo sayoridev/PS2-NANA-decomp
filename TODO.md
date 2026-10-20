@@ -12,9 +12,9 @@ phase: 3
 phase_name: Decompilation foundation
 estimated_total_functions: 2348
 identified: 190
-clean_reconstructed: 122
+clean_reconstructed: 123
 binary_matched: 0
-remaining_estimate: 2226
+remaining_estimate: 2225
 ```
 
 The function count is still an estimate until the Ghidra boundary export
@@ -154,7 +154,7 @@ separator normalization; NOTE: stale `Config__Parse` comment in
 - [x] Scheduler dependency block reconstructed
 - [x] ABI-specific stubs/compiler-extension layer added
 - [ ] Verify custom ABI layer with the real ps2dev toolchain
-- [ ] Reconstruct RPC request content dispatcher @ `0x00113270` (PARTIAL)
+- [ ] Trace the indirect `jalr` caller of `FUN_00113270`
 - [ ] Classify/reconstruct remaining `Schedule__Init` subsystem helpers
 
 ## Next — technical priorities
@@ -168,21 +168,23 @@ separator normalization; NOTE: stale `Config__Parse` comment in
 - [ ] After verification, update codegen notes with the exact compiler
 behavior and remove “target verification pending” warnings.
 
-### 2. RPC request content dispatcher
+### 2. RPC response-record content dispatcher — DONE
 
-- [ ] Complete `FUN_00113270` (currently PARTIAL: head/tail decoded).
+- [x] `FUN_00113270` reconstructed @ `0x00113270` (was PARTIAL).
 
-Head/tail facts already recovered: per-request 1088-byte records at
-`0x005A7280`, uncached alias via `0x20000000`, 25-case jump table indexed
-by `cmd - 2`, 128-bit LQ/SQ copy loops, negative-slot release scan, and a
-`SignalSema` exit path.
+Final facts: 25-entry table @ `0x002FFA90` indexed by `cmd - 2` with only
+4 handlers (cmd 2 dual-write cached+uncached, cmd 11 324-byte copy-out,
+cmd 12 64-byte context copy-out from `$s1`, cmd 23/25/26 clamped copy);
+"128-bit copies" were actually LDL/LDR/SDL/SDR (MIPS-III unaligned
+64-bit), not LQ/SQ. Tail: slot release in 32-entry table @ `0x001C4998`
+plus `fcn_0010e950` signal hypothesis.
 
-- [ ] Map its interaction with:
+Interactions mapped: record pool `0x005A7280`/1088B via `0x001C4A18`;
+memmove `fcn_00129b30`; sema pair `0x001C4A28/0x001C4A2C`; stream context
+enters as custom-ABI `$s1` (cmd 12).
 
-- `Rpc__Call` / `FUN_00113110`
-- RPC queue helpers
-- RPC semaphore helpers
-- stream worker callbacks
+- [ ] Trace the indirect `jalr` caller of `FUN_00113270` (likely an RPC
+handler table registration) to confirm the `$s1` stream-context source.
 
 ### 3. Remaining scheduler / subsystem init helpers
 
@@ -242,7 +244,7 @@ file set, so this remains blocked until a fuller local dump is inspected.
 
 Phase 3 can be considered complete when:
 
-- [ ] RPC request content dispatcher @ `0x00113270` is reconstructed.
+- [x] RPC response-record content dispatcher @ `0x00113270` reconstructed.
 - [ ] Remaining scheduler subsystem init helpers are classified or
 reconstructed.
 - [ ] Custom ABI layer is verified with ps2dev.
@@ -253,5 +255,5 @@ reconstructed.
 ## Suggested next commit
 
 - `abi: verify custom t-register call layer` after ps2dev smoke test, or
-- `decomp: reconstruct rpc request dispatcher` (@ `0x00113270`) if ABI
+- `decomp: trace rpc handler caller` (`FUN_00113270` jalr site) if ABI
 verification is deferred.

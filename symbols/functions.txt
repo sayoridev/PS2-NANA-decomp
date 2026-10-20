@@ -39,7 +39,7 @@ functions.txt
 0x001424b0	0	RECONSTRUCTED	Mode__GetState	src/game/mode.c — lhu 0x5B3E6A, 32 xrefs
 0x0013b310	0	hypothesis	Draw__SetContext2	ctx accessors 0x1347F0/0x134790, param 2
 0x001425d0	0	RECONSTRUCTED	System__InitFrameHook	src/system/framehook.c — installs default hook 0x1A8FE0
-0x00177f30	0xa0	RECONSTRUCTED	Schedule__Update	src/game/sound.c — countdown + command dispatch
+0x00177f30	0xa0	RECONSTRUCTED	Schedule__Update	src/game/schedule_update.c — countdown + command dispatch
 0x00142570	0	PARTIAL	System__RunFrameHook	src/system/framehook.c — gate/flag/callback
 0x00177f00	0x30	RECONSTRUCTED	Schedule__FrameTick	src/game/sound.c — counter @0x8DF810++
 0x00146040	0	hypothesis	Scene__Update	state machine @0x5BB880, jump table @0x1B9E20
@@ -349,10 +349,11 @@ functions.txt
 0x0012c788	0	hypothesis	fcn_0012c788	hypothesis: strchr (alignment prologue + scan loop)
 0x0012e7c8	0	hypothesis	fcn_0012e7c8	hypothesis: strlen
 0x00141fa0	0x36c	RECONSTRUCTED	FUN_00141FA0	src/game/path_build.c — media path builder (host0/cdrom0/hfs/dvd), separator normalize
-0x00113270	0x3b0	PARTIAL	FUN_00113270	src/game/sound.c — RPC request content dispatcher (25-case jump table, LQ/SQ 128-bit copies); head+tail decoded
+0x00113270	0x3b0	RECONSTRUCTED	FUN_00113270	src/game/sound.c — RPC response-record content dispatcher (25-entry table @0x002FFA90, 4 handlers: cmd 2/11/12/23-25-26; LDL/LDR/SDL/SDR copies; slot-release tail @0x001C4998)
 0x0010e940	0	hypothesis	fcn_0010e940	hypothesis: SignalSema
 0x0010e960	0	hypothesis	fcn_0010e960	hypothesis: WaitSema
 0x0010f998	0	hypothesis	fcn_0010f998	hypothesis: DelayThread-style usec sleep (odd HI/LO arg passing, verify)
+0x0010e950	0	hypothesis	fcn_0010e950	hypothesis: SignalSema thunk (no a0 setup)
 0x0012ca60	0x118	RECONSTRUCTED	fcn_0012CA60	src/game/sound.c — strcpy(dst,src)
 0x00177830	0x60	RECONSTRUCTED	FUN_00177830	src/game/sound.c — queue task cmd 14, two args
 0x00177890	0x70	RECONSTRUCTED	FUN_00177890	src/game/sound.c — queue task cmd 13, copy name

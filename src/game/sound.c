@@ -12,6 +12,10 @@
  */
 #include "../common/ps2.h"
 #include "../common/ee_custom_abi.h"
+#include <string.h>
+
+/* forward declarations for module-internal helpers used before definition */
+void Bgm__StopAll(void);
 
 /* ---- RPC / timing / stream primitives ---- */
 extern void Schedule__TickA(void);              /* @0x00192BC8: g_SoundUpdating=1, Rwa__BeginUpdate */
@@ -849,6 +853,138 @@ s32 FUN_00113110(Rpc__CallSlot *out,
     } while (tries < 101);
 
     return failed;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00113270, size 0x3B0
+ * PURPOSE: RPC response-record content dispatcher. Selects the 1088-byte
+ *          request record at 0x005A7280 via global 0x001C4A18, copies its
+ *          16-byte header to the stack, extracts the payload for
+ *          non-negative slots, then dispatches on header[1] through a
+ *          25-entry table at 0x002FFA90 indexed by cmd-2. Only 4 handlers
+ *          exist; every other cmd falls straight to the slot-release tail.
+ *
+ * CUSTOM ABI: `ctx_s1` arrives in $s1 from the caller (callee-saved reg
+ * used as an input argument) and is read only by the cmd-12 handler.
+ * The caller is an indirect jalr; not yet traced (see TODO).
+ *
+ * HANDLERS (all verified instruction-by-instruction):
+ *   cmd 2        dual-write (cached + 0x20000000 alias) of
+ *                record[36..36+n1) -> *(record+28) and
+ *                record[100..100+n2) -> *(record+32),
+ *                n1 = record[20], n2 = record[24]
+ *   cmd 11       if (*(s32*)header[2] > 0) copy 324 bytes
+ *                record[24..348) -> *(record+20); the binary picks
+ *                LDL/LDR/SDL/SDR vs LDC1/SDC1 on ((src|dst)&7) — same
+ *                semantics as a plain unaligned copy, see NOTE below
+ *   cmd 12       copy 64 bytes ctx_s1+24 -> *(record+20) (LDL/LDR family)
+ *   cmd 23/25/26 n = record[24], clamped to 1024 when >= 1025;
+ *                fcn_00129b30(*(record+20), record+28, n)
+ *
+ * TAIL (slot release on header[0]):
+ *   >= 0 : return fcn_0010e950()         (hypothesis: SignalSema thunk,
+ *                                          no a0 setup — hardcoded sema)
+ *   < 0  : clear the entry holding -header[0] in the 32-entry s32 table
+ *          at 0x001C4998 (-1 = free); entry 0 checked first, then linear
+ *          scan 1..31. Returns -1 when cleared, 0 when absent.
+ *
+ * NOTE on cmd 11: the alignment split in the original is a codegen
+ * artifact with identical observable behavior; reconstructed as one copy.
+ */
+extern s32 fcn_0010e950(void);   /* @0x0010E950 — hypothesis: SignalSema */
+
+s32 FUN_00113270(s32 request, void *ctx_s1)
+{
+    volatile u8 *s0;
+    u32 hdr[4];
+    u32 idx;
+    s32 slot;
+
+    idx = 0;
+    if (*(volatile s32 *)0x001C4A20 != 0) {
+        idx = ((volatile u32 *)(u32)request)[3];
+    }
+    *(volatile u32 *)0x001C4A18 = idx;
+    s0 = (volatile u8 *)((0x005A7280 + idx * 1088u) | 0x20000000u);
+
+    hdr[0] = *(volatile u32 *)(s0 + 0);
+    hdr[1] = *(volatile u32 *)(s0 + 4);
+    hdr[2] = *(volatile u32 *)(s0 + 8);
+    hdr[3] = *(volatile u32 *)(s0 + 12);
+
+    if ((s32)hdr[0] >= 0) {
+        fcn_00129b30((void *)hdr[2], (const void *)(s0 + 16), (s32)hdr[3]);
+    }
+
+    switch ((s32)hdr[1]) {
+    case 2: {   /* dual-write cached + uncached alias */
+        s32 n1 = *(volatile s32 *)(s0 + 20);
+        s32 n2 = *(volatile s32 *)(s0 + 24);
+        volatile u8 *d1 = *(volatile u8 **)(s0 + 28);
+        volatile u8 *d2 = *(volatile u8 **)(s0 + 32);
+        volatile u8 *d1u = (volatile u8 *)((u32)d1 | 0x20000000u);
+        volatile u8 *d2u = (volatile u8 *)((u32)d2 | 0x20000000u);
+        s32 i;
+
+        for (i = 0; i < n1; i++) {          /* record+36 -> d1 (+alias) */
+            d1u[i] = s0[36 + i];
+            d1[i] = s0[36 + i];
+        }
+        for (i = 0; i < n2; i++) {          /* record+100 -> d2 (+alias) */
+            d2u[i] = s0[100 + i];
+            d2[i] = s0[100 + i];
+        }
+        break;
+    }
+
+    case 11:    /* 324-byte payload copy-out */
+        if (*(volatile s32 *)(u32)hdr[2] > 0) {
+            u8 *dst = *(u8 **)(s0 + 20);
+            /* original splits on ((s0+24 | dst) & 7): LDL/LDR/SDL/SDR vs
+             * LDC1/SDC1, 320 bytes in the loop + tail word = 324 total */
+            memmove(dst, (const void *)(s0 + 24), 324);
+        }
+        break;
+
+    case 12:    /* 64-byte context copy-out (src = caller's $s1) */
+        memmove(*(void **)(s0 + 20), (const u8 *)ctx_s1 + 24, 64);
+        break;
+
+    case 23:    /* clamped record copy-out, 25/26 identical */
+    case 25:
+    case 26: {
+        u32 n = *(volatile u32 *)(s0 + 24);
+        if (n >= 1025u) {
+            n = 1024u;
+        }
+        fcn_00129b30(*(void **)(s0 + 20), (const void *)(s0 + 28), (s32)n);
+        break;
+    }
+
+    default:
+        break;
+    }
+
+    slot = (s32)hdr[0];
+    if (slot >= 0) {
+        return fcn_0010e950();
+    }
+    {
+        s32 want = -slot;
+        s32 i;
+
+        if (*(volatile s32 *)0x001C4998 == want) {
+            *(volatile s32 *)0x001C4998 = -1;
+            return -1;
+        }
+        for (i = 1; i < 32; i++) {
+            if (*(volatile s32 *)(0x001C4998 + i * 4) == want) {
+                *(volatile s32 *)(0x001C4998 + i * 4) = -1;
+                return -1;
+            }
+        }
+    }
+    return 0;
 }
 
 /* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
@@ -2239,23 +2375,6 @@ void Sound__ProcessCommand(void)
         SOUND_EXEC_SLOT++;
         if (SOUND_EXEC_SLOT > 0x3f) SOUND_EXEC_SLOT = 0;
     }
-}
-
-/* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F30 — main-loop call. */
-void Schedule__Update(void)
-{
-    if (SOUND_COUNTDOWN > 0) {
-        SOUND_COUNTDOWN--;
-        if (SOUND_COUNTDOWN < 1) SOUND_COUNTDOWN = 0;
-    }
-    Schedule__TickA();
-    Job__PollAll();
-    Schedule__WalkSlots();                        /* @0x00177140 */
-    if (SOUND_COUNTDOWN == 0 &&
-        *(volatile s32 *)(SOUND_EXEC_SLOT * 0x134 + 0x8d3904) != 0) {
-        Sound__ProcessCommand();
-    }
-    Schedule__TickB();
 }
 
 /* STATUS: RECONSTRUCTED  ADDRESS: 0x00177F00 — main-loop call. */

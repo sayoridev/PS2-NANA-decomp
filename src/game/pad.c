@@ -17,6 +17,7 @@
  *           upper bits (see Mode__Update flag packing).
  */
 #include "../common/ps2.h"
+#include <stddef.h>
 
 /* ---- context tables ---- */
 #define PAD_CTX_BASE      0x005ABB50   /* entry = slot*0x70 + sub*0x1C */
@@ -217,7 +218,7 @@ undefined4 Pad__TransferTrigger(int slot, int sub)
 {
     int   entry = sub * 0x1c + slot * 0x70;
     uint *ring  = *(uint **)(entry + PAD_XFER_PTRS);
-    int   iopDst, idx;
+    int   idx;
     u32   newIdx;
     s64   dmaId;
 

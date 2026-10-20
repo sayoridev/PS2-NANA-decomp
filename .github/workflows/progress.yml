@@ -7,6 +7,9 @@ on:
     paths:
       - progress.yaml
       - tools/progress_chart.py
+      - tools/progress_map.py
+      - symbols/functions.txt
+      - docs/functions/**
       - .github/workflows/progress.yml
 
 permissions:
@@ -36,12 +39,15 @@ jobs:
       - name: Regenerate progress chart
         run: python3 tools/progress_chart.py
 
+      - name: Regenerate function map
+        run: python3 tools/progress_map.py docs/functions docs/progress_map.html
+
       - name: Commit updated chart
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/progress.png
+          git add docs/progress.png docs/progress_map.html docs/progress_map.png
           if ! git diff --cached --quiet; then
-            git commit -m "chore: regenerate progress chart [skip ci]"
+            git commit -m "chore: regenerate progress charts [skip ci]"
             git push
           fi

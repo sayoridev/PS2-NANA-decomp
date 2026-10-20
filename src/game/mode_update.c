@@ -82,10 +82,6 @@ Mode__StateBlock g_ModeState[2];   /* @0x005B2F00, @0x005B3080 */
 #define RAMP_LINEAR 2
 #define RAMP_TWOPHASE 3
 
-/* advance one ramp channel; original interleaves A(+0x104..) and B(+0x118..) */
-static void Mode__RampChannel(u8 *out, s16 *counterFields, s32 altModeHold,
-                              u16 start, u16 end, s32 type, s32 max, s32 cur);
-
 /* STATUS: RECONSTRUCTED
  * ADDRESS: 0x0013BDE0
  * PURPOSE: per-frame input/state processing for both mode slots. */

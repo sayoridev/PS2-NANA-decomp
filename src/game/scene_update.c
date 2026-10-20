@@ -12,7 +12,7 @@
 #include "../common/ps2.h"
 
 /* ---- display/DMA family ---- */
-extern void Display__BeginContext(int);            /* @0x001347F0 */
+extern void *Display__BeginContext(int);            /* @0x001347F0 */
 extern void Display__EndContext(void);             /* @0x00134790 */
 extern void Draw__SetItemCount(int id, int count); /* @0x00139470 */
 extern void Draw__SubmitPacket(void *ctx, int id, void *packet); /* @0x00138700 */
@@ -209,7 +209,7 @@ void Scene__Update(void)
 
     /* DMA packet scheduling */
     if (SCENE_SUSPEND == 0) {
-        void *ctx = (void *)Display__BeginContext(8);
+        void *ctx = Display__BeginContext(8);
         if (SCENE_FLAG == 1) {
             for (i = 0; i < g_FadeCounts[mode]; i++) {
                 volatile u32 *pkt = (volatile u32 *)0x005BB8A8;
