@@ -7,6 +7,7 @@ the human-readable mirror.
 
 ## Completed
 
+- [x] RPC helper cluster reconstructed: `FUN_00112D38`, `FUN_00112F58`, `FUN_00112F98`, `FUN_00113008`, `FUN_00113088`
 - [x] RPC request cluster reconstructed: `Rpc__Call`, `Rpc__IsPending`, `FUN_00112AA8`, `FUN_00112B40`, `FUN_00112C10`, `FUN_00112CA8`
 - [x] Stream root open/close cluster reconstructed: `Stream__Open`, `FUN_001A2E70`, `FUN_001A2EE0`, `FUN_001A2F00`
 - [x] Stream accessor/worker-init cluster reconstructed: `FUN_001A31A0`, `FUN_001A31D0`, `FUN_001A31D8`, `FUN_001A32A0`, `FUN_001A32B8`, `FUN_001A3340`

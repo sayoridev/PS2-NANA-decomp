@@ -5,7 +5,7 @@
 # =============================================================================
 
 project: PS2-NANA-decomp
-updated: "2026-10-20"
+updated: "2026-10-19"
 phase: 3
 
 # Analysis source: maintainer's personal dump (private, never committed).
@@ -25,7 +25,7 @@ functions:
   identified: 190         # pending Ghidra confirmation
   decompiled: 101         # clean reconstructed functions; raw references not summed
   matched: 0
-  remaining: 2241         # 2348 - 107 clean reconstructions; estimate
+  remaining: 2236         # 2348 - 112 clean reconstructions; estimate
 
 modules: []
 

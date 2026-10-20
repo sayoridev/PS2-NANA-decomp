@@ -61,6 +61,8 @@ extern s32  fcn_00111C68(s32, s32, s32, s32, s32, s32); /* @0x00111C68 — RPC s
 extern s32  fcn_0010E920(s32);                  /* @0x0010E920 — CreateSema */
 extern void fcn_0010E930(s32);                  /* @0x0010E930 — DeleteSema */
 extern void fcn_0010E960(s32);                  /* @0x0010E960 — WaitSema */
+extern void fcn_001189E0(void);                 /* @0x001189E0 — RPC sync enter */
+extern void fcn_00118A30(void);                 /* @0x00118A30 — RPC sync exit */
 extern void fcn_00112150(s32);                  /* @0x00112150 — RPC request free */
 extern s32  WaitSema(s32);                      /* @0x0010E960 */
 extern s32  SignalSema(s32);                    /* @0x0010E940 */
@@ -822,6 +824,116 @@ s32 FUN_00112CA8(s32 req)
         }
         node = next;
     }
+    return 0;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112D38, size 0x58
+ * PURPOSE: fetch the next pending RPC request and advance the call slot. */
+s32 FUN_00112D38(s32 call)
+{
+    volatile s32 *slot = (volatile s32 *)(u32)call;
+    s32 req;
+
+    fcn_001189E0();
+    req = slot[3];
+
+    if (req == 0) {
+        slot[1] = 0;
+        fcn_00118A30();
+        return 0;
+    }
+
+    slot[1] = 1;
+    slot[3] = (*(volatile s32 *)(u32)(req + 0x3C));
+    fcn_00118A30();
+    return req;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112F58, size 0x40 */
+void FUN_00112F58(s32 call)
+{
+    s32 req;
+
+    do {
+        req = FUN_00112D38(call);
+        if (req != 0) {
+            break;
+        }
+        SleepThread();
+    } while (req == 0);
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00112F98, size 0x6C
+ * PURPOSE: initialize the two RPC semaphores once. */
+void FUN_00112F98(void)
+{
+    if ((*(volatile s32 *)0x001C4A28) != -1) {
+        return;
+    }
+
+    {
+        s32 args[6];
+
+        args[1] = 1;
+        args[5] = 0x0002FA70;
+        (*(volatile s32 *)0x001C4A28) = fcn_0010E920((s32)args);
+
+        args[1] = 1;
+        args[5] = 0x0002FA80;
+        (*(volatile s32 *)0x001C4A2C) = fcn_0010E920((s32)args);
+    }
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00113008, size 0x80
+ * PURPOSE: count non-empty RPC slots in the fixed 512-byte table. */
+s32 FUN_00113008(void)
+{
+    s32 slot;
+    s32 end = 0x005A7D00;
+    s32 count = 0;
+    s32 sema;
+
+    FUN_00112F98();
+    sema = (*(volatile s32 *)0x001C4A28);
+    fcn_0010E960(sema);
+
+    for (slot = 0x005A7B00; slot < end; slot += 16) {
+        if ((*(volatile s32 *)(u32)(slot + 0x04)) != 0) {
+            count++;
+        }
+    }
+
+    fcn_0010E940(sema);
+    return count;
+}
+
+/* STATUS: RECONSTRUCTED (manual MIPS decode, 2026-10-20)
+ * ADDRESS: 0x00113088, size 0x84
+ * PURPOSE: find a free RPC slot, mark it busy and return its address. */
+s32 FUN_00113088(void)
+{
+    s32 slot = 0x005A7B00;
+    s32 end = slot + 512;
+    s32 sema;
+
+    FUN_00112F98();
+    sema = (*(volatile s32 *)0x001C4A28);
+    fcn_0010E960(sema);
+
+    while (slot < end) {
+        if ((*(volatile s32 *)(u32)(slot + 0x04)) == 0) {
+            fcn_0010E940(sema);
+            (*(volatile s32 *)(u32)(slot + 0x04)) = 0x1000;
+            return slot;
+        }
+        slot += 16;
+    }
+
+    fcn_0010E940(sema);
     return 0;
 }
 
