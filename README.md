@@ -80,11 +80,21 @@ The matching strategy is deliberately pragmatic:
 
 ## 📈 progress snapshot
 
-## 📈 progress snapshot
-
 ![PS2-NANA-decomp progress](docs/progress.png)
 
 The chart is auto-generated from `progress.yaml` on every push.
+
+## 🗺️ function map
+
+[![function map](docs/progress_map.png)](docs/progress_map.html)
+
+*One square per function, colored by decompilation status
+(green = reconstructed/verified, yellow = partial, blue = hypothesis,
+grey = unidentified). Interactive version with per-function tooltips:
+[docs/progress_map.html](docs/progress_map.html).
+Regenerate locally with `python3 tools/progress_map.py` (reads
+`docs/functions/*.json` rizin `aflj` exports; see the tool header).
+Overlay modules appear automatically as their JSONs land.*
 
 ## 🛠️ workflow
 

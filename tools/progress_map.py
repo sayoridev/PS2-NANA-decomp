@@ -131,6 +131,65 @@ unidentified<span style="background:#30363d"></span></p>
 </body></html>
 """
 
+# --- static PNG render (for README embedding) -------------------------------
+COLORS = {k: tuple(int(c[i:i+2], 16) for i in (1, 3, 5))
+          for k, c in (("VERIFIED", "#39d353"), ("RECONSTRUCTED", "#26a641"),
+                       ("PARTIAL", "#e3b341"), ("hypothesis", "#58a6ff"))}
+PNG_UNKNOWN = (48, 54, 61)
+PNG_BG = (13, 17, 23)
+PNG_FG = (201, 209, 217)
+PNG_SUB = (139, 148, 158)
+CELL = 10
+GAP = 1
+COLS = 96
+
+def _font(sz):
+    try:
+        from PIL import ImageFont
+        for cand in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                     "/usr/share/fonts/dejavu/DejaVuSans.ttf"):
+            if os.path.exists(cand):
+                return ImageFont.truetype(cand, sz)
+    except Exception:
+        pass
+    return None
+
+def render_png(module_rows, out_png):
+    from PIL import Image, ImageDraw
+    mods = []
+    for k in MODULES:
+        if k in module_rows:
+            mods.append((k, MODULES[k][0], module_rows[k]))
+    H = 40  # header
+    for _, _, rows in mods:
+        H += 24 + ((len(rows) + COLS - 1) // COLS) * (CELL + GAP) + 10
+    W = COLS * (CELL + GAP) + 20
+    img = Image.new("RGB", (W, max(H, 60)), PNG_BG)
+    dr = ImageDraw.Draw(img)
+    f_t, f_s = _font(13), _font(11)
+    y = 10
+    tot = sum(len(r) for _, _, r in mods)
+    done = sum(1 for _, _, r in mods for x in r if x["status"] != "unidentified")
+    pct = (100.0 * done / tot) if tot else 0.0
+    dr.text((10, y), "PS2-NANA-decomp — function map  %.2f%% (%d/%d)"
+            % (pct, done, tot), fill=PNG_FG, font=f_t)
+    y += 30
+    for key, title, rows in mods:
+        n = len(rows)
+        dn = sum(1 for x in rows if x["status"] != "unidentified")
+        p = (100.0 * dn / n) if n else 0.0
+        dr.text((10, y), "%s  %.2f%% (%d/%d)" % (title, p, dn, n),
+                fill=PNG_FG, font=f_s)
+        y += 20
+        x0, yy = 10, y
+        for i, x in enumerate(rows):
+            col = COLORS.get(x["status"], PNG_UNKNOWN)
+            cx = x0 + (i % COLS) * (CELL + GAP)
+            cy = yy + (i // COLS) * (CELL + GAP)
+            dr.rectangle([cx, cy, cx + CELL - 1, cy + CELL - 1], fill=col)
+        y = yy + ((n + COLS - 1) // COLS) * (CELL + GAP) + 10
+    img.save(out_png)
+
 def main():
     fdir = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, "docs", "functions")
     out_html = sys.argv[2] if len(sys.argv) > 2 else os.path.join(REPO, "docs", "progress_map.html")
@@ -150,6 +209,12 @@ def main():
     with open(out_html, "w", encoding="utf-8") as fh:
         fh.write(render(module_rows))
     print("wrote", out_html)
+    out_png = os.path.splitext(out_html)[0] + ".png"
+    try:
+        render_png(module_rows, out_png)
+        print("wrote", out_png)
+    except ImportError:
+        print("PIL not available, PNG skipped")
 
 if __name__ == "__main__":
     main()
